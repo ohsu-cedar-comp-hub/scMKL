@@ -50,7 +50,7 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
     '''
     assert assay.lower() in ['atac', 'rna', 'gene_scores'], 'Assay must be atac, rna, or gene_scores'
     assert kernel_type.lower() in ['gaussian', 'cauchy', 'laplacian'], 'Kernel function must be Gaussian, Cauchy, or Laplacian'
-    assert X.shape[1] == len(feature_set), 'Given features do not correspond with features in X'
+    assert X_train.shape[1] == len(feature_set), 'Given features do not correspond with features in X'
 
     #Number of groupings taking from group_dict
     N_pathway = len(group_dict.keys())
