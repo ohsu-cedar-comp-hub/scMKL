@@ -14,6 +14,7 @@ def Calculate_Auroc(model, X_test, y_test)-> float:
             Calculated AUROC value
 
     '''
+    y_test = y_test.ravel()
     assert X_test.shape[0] == len(y_test), 'X and y must have the same number of samples'
 
     # Sigmoid function to force probabilities into [0,1]
