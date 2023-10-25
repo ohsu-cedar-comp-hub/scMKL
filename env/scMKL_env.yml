@@ -1,0 +1,12 @@
+name: scMKL
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11.3
+  - numpy
+  - ca-certificates
+  - openssl
+  - scipy
+  - scikit-learn
+  - celer
+prefix: /home/groups/CEDAR/kupp/env/mambaforge/envs/scMKL
