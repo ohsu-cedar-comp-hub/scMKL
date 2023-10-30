@@ -94,6 +94,9 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
 
         #Data processing- may be controlled by a flag in the future.
         if assay.lower() in ['rna', 'gene_scores']:
+
+            train_features = np.log1p(train_features)
+            test_features = np.log1p(test_features)
             
             #Center and scale count data
             train_means = np.mean(train_features, 0)
@@ -188,6 +191,8 @@ def Calculate_Sigma(X, group_dict, assay, feature_set, kernel_type = 'Gaussian',
 
         # Process data according to modality
         if assay.lower() in ['rna', 'gene_scores']:
+
+            train_features = np.log1p(train_features)
 
             train_means = np.mean(train_features, 0)
             train_sds = np.std(train_features, 0)
@@ -407,13 +412,12 @@ def Find_Selected_Pathways(model, group_names) -> np.ndarray:
     selected_groups = []
     coefficients = model.coef_
     group_widths = model.get_params()['groups']
-    if isinstance(group_widths, int):
-        group_widths = np.repeat(group_widths, len(group_names))
+
 
     for i, group in enumerate(group_names):
-        if np.all([isinstance(x, np.int64) for x in group_widths]):
-            group_norm = np.linalg.norm(coefficients[np.arange(i * group_widths[i], (i+1) * group_widths[i] - 1)])
-        elif np.all([isinstance(x, list) for x in group_widths]):
+        if not isinstance(group_widths, (list, set, np.ndarray, tuple)):
+            group_norm = np.linalg.norm(coefficients[np.arange(i * group_widths, (i+1) * group_widths - 1)])
+        else: 
             group_norm = np.linalg.norm(coefficients[group_widths[i]])
 
         if group_norm != 0:
@@ -450,7 +454,7 @@ def TF_IDF_filter(x, mode = 'filter'):
     if mode == 'filter':
         return np.where(np.sum(TFIDF, axis = 0) > 0)[0]
 
-def Downselect_Features(X, feature_names, group_dict):
+def Filter_Features(X, feature_names, group_dict):
     '''
     Function to remove unused features from X matrix.  Any features not included in group_dict will be removed from the matrix.
     Input:
@@ -467,7 +471,7 @@ def Downselect_Features(X, feature_names, group_dict):
 
     # Store all objects in dictionary in array
     for group in group_dict.keys():
-        group_features.update(group_dict[group])
+        group_features.update(set(group_dict[group]))
 
     # Find location of desired features in whole feature set
     group_feature_indices = np.nonzero(np.isin(feature_names, np.array(list(group_features))))[0]
