@@ -39,7 +39,7 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
             group_dict- Dictionary containing feature grouping information.
                         Example: {geneset: np.array(gene_1, gene_2, ..., gene_n)}
             assay- What type of sequencing data.  Used to determine how to process the data.
-                        If not rna, atac, or gene_scores, nothing will be done to the data. Will likely be updated for new modalities.
+                        If not rna, atac, or gene_scores, no preprocessing will be done. Will likely be updated for new modalities.
             feature_set- Numpy array containing the names of all features
             sigma_array- Numpy array with 'kernel weights' used for calculating the distribution for projection.
             kernel_type- String to determine which kernel function to approximate. Currently on Gaussian, Laplacian, and Cauchy are supported.
@@ -49,7 +49,6 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
             Z_test- Approximate kernel for testing of shape M x 2*D*G for M training samples, D Random Fourier Features, and G groups
 
     '''
-    assert assay.lower() in ['atac', 'rna', 'gene_scores'], 'Assay must be atac, rna, or gene_scores'
     assert kernel_type.lower() in ['gaussian', 'cauchy', 'laplacian'], 'Kernel function must be Gaussian, Cauchy, or Laplacian'
     assert X_train.shape[1] == len(feature_set), 'Given features do not correspond with features in X'
 
@@ -157,7 +156,7 @@ def Calculate_Sigma(X, group_dict, assay, feature_set, kernel_type = 'Gaussian',
             group_dict- Dictionary containing feature grouping information.
                         Example: {geneset: np.array(gene_1, gene_2, ..., gene_n)}
             assay- What type of sequencing data.  Used to determine how to process the data.
-                        If not rna, atac, or gene_scores, nothing will be done to the data. Will likely be updated for new modalities.
+                        If not rna, atac, or gene_scores, no preprocessing will be done. Will likely be updated for new modalities.
             feature_set- Numpy array containing the names of all features
             kernel_type- String to determine which kernel function to approximate. Currently on Gaussian, Laplacian, and Cauchy are supported.
             seed_obj- Numpy random state used for random processes. Can be specified for reproducubility or set by default.
@@ -166,7 +165,6 @@ def Calculate_Sigma(X, group_dict, assay, feature_set, kernel_type = 'Gaussian',
 
     '''
     assert kernel_type.lower() in ['gaussian', 'cauchy', 'laplacian'], 'Kernel function must be Gaussian, Cauchy, or Laplacian'
-    assert assay.lower() in ['atac', 'rna', 'gene_scores'], 'Assay must be atac, rna, or gene_scores'
     assert X.shape[1] == len(feature_set), 'Given features do not correspond with features in X'
 
     sigma_list = []
@@ -238,7 +236,7 @@ def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_t
             group_dict- Dictionary containing feature grouping information.
                         Example: {geneset: np.array(gene_1, gene_2, ..., gene_n)}
             assay- What type of sequencing data.  Used to determine how to process the data.
-                        If not rna, atac, or gene_scores, nothing will be done to the data. Will likely be updated for new modalities.
+                        If not rna, atac, or gene_scores, no preprocessing will be done. Will likely be updated for new modalities.
             feature_set- Numpy array containing the names of all features
             sigma_array- Numpy array with 'kernel weights' used for calculating the distribution for projection.
             kernel_type- String to determine which kernel function to approximate. Currently on Gaussian, Laplacian, and Cauchy are supported.
@@ -255,7 +253,6 @@ def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_t
     assert np.all(sigma_adjustments > 0), 'Adjustment values must be positive'
     assert X.shape[0] == len(y), 'X and y must have the same number of samples'
     assert X.shape[1] == len(feature_set), 'Given features do not correspond with features in X'
-    assert assay.lower() in ['atac', 'rna', 'gene_scores'], 'Assay must be atac, rna, or gene_scores'
     assert kernel_type.lower() in ['gaussian', 'cauchy', 'laplacian'], 'Kernel function must be Gaussian, Cauchy, or Laplacian'
     assert isinstance(k, int) and k > 0, 'Must be a positive integer number of folds'
     
@@ -505,6 +502,8 @@ def Combine_Modalities(Assay_1_name: str, Assay_1_Z, Assay_1_Group_Names, Assay_
     return combined_Z, combined_group_names
 
 def Train_Test_Split(y, train_indices = None, seed_obj = np.random.RandomState(100), train_ratio = 0.8):
+
+
     '''
     Function to calculate training and testing indices for given dataset. If train indices are given, it will calculate the test indices.
         If train_indices == None, then it calculates both indices, preserving the ratio of each label in y
@@ -541,3 +540,18 @@ def Train_Test_Split(y, train_indices = None, seed_obj = np.random.RandomState(1
     test_indices = np.setdiff1d(np.arange(len(y)), train_indices, assume_unique = True)
 
     return train_indices, test_indices
+
+def Sparse_Var(X, axis = None):
+    '''
+    Function to calculate variance on a sparse matrix.
+    Input:
+        X- A scipy sparse matrix
+        axis- Determines which axis variance is calculated on. Same usage as Numpy
+            axis = 0 => column variances
+            axis = 1 => row variances
+            axis = None => total variance (calculated on all data)
+    '''
+
+    # E[X^2] - E[X]^2
+    var = (X.power(2).mean(axis = axis)) - np.square(X.mean(axis = axis))
+    return np.array(var)
