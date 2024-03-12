@@ -41,7 +41,7 @@ D = int(np.sqrt(len(labels)) * np.log(np.log(len(labels))))
 
 #### Parameter Optimization
 
-Kernel weights (sigma) are a parameter of the kernel approximation. Here we calculate sigma on the full dataset before optimizing it with k-Fold Cross Validation on the training set.
+Kernel widths (sigma) are a parameter of the kernel approximation. Here we calculate sigma on the full dataset before optimizing it with k-Fold Cross Validation on the training set.
 
 ```
 sigmas = src.Calculate_Sigma(x, group_dict, 'rna', features)
