@@ -12,7 +12,8 @@ def Predict(model, X_test, y_test):
             y_test- Corresponding labels for testing data.  Needs to binary, but not necessarily discrete.
 
     Output:
-            Calculated AUROC value
+            Values predicted by the model
+            Dictionary containing AUROC, Accuracy, F1 Score, Precision, and Recall
 
     '''
     y_test = y_test.ravel()
@@ -27,11 +28,11 @@ def Predict(model, X_test, y_test):
 
     metric_dict = {}
 
-    metric_dict['AUROC'] = sklearn.metrics.auc_roc_curve(y_test, probabilities)
-
+    #Convert numerical probabilies into binary phenotype
     y_pred = np.repeat(np.unique(y_test)[0], len(y_test))
-    y_pred[y_pred == 1] = np.unique(y_test)[1]
+    y_pred[y_pred.astype(int) == 1] = np.unique(y_test)[1]
 
+    metric_dict['AUROC'] = sklearn.metrics.auc_roc_curve(y_test, probabilities)
     metric_dict['Accuracy'] = np.mean(y_test == y_pred)
     metric_dict['F1 Score'] = sklearn.metrics.f1_score(y_test, y_pred, pos_label = np.unique(y_test)[0])
     metric_dict['Precision'] = sklearn.metrics.precision_score(y_test, y_pred, pos_label = np.unique(y_test)[0])
