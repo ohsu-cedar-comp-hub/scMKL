@@ -3,13 +3,14 @@ import scipy
 import celer
 import sklearn
 
-def Calculate_Auroc(model, X_test, y_test)-> float:
+def Predict(model, X_test, y_test):
     '''
-    Function to calculate the AUROC for a classification. 
+    Function to calculate the AUROC, Accuracy, F1 Score, Precision, and Recall for a classification. 
     Input:  
             Trained model- should work with an sklearn based ML model.
             X_test- the Matrix containing the testing data (will be approximate Z in this workflow).
             y_test- Corresponding labels for testing data.  Needs to binary, but not necessarily discrete.
+
     Output:
             Calculated AUROC value
 
@@ -24,11 +25,19 @@ def Calculate_Auroc(model, X_test, y_test)-> float:
     y = np.zeros((len(y_test)))
     y[y_test == np.unique(y_test)[0]] = 1
 
-    fpr, tpr, _ = sklearn.metrics.roc_curve(y, probabilities)
+    metric_dict = {}
 
-    auc = sklearn.metrics.auc(fpr, tpr)
-    
-    return(auc)
+    metric_dict['AUROC'] = sklearn.metrics.auc_roc_curve(y_test, probabilities)
+
+    y_pred = np.repeat(np.unique(y_test)[0], len(y_test))
+    y_pred[y_pred == 1] = np.unique(y_test)[1]
+
+    metric_dict['Accuracy'] = np.mean(y_test == y_pred)
+    metric_dict['F1 Score'] = sklearn.metrics.f1_score(y_test, y_pred, pos_label = np.unique(y_test)[0])
+    metric_dict['Precision'] = sklearn.metrics.precision_score(y_test, y_pred, pos_label = np.unique(y_test)[0])
+    metric_dict['Recall'] = sklearn.metrics.recall_score(y_test, y_pred, pos_label = np.unique(y_test)[0])
+
+    return y_pred, metric_dict
 
 def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_set, sigma_list, kernel_type = 'Gaussian', seed_obj = np.random.RandomState(100)) -> tuple:
     '''
@@ -119,20 +128,20 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
 
         #Calculates approximate kernel according to chosen kernel function- may add more functions in the future
         #Distribution data comes from Fourier Transform of original kernel function
-        if kernel_type == 'Gaussian':
+        if kernel_type.lower() == 'gaussian':
 
             gamma = 1/(2*adjusted_sigma**2)
             sigma_p = 0.5*np.sqrt(2*gamma)
 
             W = seed_obj.normal(0, sigma_p, train_features.shape[1]*D).reshape((train_features.shape[1]),D)
 
-        elif kernel_type == 'Laplacian':
+        elif kernel_type.lower() == 'laplacian':
 
             gamma = 1/(2*adjusted_sigma)
 
             W = gamma * seed_obj.standard_cauchy(train_features.shape[1]*D).reshape((train_features.shape[1],D))
 
-        elif kernel_type == 'Cauchy':
+        elif kernel_type.lower() == 'cauchy':
 
             gamma = 1/(2*adjusted_sigma**2)
             b = 0.5*np.sqrt(gamma)
@@ -424,7 +433,8 @@ def Find_Selected_Pathways(model, group_names) -> np.ndarray:
 
 def TF_IDF_filter(x, mode = 'filter'):
     '''
-    Function to use Term Frequency Inverse Document Frequency filtering for atac data to find meaningful features (Needs to be optimized)
+    Function to use Term Frequency Inverse Document Frequency filtering for atac data to find meaningful features (Needs to be optimized). 
+    If input is pandas data frame or scipy sparse array, it will be converted to a numpy array.
     Input:
             x- Data matrix of cell x feature.  Must be a Numpy array or Scipy sparse array.
             mode- Argument to determine what to return.  Must be filter or normalize
@@ -434,17 +444,20 @@ def TF_IDF_filter(x, mode = 'filter'):
                 'normalize'- returns TFIDF filtered data matrix of the same dimensions as x. Returns as scipy sparse matrix
     '''
 
-    if scipy.sparse.issparse(x):
-        colsums = x.sum(axis = 0)
-        rowsums = x.sum(axis = 1)
-    else:
-        colsums = np.sum(x, axis = 0, keepdims= True)
-        rowsums = np.sum(x, axis = 1, keepdims= True)
+    assert mode in ['filter', 'normalize'], 'mode must be "filter" or "normalize".'
+    
 
-    Tfs = x * 1/rowsums #np.matmul(x, y.T)
+    if scipy.sparse.issparse(x):
+        x = x.toarray()
+    
+    colsums = np.sum(x, axis = 0, keepdims= True)
+    rowsums = np.sum(x, axis = 1, keepdims= True)
+
+    TFs = x * 1/rowsums #np.matmul(x, y.T)
     IDFs = x.shape[1] / colsums
 
-    TFIDF =  np.log1p(IDFs * Tfs * 1e4)
+
+    TFIDF =  np.log1p(IDFs * TFs * 1e4)
 
     if mode == 'normalize':
         return TFIDF
