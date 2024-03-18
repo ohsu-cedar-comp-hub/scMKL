@@ -27,7 +27,7 @@ There are 4 required pieces of data (per modality) required for scMKL
     - Example: {Group1: [feature1, feature2, feature3], Group2: [feature4, feature5, feature6], ...}
 
 ```
-x = np.load('./data/TCGA-ESCA.npy', allow_pickle = True)
+X = np.load('./data/TCGA-ESCA.npy', allow_pickle = True)
 labels = np.load('./data/TCGA-ESCA_cell_metadata.npy', allow_pickle = True)
 features = np.load('./data/TCGA-ESCA_RNA_feature_names.npy', allow_pickle = True)
 
@@ -44,18 +44,17 @@ D = int(np.sqrt(len(labels)) * np.log(np.log(len(labels))))
 Kernel widths (sigma) are a parameter of the kernel approximation. Here we calculate sigma on the full dataset before optimizing it with k-Fold Cross Validation on the training set.
 
 ```
-sigmas = src.Calculate_Sigma(x, group_dict, 'rna', features)
-
 # The train/test sets are calculated to keep the proportion of each label the same in the training and testing sets.
 train_indices, test_indices = src.Train_Test_Split(labels, seed_obj= np.random.RandomState(500))
 
-x_train = x[train_indices,:]
-x_test = x[test_indices,:]
+X_train = X[train_indices,:]
+X_test = X[test_indices,:]
 y_train = labels[train_indices]
 y_test = labels[test_indices]
 
+sigmas = src.Calculate_Sigma(X_train, group_dict, 'rna', features)
 
-sigmas = src.Optimize_Sigma(X = x_train, y = y_train, group_dict = group_dict, assay = 'rna', D = D, feature_set = features, sigma_list = sigmas)
+sigmas = src.Optimize_Sigma(X = X_train, y = y_train, group_dict = group_dict, assay = 'rna', D = D, feature_set = features, sigma_list = sigmas)
 ```
 
 #### Calculating Z and Model Evaluation
@@ -65,7 +64,7 @@ Below, we calculate approximate kernels for each group in the grouping informati
 Then we evaluate the model to find the Area Under the Receiver Operating Curve, and view the distinguishing features between groups.
 
 ```
-Z_train, Z_test = src.Calculate_Z(x_train, x_test, group_dict, 'rna', D, features, sigmas)
+Z_train, Z_test = src.Calculate_Z(X_train, X_test, group_dict, 'rna', D, features, sigmas)
 
 gl = src.Train_Model(Z_train, y_train, 2 * D)
 auc = src.Calculate_Auroc(gl, Z_test, y_test)
