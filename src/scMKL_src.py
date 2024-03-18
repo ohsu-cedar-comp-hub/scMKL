@@ -3,13 +3,15 @@ import scipy
 import celer
 import sklearn
 
-def Predict(model, X_test, y_test):
+def Predict(model, X_test, y_test, metrics = None):
     '''
-    Function to calculate the AUROC, Accuracy, F1 Score, Precision, and Recall for a classification. 
+    Function to return predicted labels and calculate any of AUROC, Accuracy, F1 Score, Precision, Recall for a classification. 
     Input:  
             Trained model- should work with an sklearn based ML model.
             X_test- the Matrix containing the testing data (will be approximate Z in this workflow).
             y_test- Corresponding labels for testing data.  Needs to binary, but not necessarily discrete.
+            metrics- Which metrics to calculate on the predicted values.
+                     Only metrics for binary classification at the moment. May be extended for multiclass.
 
     Output:
             Values predicted by the model
@@ -24,21 +26,51 @@ def Predict(model, X_test, y_test):
 
     # Group Lasso requires 'continous' y values need to re-descritize it
     y = np.zeros((len(y_test)))
-    y[y_test == np.unique(y_test)[0]] = 1
+    y[y_test == np.unique(y_test)[0]] = 0
 
     metric_dict = {}
 
     #Convert numerical probabilies into binary phenotype
     y_pred = np.repeat(np.unique(y_test)[0], len(y_test))
-    y_pred[y_pred.astype(int) == 1] = np.unique(y_test)[1]
+    y_pred[probabilities.astype(int) == 1] = np.unique(y_test)[1]
 
-    metric_dict['AUROC'] = sklearn.metrics.auc_roc_curve(y_test, probabilities)
-    metric_dict['Accuracy'] = np.mean(y_test == y_pred)
-    metric_dict['F1 Score'] = sklearn.metrics.f1_score(y_test, y_pred, pos_label = np.unique(y_test)[0])
-    metric_dict['Precision'] = sklearn.metrics.precision_score(y_test, y_pred, pos_label = np.unique(y_test)[0])
-    metric_dict['Recall'] = sklearn.metrics.recall_score(y_test, y_pred, pos_label = np.unique(y_test)[0])
+    if metrics == None:
+        return y_pred
+    if 'AUROC' in metrics:
+        fpr, tpr, _ = sklearn.metrics.roc_curve(y, probabilities)
+        metric_dict['AUROC'] = sklearn.metrics.auc(fpr, tpr)
+    if 'Accuracy' in metrics:
+        metric_dict['Accuracy'] = np.mean(y_test == y_pred)
+    if 'F1-Score' in metrics:
+        metric_dict['F1-Score'] = sklearn.metrics.f1_score(y_test, y_pred, pos_label = np.unique(y_test)[0])
+    if 'Precision' in metrics:
+        metric_dict['Precision'] = sklearn.metrics.precision_score(y_test, y_pred, pos_label = np.unique(y_test)[0])
+    if 'Recall' in metrics:
+        metric_dict['Recall'] = sklearn.metrics.recall_score(y_test, y_pred, pos_label = np.unique(y_test)[0])
 
     return y_pred, metric_dict
+
+def Calculate_AUROC(model, X_test, y_test)-> float:
+    '''
+    Function to calculate the AUROC for a classification. 
+    Input:  
+            Trained model- should work with an sklearn based ML model.
+            X_test- the Matrix containing the testing data (will be approximate Z in this workflow).
+            y_test- Corresponding labels for testing data.  Needs to binary, but not necessarily discrete.
+    Output:
+            Calculated AUROC value
+    '''
+    y_test = y_test.ravel()
+    assert X_test.shape[0] == len(y_test), 'X and y must have the same number of samples'
+    # Sigmoid function to force probabilities into [0,1]
+    probabilities = 1 / (1 + np.exp(-model.predict(X_test)))
+    # Group Lasso requires 'continous' y values need to re-descritize it
+    y = np.zeros((len(y_test)))
+    y[y_test == np.unique(y_test)[0]] = 1
+    fpr, tpr, _ = sklearn.metrics.roc_curve(y, probabilities)
+    auc = sklearn.metrics.auc(fpr, tpr)
+    
+    return(auc)
 
 def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_set, sigma_list, kernel_type = 'Gaussian', seed_obj = np.random.RandomState(100)) -> tuple:
     '''
@@ -285,7 +317,7 @@ def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_t
             Z_train, Z_test = Calculate_Z(X_train, X_test, group_dict, assay, D, feature_set, new_sigma_list, kernel_type, seed_obj)
 
             gl = Train_Model(Z_train, y_train, group_widths= 2 * D, alpha = alpha)
-            auc_array[i, fold] = Calculate_Auroc(gl, Z_test, y_test)
+            auc_array[i, fold] = Calculate_AUROC(gl, Z_test, y_test)
     
     best_adj = sigma_adjustments[np.argmax(np.mean(auc_array, axis = 1))]
     optimized_sigma = sigma_list * best_adj
@@ -391,7 +423,7 @@ def Optimize_Alpha(X, y, group_widths, k = 4, alpha_list = [1.9,0.9], seed_obj =
         for i, alpha in enumerate(alpha_list):
 
             gl = Train_Model(X_train, y_train, group_widths, alpha = alpha * alphamax_multiplyer)
-            auroc_array[fold, i] = Calculate_Auroc(gl, X_test, y_test)
+            auroc_array[fold, i] = Calculate_AUROC(gl, X_test, y_test)
 
     # Returns value based off 'output_value' parameter.
     if output_type == 'best':
