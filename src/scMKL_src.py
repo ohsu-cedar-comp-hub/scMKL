@@ -26,13 +26,13 @@ def Predict(model, X_test, y_test, metrics = None):
 
     # Group Lasso requires 'continous' y values need to re-descritize it
     y = np.zeros((len(y_test)))
-    y[y_test == np.unique(y_test)[0]] = 0
+    y[y_test == np.unique(y_test)[0]] = 1
 
     metric_dict = {}
 
     #Convert numerical probabilies into binary phenotype
     y_pred = np.repeat(np.unique(y_test)[0], len(y_test))
-    y_pred[probabilities.astype(int) == 1] = np.unique(y_test)[1]
+    y_pred[np.round(probabilities,0).astype(int) == 1] = np.unique(y_test)[1]
 
     if metrics == None:
         return y_pred
@@ -119,16 +119,9 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
             train_features = train_features.toarray()
             test_features = test_features.toarray()
 
-        # Removes features with no signal
-        column_sums = np.sum(train_features, 0)
-        variable_cols = np.where(column_sums != 0)[0] 
-
-        train_features = train_features[:, variable_cols]
-        test_features = test_features[:, variable_cols]
-
         # Removes non-variable features
-        sds = np.std(train_features, 0)
-        variable_features = np.where(sds > 0)[0]
+        sds = np.std(train_features, axis = 0)
+        variable_features = np.where(sds > 1e-10)[0]
         
         train_features = train_features[:,variable_features]
         test_features = test_features[:, variable_features]
@@ -141,7 +134,7 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
             
             #Center and scale count data
             train_means = np.mean(train_features, 0)
-            train_sds = np.std(train_features, 0) + 1e-10
+            train_sds = np.std(train_features, 0)
 
             train_features = (train_features - train_means) / train_sds
             test_features = (test_features - train_means) / train_sds
@@ -224,8 +217,8 @@ def Estimate_Sigma(X, group_dict, assay, feature_set, kernel_type = 'Gaussian', 
             train_features = train_features.toarray()
 
         # Remove all 0 and non-variable columns
-        sds = np.std(train_features, 0)
-        variable_features = np.where(sds > 0)[0]
+        sds = np.std(train_features, axis = 0)
+        variable_features = np.where(sds > 1e-10)[0]
         
         train_features = train_features[:,variable_features]
 
@@ -298,14 +291,18 @@ def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_t
     assert kernel_type.lower() in ['gaussian', 'cauchy', 'laplacian'], 'Kernel function must be Gaussian, Cauchy, or Laplacian'
     assert isinstance(k, int) and k > 0, 'Must be a positive integer number of folds'
     
-    fold_annotations = seed_obj.choice(np.arange(k), len(y))
+    positive_indices = np.where(y == np.unique(y)[0])[0]
+    negative_indices = np.setdiff1d(np.arange(len(y)), positive_indices)
+
+    positive_annotations = np.arange(len(positive_indices)) % k
+    negative_annotations = np.arange(len(negative_indices)) % k
     sigma_list = np.array(sigma_list)
 
     auc_array = np.zeros((len(sigma_adjustments), k))
 
-    for fold in range(k):
-        fold_train = np.array(fold_annotations != fold)
-        fold_test = np.array(fold_annotations == fold)
+    for fold in np.arange(k):
+        fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], negative_indices[np.where(negative_annotations != fold)[0]]))
+        fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], negative_indices[np.where(negative_annotations == fold)[0]]))
 
         X_train = X[fold_train,:]
         X_test = X[fold_test,:]
@@ -355,7 +352,7 @@ def Train_Model(X_train, y_train, group_size = 1, alpha = 0.9) -> celer.dropin_s
     train_labels = np.ones(y_train.shape)
     train_labels[y_train == cell_labels[1]] = -1
 
-    train_labels = (train_labels - np.mean(train_labels)) / np.std(train_labels)
+    # train_labels = (train_labels - np.mean(train_labels)) / np.std(train_labels)
 
     # Alphamax is an attempt to regularize the effect of alpha (a sparsity parameter) across different data sets
     alphamax = np.max(np.abs(X_train.T.dot(train_labels))) / X_train.shape[0] * alpha
@@ -396,8 +393,6 @@ def Optimize_Alpha(X, y, group_size, k = 4, alpha_list = [1.9,0.9], seed_obj = n
             'all'- Returns the AUROC for each alpha across k folds as a dict of format 
                 {alpha1: np.array(Fold1 AUROC for alpha1, Fold2 AUROC for alpha1, ...), alpha2: np.array(Fold1 AUROC for alpha2, Fold2 AUROC for alpha2, ...)}
     '''
-    # Randomly 'assign' samples to a fold
-    fold_annotations = seed_obj.choice(np.arange(k), len(y))
 
     #Object to store AUROC values
     auroc_array = np.zeros((k, len(alpha_list)))
@@ -405,12 +400,18 @@ def Optimize_Alpha(X, y, group_size, k = 4, alpha_list = [1.9,0.9], seed_obj = n
     numbered_labels = np.ones((len(y)))
     numbered_labels[y == np.unique(y)[0]] = -1
 
-    # Perform k-fold CV
-    for fold in range(k):
-        # Assigns train-test split according to randomly selected annotations from before
-        fold_train = np.array(fold_annotations != fold)
-        fold_test = np.array(fold_annotations == fold)
+    positive_indices = np.where(y == np.unique(y)[0])[0]
+    negative_indices = np.setdiff1d(np.arange(len(y)), positive_indices)
 
+    positive_annotations = np.arange(len(positive_indices)) % k
+    negative_annotations = np.arange(len(negative_indices)) % k
+    sigma_list = np.array(sigma_list)
+
+    for fold in np.arange(k):
+        fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], negative_indices[np.where(negative_annotations != fold)[0]]))
+        fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], negative_indices[np.where(negative_annotations == fold)[0]]))
+
+    # Perform k-fold CV
         X_train = X[fold_train,:]
         y_train = numbered_labels[fold_train]
         X_test = X[fold_test,:]
@@ -587,11 +588,13 @@ def Sparse_Var(X, axis = None):
     '''
     Function to calculate variance on a sparse matrix.
     Input:
-        X- A scipy sparse matrix
+        X- A scipy sparse or numpy array
         axis- Determines which axis variance is calculated on. Same usage as Numpy
             axis = 0 => column variances
             axis = 1 => row variances
             axis = None => total variance (calculated on all data)
+    Output:
+        var- Variance values calculated over the given axis
     '''
 
     # E[X^2] - E[X]^2
