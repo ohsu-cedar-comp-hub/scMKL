@@ -83,7 +83,7 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
             assay- What type of sequencing data.  Used to determine how to process the data.
                         If not rna, atac, or gene_scores, no preprocessing will be done. Will likely be updated for new modalities.
             feature_set- Numpy array containing the names of all features
-            sigma_array- Numpy array with 'kernel weights' used for calculating the distribution for projection.
+            sigma_array- Numpy array with 'kernel widths' used for calculating the distribution for projection.
             kernel_type- String to determine which kernel function to approximate. Currently on Gaussian, Laplacian, and Cauchy are supported.
             seed_obj- Numpy random state used for random processes. Can be specified for reproducubility or set by default.
     Output:
@@ -190,7 +190,7 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
 
     return Z_train, Z_test
 
-def Calculate_Sigma(X, group_dict, assay, feature_set, kernel_type = 'Gaussian', seed_obj = np.random.RandomState(100)) -> np.ndarray:
+def Estimate_Sigma(X, group_dict, assay, feature_set, kernel_type = 'Gaussian', seed_obj = np.random.RandomState(100)) -> np.ndarray:
     '''
     Function to calculate approximate kernels weights to inform distribution for project of Fourier Features. Calculates one sigma per group of features
     Input:
@@ -203,7 +203,7 @@ def Calculate_Sigma(X, group_dict, assay, feature_set, kernel_type = 'Gaussian',
             kernel_type- String to determine which kernel function to approximate. Currently on Gaussian, Laplacian, and Cauchy are supported.
             seed_obj- Numpy random state used for random processes. Can be specified for reproducubility or set by default.
     Output:
-            sigma_list- Numpy array of kernel weights in the order of the groups in the group_dict to be used in Calculate_Z() function.
+            sigma_list- Numpy array of kernel widths in the order of the groups in the group_dict to be used in Calculate_Z() function.
 
     '''
     assert kernel_type.lower() in ['gaussian', 'cauchy', 'laplacian'], 'Kernel function must be Gaussian, Cauchy, or Laplacian'
@@ -270,7 +270,7 @@ def Calculate_Sigma(X, group_dict, assay, feature_set, kernel_type = 'Gaussian',
 def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_type = 'Gaussian', seed_obj = np.random.RandomState(100), 
                    alpha = 1.9, sigma_adjustments = np.arange(0.1,2.1,0.3), k = 4) -> np.ndarray:
     '''
-    Function to perform k-fold cross-validation to optimize sigma (kernel weights) based on classification AUROC
+    Function to perform k-fold cross-validation to optimize sigma (kernel widths) based on classification AUROC
     Inputs:
             X- Matrix containing data that will be split into training and testing data for cross validation.
             Best practice is to not include any data from the testing set.
@@ -280,7 +280,7 @@ def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_t
             assay- What type of sequencing data.  Used to determine how to process the data.
                         If not rna, atac, or gene_scores, no preprocessing will be done. Will likely be updated for new modalities.
             feature_set- Numpy array containing the names of all features
-            sigma_array- Numpy array with 'kernel weights' used for calculating the distribution for projection.
+            sigma_array- Numpy array with 'kernel widths' used for calculating the distribution for projection.
             kernel_type- String to determine which kernel function to approximate. Currently on Gaussian, Laplacian, and Cauchy are supported.
             seed_obj- Numpy random state used for random processes. Can be specified for reproducubility or set by default.
             alpha- Group Lasso regularization coefficient. alpha is a floating point value controlling model solution sparsity. Must be a positive float.
@@ -291,7 +291,7 @@ def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_t
             optimized_sigma- Numpy array with sigma array producing highest AUROC classification
     '''
 
-    assert np.all(sigma_list > 0), 'Kernel Weights must be positive'
+    assert np.all(sigma_list > 0), 'Kernel Widths must be positive'
     assert np.all(sigma_adjustments > 0), 'Adjustment values must be positive'
     assert X.shape[0] == len(y), 'X and y must have the same number of samples'
     assert X.shape[1] == len(feature_set), 'Given features do not correspond with features in X'
@@ -316,7 +316,7 @@ def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_t
             new_sigma_list = sigma_list * adj
             Z_train, Z_test = Calculate_Z(X_train, X_test, group_dict, assay, D, feature_set, new_sigma_list, kernel_type, seed_obj)
 
-            gl = Train_Model(Z_train, y_train, group_widths= 2 * D, alpha = alpha)
+            gl = Train_Model(Z_train, y_train, group_size= 2 * D, alpha = alpha)
             auc_array[i, fold] = Calculate_AUROC(gl, Z_test, y_test)
     
     best_adj = sigma_adjustments[np.argmax(np.mean(auc_array, axis = 1))]
@@ -324,13 +324,13 @@ def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_t
 
     return optimized_sigma
 
-def Train_Model(X_train, y_train, group_widths = 1, alpha = 0.9) -> celer.dropin_sklearn.GroupLasso:
+def Train_Model(X_train, y_train, group_size = 1, alpha = 0.9) -> celer.dropin_sklearn.GroupLasso:
     '''
     Function to train and test grouplasso model
     Inputs:
             X_train- Training Data of samples by features.  Must be a numpy array
             y_train- Sample labels corresponding to training data. Must be binary
-            group_widths- Argument describing how the features are grouped. 
+            group_size- Argument describing how the features are grouped. 
                     From Celer documentation:
                     "groupsint | list of ints | list of lists of ints.
                         Partition of features used in the penalty on w. 
@@ -361,21 +361,21 @@ def Train_Model(X_train, y_train, group_widths = 1, alpha = 0.9) -> celer.dropin
     alphamax = np.max(np.abs(X_train.T.dot(train_labels))) / X_train.shape[0] * alpha
 
     # Instantiate celer Group Lasso Regression Model Object
-    model = celer.GroupLasso(groups = group_widths, alpha = alphamax)
+    model = celer.GroupLasso(groups = group_size, alpha = alphamax)
 
     # Fit model using training data
     model.fit(X_train, train_labels.ravel())
 
     return model
 
-def Optimize_Alpha(X, y, group_widths, k = 4, alpha_list = [1.9,0.9], seed_obj = np.random.RandomState(100), output_type = 'best'):
+def Optimize_Alpha(X, y, group_size, k = 4, alpha_list = [1.9,0.9], seed_obj = np.random.RandomState(100), output_type = 'best'):
     '''
     Function to perform k-fold Cross Validation on alpha (functionality may be extended to other lasso parameters) to determine which produces the highest AUROC
     Input:
         X- Matrix containing data that will be split into training and testing data for cross validation.
             Best practice is to not include any data from the testing set.
         y- Samples labels corresponding to X.
-        group_widths- Argument describing how the features are grouped. 
+        group_size- Argument describing how the features are grouped. 
             From Celer documentation:
             "groupsint | list of ints | list of lists of ints.
                 Partition of features used in the penalty on w. 
@@ -422,7 +422,7 @@ def Optimize_Alpha(X, y, group_widths, k = 4, alpha_list = [1.9,0.9], seed_obj =
         # Evaluates the model with the given parameter using 'Evaluate_Model()' function.  Stores AUROC for each fold + alpha combination
         for i, alpha in enumerate(alpha_list):
 
-            gl = Train_Model(X_train, y_train, group_widths, alpha = alpha * alphamax_multiplyer)
+            gl = Train_Model(X_train, y_train, group_size, alpha = alpha * alphamax_multiplyer)
             auroc_array[fold, i] = Calculate_AUROC(gl, X_test, y_test)
 
     # Returns value based off 'output_value' parameter.
@@ -450,21 +450,21 @@ def Find_Selected_Pathways(model, group_names) -> np.ndarray:
 
     selected_groups = []
     coefficients = model.coef_
-    group_widths = model.get_params()['groups']
+    group_size = model.get_params()['groups']
 
 
     for i, group in enumerate(group_names):
-        if not isinstance(group_widths, (list, set, np.ndarray, tuple)):
-            group_norm = np.linalg.norm(coefficients[np.arange(i * group_widths, (i+1) * group_widths - 1)])
+        if not isinstance(group_size, (list, set, np.ndarray, tuple)):
+            group_norm = np.linalg.norm(coefficients[np.arange(i * group_size, (i+1) * group_size - 1)])
         else: 
-            group_norm = np.linalg.norm(coefficients[group_widths[i]])
+            group_norm = np.linalg.norm(coefficients[group_size[i]])
 
         if group_norm != 0:
             selected_groups.append(group)
 
     return np.array(selected_groups)
 
-def TF_IDF_filter(x, mode = 'filter'):
+def TF_IDF_filter(X, mode = 'filter'):
     '''
     Function to use Term Frequency Inverse Document Frequency filtering for atac data to find meaningful features (Needs to be optimized). 
     If input is pandas data frame or scipy sparse array, it will be converted to a numpy array.
@@ -480,22 +480,18 @@ def TF_IDF_filter(x, mode = 'filter'):
     assert mode in ['filter', 'normalize'], 'mode must be "filter" or "normalize".'
     
 
-    if scipy.sparse.issparse(x):
-        x = x.toarray()
+    if scipy.sparse.issparse(X):
+        X = X.toarray()
     
-    colsums = np.sum(x, axis = 0, keepdims= True)
-    rowsums = np.sum(x, axis = 1, keepdims= True)
-
-    TFs = x * 1/rowsums #np.matmul(x, y.T)
-    IDFs = x.shape[1] / colsums
-
-
-    TFIDF =  np.log1p(IDFs * TFs * 1e4)
+    doc_freq = np.array(np.sum(X > 0, axis=0)).flatten()
+    idf = np.log(X.shape[0] / (1 + doc_freq))
+    tf = X * 1 / np.sum(X, axis = 1, keepdims= True)
+    tfidf = tf * idf
 
     if mode == 'normalize':
-        return TFIDF
+        return tfidf
     if mode == 'filter':
-        return np.where(np.sum(TFIDF, axis = 0) > 0)[0]
+        return np.where(np.sum(tfidf, axis = 0) > 0)[0]
 
 def Filter_Features(X, feature_names, group_dict):
     '''
@@ -599,5 +595,8 @@ def Sparse_Var(X, axis = None):
     '''
 
     # E[X^2] - E[X]^2
-    var = (X.power(2).mean(axis = axis)) - np.square(X.mean(axis = axis))
-    return np.array(var)
+    if scipy.sparse.issparse(X):
+        var = np.array((X.power(2).mean(axis = axis)) - np.square(X.mean(axis = axis)))
+    else:
+        var = np.var(X, axis = axis)
+    return var
