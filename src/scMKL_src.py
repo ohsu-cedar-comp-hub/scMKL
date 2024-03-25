@@ -183,7 +183,7 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
 
     return Z_train, Z_test
 
-def Estimate_Sigma(X, group_dict, assay, feature_set, kernel_type = 'Gaussian', seed_obj = np.random.RandomState(100)) -> np.ndarray:
+def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclidean', seed_obj = np.random.RandomState(100)) -> np.ndarray:
     '''
     Function to calculate approximate kernels weights to inform distribution for project of Fourier Features. Calculates one sigma per group of features
     Input:
@@ -193,15 +193,14 @@ def Estimate_Sigma(X, group_dict, assay, feature_set, kernel_type = 'Gaussian', 
             assay- What type of sequencing data.  Used to determine how to process the data.
                         If not rna, atac, or gene_scores, no preprocessing will be done. Will likely be updated for new modalities.
             feature_set- Numpy array containing the names of all features
-            kernel_type- String to determine which kernel function to approximate. Currently on Gaussian, Laplacian, and Cauchy are supported.
+            distance_metric- Pairwise distance metric to use. Must be from the list offered in scipy cdist function or a custom distance function.
             seed_obj- Numpy random state used for random processes. Can be specified for reproducubility or set by default.
     Output:
             sigma_list- Numpy array of kernel widths in the order of the groups in the group_dict to be used in Calculate_Z() function.
 
     '''
-    assert kernel_type.lower() in ['gaussian', 'cauchy', 'laplacian'], 'Kernel function must be Gaussian, Cauchy, or Laplacian'
     assert X.shape[1] == len(feature_set), 'Given features do not correspond with features in X'
-
+ 
     sigma_list = []
 
     # Loop over every group
@@ -242,16 +241,8 @@ def Estimate_Sigma(X, group_dict, assay, feature_set, kernel_type = 'Gaussian', 
         # Sample cells because distance calculation are costly and can be approximated
         distance_indices = seed_obj.choice(np.arange(train_features.shape[0]), np.min((2000, train_features.shape[0])))
 
-        # Calculate Distance Matrix with method according to modality.  These metrics were empirically determined to be best among those tested.
-        if kernel_type in ['Gaussian', 'Cauchy']:
-
-            sigma = np.mean(scipy.spatial.distance.cdist(train_features[distance_indices,:], train_features[distance_indices,:], 'euclidean'))
-
-
-        elif kernel_type == 'Laplacian':
-
-            sigma = np.mean(scipy.spatial.distance.cdist(train_features[distance_indices,:], train_features[distance_indices,:], 'cityblock'))
-
+        # Calculate Distance Matrix with specified metric
+        sigma = np.mean(scipy.spatial.distance.cdist(train_features[distance_indices,:], train_features[distance_indices,:], distance_metric))
 
         if sigma == 0:
             sigma += 1e-5
