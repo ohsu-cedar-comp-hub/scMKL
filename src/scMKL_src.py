@@ -20,6 +20,7 @@ def Predict(model, X_test, y_test, metrics = None):
     '''
     y_test = y_test.ravel()
     assert X_test.shape[0] == len(y_test), 'X and y must have the same number of samples'
+    assert all([metric in ['AUROC', 'Accuracy', 'F1-Score', 'Precision', 'Recall'] for metric in metrics]), 'Unknown metric provided.  Must be one or more of AUROC, Accuracy, F1-Score, Precision, Recall'
 
     # Sigmoid function to force probabilities into [0,1]
     probabilities = 1 / (1 + np.exp(-model.predict(X_test)))
@@ -31,11 +32,12 @@ def Predict(model, X_test, y_test, metrics = None):
     metric_dict = {}
 
     #Convert numerical probabilies into binary phenotype
-    y_pred = np.repeat(np.unique(y_test)[0], len(y_test))
-    y_pred[np.round(probabilities,0).astype(int) == 1] = np.unique(y_test)[1]
+    y_pred = np.array(np.repeat(np.unique(y_test)[1], len(y_test)), dtype = 'object')
+    y_pred[np.round(probabilities,0).astype(int) == 1] = np.unique(y_test)[0]
 
     if metrics == None:
         return y_pred
+
     if 'AUROC' in metrics:
         fpr, tpr, _ = sklearn.metrics.roc_curve(y, probabilities)
         metric_dict['AUROC'] = sklearn.metrics.auc(fpr, tpr)
@@ -72,7 +74,7 @@ def Calculate_AUROC(model, X_test, y_test)-> float:
     
     return(auc)
 
-def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_set, sigma_list, kernel_type = 'Gaussian', seed_obj = np.random.RandomState(100)) -> tuple:
+def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_set, sigma_list, kernel_type = 'Gaussian', seed_obj = np.random.default_rng(100)) -> tuple:
     '''
     Function to calculate approximate kernels.
     Input:
@@ -183,7 +185,7 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
 
     return Z_train, Z_test
 
-def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclidean', seed_obj = np.random.RandomState(100)) -> np.ndarray:
+def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclidean', seed_obj = np.random.default_rng(100)) -> np.ndarray:
     '''
     Function to calculate approximate kernels weights to inform distribution for project of Fourier Features. Calculates one sigma per group of features
     Input:
@@ -251,7 +253,7 @@ def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclide
         
     return np.array(sigma_list)
 
-def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_type = 'Gaussian', seed_obj = np.random.RandomState(100), 
+def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_type = 'Gaussian', seed_obj = np.random.default_rng(100), 
                    alpha = 1.9, sigma_adjustments = np.arange(0.1,2.1,0.3), k = 4) -> np.ndarray:
     '''
     Function to perform k-fold cross-validation to optimize sigma (kernel widths) based on classification AUROC
@@ -356,7 +358,7 @@ def Train_Model(X_train, y_train, group_size = 1, alpha = 0.9) -> celer.dropin_s
 
     return model
 
-def Optimize_Alpha(X, y, group_size, k = 4, alpha_list = [1.9,0.9], seed_obj = np.random.RandomState(100), output_type = 'best'):
+def Optimize_Alpha(X, y, group_size, k = 4, alpha_list = [1.9,0.9], seed_obj = np.random.default_rng(100), output_type = 'best'):
     '''
     Function to perform k-fold Cross Validation on alpha (functionality may be extended to other lasso parameters) to determine which produces the highest AUROC
     Input:
@@ -535,7 +537,7 @@ def Combine_Modalities(Assay_1_name: str, Assay_1_Z, Assay_1_Group_Names, Assay_
 
     return combined_Z, combined_group_names
 
-def Train_Test_Split(y, train_indices = None, seed_obj = np.random.RandomState(100), train_ratio = 0.8):
+def Train_Test_Split(y, train_indices = None, seed_obj = np.random.default_rng(100), train_ratio = 0.8):
 
 
     '''
