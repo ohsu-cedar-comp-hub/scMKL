@@ -358,13 +358,14 @@ def Train_Model(X_train, y_train, group_size = 1, alpha = 0.9) -> celer.dropin_s
 
     return model
 
-def Optimize_Alpha(X, y, group_size, k = 4, alpha_list = [1.9,0.9], seed_obj = np.random.default_rng(100), output_type = 'best'):
+def Optimize_Alpha(X_train, y_train, group_size, starting_alpha = 1.9, increment = 0.2, target = 1, n_iter = 10):
     '''
-    Function to perform k-fold Cross Validation on alpha (functionality may be extended to other lasso parameters) to determine which produces the highest AUROC
+    Iteratively train a grouplasso model and update alpha to find the parameter yielding the desired sparsity.
+    This function is meant to find a good starting point for your model, and the alpha may need further fine tuning.
     Input:
-        X- Matrix containing data that will be split into training and testing data for cross validation.
+        X_train- Matrix containing data that will be split into training and testing data for cross validation.
             Best practice is to not include any data from the testing set.
-        y- Samples labels corresponding to X.
+        y_train- Samples labels corresponding to X.
         group_size- Argument describing how the features are grouped. 
             From Celer documentation:
             "groupsint | list of ints | list of lists of ints.
@@ -373,64 +374,49 @@ def Optimize_Alpha(X, y, group_size, k = 4, alpha_list = [1.9,0.9], seed_obj = n
                     If a list of ints is passed, groups are assumed to be contiguous, group number g being of size groups[g]. 
                     If a list of lists of ints is passed, groups[g] contains the feature indices of the group number g."
             If 1, model will behave identically to Lasso Regression.
-        k- Number of cross validation steps. Use k = # Samples for leave-one-out cross validation
-        alpha_list- Iterable object containing the alpha values to be tested.
-        seed_obj- Numpy random state used for random processes. Can be specified for reproducubility or set by default.
-        output_type- Argument defining output of function.  Acceptable types are 'best', 'mean', and 'all'.  The effect of each is described under 'Output'.
+        starting_alpha- The alpha value to start the search at.
+        increment- amount to adjust alpha by between iterations
+        target- The desired number of groups selected by the model.
+        n_iter- The maximum number of iterations to run
             
     Output:
-        Output varies considerably based on 'output_type' parameter.
-            'best'- Returns the alpha that produced the highest average AUROC across k folds as a float,
-            'mean'- Returns the average AUROC for each alpha across k folds as a dict of format 
-                {alpha1: mean(AUROC for alpha 1), alpha2: mean(AUROC for alpha2), ...}
-            'all'- Returns the AUROC for each alpha across k folds as a dict of format 
-                {alpha1: np.array(Fold1 AUROC for alpha1, Fold2 AUROC for alpha1, ...), alpha2: np.array(Fold1 AUROC for alpha2, Fold2 AUROC for alpha2, ...)}
+        sparsity_dict- Dictionary with tested alpha as keys and the number of selected pathways as the values
+        alpha- The alpha value yielding the number of selected groups closest to the target.
     '''
+    assert X_train.shape[0] == len(y_train), 'X and y must have the same number of samples'
+    assert increment > 0 and increment < starting_alpha, 'Choose a positive increment less than alpha'
+    assert target > 0 and isinstance(target, int), 'Choose an integer target number of groups that is greater than 0'
+    assert n_iter > 0 and isinstance(n_iter, int), 'Choose an integer number of iterations that is greater than 0'
 
-    #Object to store AUROC values
-    auroc_array = np.zeros((k, len(alpha_list)))
+    if isinstance(group_size, int):
+        num_groups = int(X_train.shape[1]/group_size)
+    else:
+        num_groups = len(group_size)
 
-    numbered_labels = np.ones((len(y)))
-    numbered_labels[y == np.unique(y)[0]] = -1
+    sparsity_dict = {}
+    alpha = starting_alpha
 
-    positive_indices = np.where(y == np.unique(y)[0])[0]
-    negative_indices = np.setdiff1d(np.arange(len(y)), positive_indices)
+    for i in np.arange(n_iter):
+        model = Train_Model(X_train, y_train, group_size, alpha)
+        num_selected = len(Find_Selected_Pathways(model, np.arange(num_groups)))
 
-    positive_annotations = np.arange(len(positive_indices)) % k
-    negative_annotations = np.arange(len(negative_indices)) % k
-    sigma_list = np.array(sigma_list)
+        sparsity_dict[np.round(alpha,4)] = num_selected
 
-    for fold in np.arange(k):
-        fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], negative_indices[np.where(negative_annotations != fold)[0]]))
-        fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], negative_indices[np.where(negative_annotations == fold)[0]]))
+        if num_selected < target:
+            #Decreasing alpha will increase the number of selected pathways
+            if alpha - increment in sparsity_dict.keys():
+                # Make increment smaller so the model can't go back and forth between alpha values
+                increment /= 2
+            alpha = np.max([alpha - increment, 1e-3]) #Ensures that alpha will never be negative
+        elif num_selected > target:
+            if alpha + increment in sparsity_dict.keys():
+                increment /= 2
+            alpha += increment
+        if num_selected == target:
+            break
 
-    # Perform k-fold CV
-        X_train = X[fold_train,:]
-        y_train = numbered_labels[fold_train]
-        X_test = X[fold_test,:]
-        y_test = numbered_labels[fold_test]
-
-        #Regularize alpha parameter across folds
-        alphamax_multiplyer = np.max(np.abs(X_train.T.dot(y_train))) / X_train.shape[0]
-
-        # Evaluates the model with the given parameter using 'Evaluate_Model()' function.  Stores AUROC for each fold + alpha combination
-        for i, alpha in enumerate(alpha_list):
-
-            gl = Train_Model(X_train, y_train, group_size, alpha = alpha * alphamax_multiplyer)
-            auroc_array[fold, i] = Calculate_AUROC(gl, X_test, y_test)
-
-    # Returns value based off 'output_value' parameter.
-    if output_type == 'best':
-        # Return the alpha yielding highest mean AUROC
-        max_alpha_index = np.argmax(np.mean(auroc_array, axis = 0))
-        return alpha_list[max_alpha_index]
-    elif output_type == 'mean':
-        # Returns mean AUROC for each alpha
-        mean_AUROC = np.mean(auroc_array, axis = 0)
-        return {alpha_list[i]: mean_AUROC[i] for i in range(len(alpha_list))}
-    elif output_type == 'all':
-        # Returns all AUROC for each fold + alpha combination
-        return {alpha_list[i]: np.array(auroc_array[:,i]) for i in range(len(alpha_list))}
+    optimal_alpha = list(sparsity_dict.keys())[np.argmin([np.abs(selected - target) for selected in sparsity_dict.values()])]
+    return sparsity_dict, optimal_alpha
 
 def Find_Selected_Pathways(model, group_names) -> np.ndarray:
     '''
