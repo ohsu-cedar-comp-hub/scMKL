@@ -42,7 +42,7 @@ X, features = src.Filter_Features(X, features, group_dict)
 ```
 
 #### Parameter Optimization
-Kernel weights (sigma) are a parameter of the kernel approximation.  Here we estimate sigma on a random 2000 samples from the training set before optimizing it with k-Fold Cross Validation on the training set.
+Kernel widths (sigma) are a parameter of the kernel approximation.  Here we estimate sigma on a random 2000 samples from the training set before optimizing it with k-Fold Cross Validation on the full training set.
 
 
 ```python
@@ -54,7 +54,7 @@ X_test = X[test_indices,:]
 y_train = labels[train_indices]
 y_test = labels[test_indices]
 
-sigmas = src.Estimate_Sigma(X, group_dict, 'rna', features, seed_obj= seed)
+sigmas = src.Estimate_Sigma(X= X_train, group_dict= group_dict, assay= 'rna', feature_set= features, seed_obj= seed)
 
 sigmas = src.Optimize_Sigma(X = X_train, y = y_train, group_dict = group_dict, assay = 'rna', D = D, feature_set = features, 
                             sigma_list = sigmas, k = 2, sigma_adjustments = np.arange(0.1,2,0.1), seed_obj= seed)
@@ -67,7 +67,7 @@ Then we train the model to view the distinguishing feature groups between phenot
 
 
 ```python
-Z_train, Z_test = src.Calculate_Z(X_train, X_test, group_dict, 'rna', D, features, sigmas, seed_obj= seed)
+Z_train, Z_test = src.Calculate_Z(X_train= X_train, X_test= X_test, group_dict= group_dict, assay= 'rna', D= D, feature_set= features, sigma_list= sigmas, seed_obj= seed)
 
 gl = src.Train_Model(Z_train, y_train, 2 * D)
 predictions, metrics = src.Predict(gl, Z_test, y_test, metrics = ['AUROC', 'F1-Score', 'Accuracy', 'Precision', 'Recall'])
@@ -81,6 +81,5 @@ print(selected_groups)
 ```
 
     {'AUROC': 1.0, 'Accuracy': 1.0, 'F1-Score': 1.0, 'Precision': 1.0, 'Recall': 1.0}
-    ['HALLMARK_NOTCH_SIGNALING' 'HALLMARK_ESTROGEN_RESPONSE_EARLY'
-     'HALLMARK_GLYCOLYSIS' 'HALLMARK_UV_RESPONSE_DN']
+    ['HALLMARK_ESTROGEN_RESPONSE_EARLY']
 
