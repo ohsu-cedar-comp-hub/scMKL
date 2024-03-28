@@ -501,27 +501,35 @@ def Filter_Features(X, feature_names, group_dict):
 
     return X, feature_names
 
-def Combine_Modalities(Assay_1_name: str, Assay_1_Z, Assay_1_Group_Names, Assay_2_name: str, Assay_2_Z, Assay_2_Group_Names) -> tuple:
+def Combine_Modalities(Assay_1_name: str, Assay_2_name: str,
+                       Assay_1_Z_train, Assay_2_Z_train, 
+                       Assay_1_Group_Names, Assay_2_Group_Names,
+                       Assay_1_Z_test = np.zeros((0)), Assay_2_Z_test = np.zeros((0)),) -> tuple:
     '''
     Combines data sets for multimodal classification.  Combined group names are assay+group_name
     Input:
             Assay_#_name: Name of assay to be added to group_names as a string
-            Assay_#_Z: Numpy array containing data
+            Assay_#_Z_train: Numpy array containing train data
             Assay_#_Group_Names: Names of groups for the given data set
+            Assay_#_Z_test: Numpy array containing test.  Is None by default 
     Output:
             combined_Z: Concatenated data matrices as numpy array
             combined_group_names = Concatenated group names of form assay+group_name
     '''
-    assert Assay_1_Z.shape[0] == Assay_2_Z.shape[0], 'Cannot concatenate arrays with different number of rows.'
+    assert Assay_1_Z_train.shape[0] == Assay_2_Z_train.shape[0] and Assay_1_Z_test.shape[0] == Assay_2_Z_test.shape[0], 'Cannot concatenate arrays with different number of rows.'
 
-    combined_Z = np.hstack((Assay_1_Z, Assay_2_Z))
+    combined_Z_train = np.hstack((Assay_1_Z_train, Assay_2_Z_train))
 
     Assay_1_Group_Names = [f'{Assay_1_name}_{name}' for name in Assay_1_Group_Names]
     Assay_2_Group_Names = [f'{Assay_2_name}_{name}' for name in Assay_2_Group_Names]
 
     combined_group_names = np.concatenate((Assay_1_Group_Names, Assay_2_Group_Names))
 
-    return combined_Z, combined_group_names
+    if Assay_1_Z_test.shape[0] == 0 or Assay_2_Z_test.shape[0] == 0:
+        return combined_Z_train, combined_group_names
+    else:
+        combined_Z_test = np.hstack((Assay_1_Z_test, Assay_2_Z_test))
+        return combined_Z_train, combined_Z_test, combined_group_names
 
 def Train_Test_Split(y, train_indices = None, seed_obj = np.random.default_rng(100), train_ratio = 0.8):
 

@@ -27,6 +27,10 @@ atac_feature_names = np.load(f'/home/groups/CEDAR/kupp/scMKL/data/scMM/{dataset}
 
 cell_labels = np.load(f'/home/groups/CEDAR/kupp/scMKL/data/scMM/{dataset}/{dataset}_cell_metadata.npy', allow_pickle= True)
 
+sample = seed_obj.choice(np.arange(len(cell_labels)), 1000)
+rna_X = rna_X[sample,:]
+atac_X = atac_X[sample,:]
+cell_labels = cell_labels[sample]
 
 with open(f'/home/groups/CEDAR/kupp/scMKL/data/scMM/{dataset}/{dataset}_groupings.pkl', 'rb') as fin:
     groupings = pickle.load(fin)
@@ -69,10 +73,11 @@ atac_Z_train, atac_Z_test = src.Calculate_Z(X_train = atac_X[train_indices,:], X
                                         feature_set= atac_feature_names, sigma_list= atac_sigmas, kernel_type= 'Laplacian', seed_obj= seed_obj)
 del rna_X, atac_X
 
-combined_Z_train, group_names = src.Combine_Modalities('rna', rna_Z_train, rna_group_dict.keys(), 'atac', atac_Z_train, atac_group_dict.keys())
+combined_Z_train, combined_Z_test, group_names = src.Combine_Modalities(Assay_1_name= 'rna', Assay_2_name= 'atac', 
+                                                                        Assay_1_Z_train= rna_Z_train, Assay_2_Z_train= atac_Z_train,
+                                                                        Assay_1_Group_Names= rna_group_dict.keys(), Assay_2_Group_Names= atac_group_dict.keys(),
+                                                                        Assay_1_Z_test= rna_Z_test, Assay_2_Z_test= atac_Z_test)
 del rna_Z_train, atac_Z_train
-
-combined_Z_test, _ = src.Combine_Modalities('rna', rna_Z_test, rna_group_dict.keys(), 'atac', atac_Z_test, atac_group_dict.keys())
 del rna_Z_test, atac_Z_test
 
 alpha_list = np.round(np.linspace(1.9,0.1,10), 2)
