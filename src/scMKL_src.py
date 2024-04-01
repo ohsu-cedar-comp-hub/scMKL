@@ -7,15 +7,14 @@ def Predict(model, X_test, y_test, metrics = None):
     '''
     Function to return predicted labels and calculate any of AUROC, Accuracy, F1 Score, Precision, Recall for a classification. 
     Input:  
-            Trained model- should work with an sklearn based ML model.
-            X_test- the Matrix containing the testing data (will be approximate Z in this workflow).
-            y_test- Corresponding labels for testing data.  Needs to binary, but not necessarily discrete.
-            metrics- Which metrics to calculate on the predicted values.
-                     Only metrics for binary classification at the moment. May be extended for multiclass.
+            Trained model- Must be compatible with sklearn based ML model
+            X_test- the Matrix containing the testing data (will be Z_test in this workflow)
+            y_test- Corresponding labels for testing data.  Needs to binary, but not necessarily numeric
+            metrics- Which metrics to calculate on the predicted values
 
     Output:
             Values predicted by the model
-            Dictionary containing AUROC, Accuracy, F1 Score, Precision, and Recall
+            Dictionary containing AUROC, Accuracy, F1 Score, Precision, and/or Recall depending on metrics argument
 
     '''
     y_test = y_test.ravel()
@@ -31,7 +30,7 @@ def Predict(model, X_test, y_test, metrics = None):
 
     metric_dict = {}
 
-    #Convert numerical probabilies into binary phenotype
+    #Convert numerical probabilities into binary phenotype
     y_pred = np.array(np.repeat(np.unique(y_test)[1], len(y_test)), dtype = 'object')
     y_pred[np.round(probabilities,0).astype(int) == 1] = np.unique(y_test)[0]
 
@@ -55,10 +54,11 @@ def Predict(model, X_test, y_test, metrics = None):
 def Calculate_AUROC(model, X_test, y_test)-> float:
     '''
     Function to calculate the AUROC for a classification. 
+    Designed as a helper function.  Recommended to use Predict() for model evaluation.
     Input:  
-            Trained model- should work with an sklearn based ML model.
+            Trained model- should be compatible with an sklearn based ML model.
             X_test- the Matrix containing the testing data (will be approximate Z in this workflow).
-            y_test- Corresponding labels for testing data.  Needs to binary, but not necessarily discrete.
+            y_test- Corresponding labels for testing data.  Needs to binary, but not necessarily numeric.
     Output:
             Calculated AUROC value
     '''
@@ -84,9 +84,10 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
                         Example: {geneset: np.array(gene_1, gene_2, ..., gene_n)}
             assay- What type of sequencing data.  Used to determine how to process the data.
                         If not rna, atac, or gene_scores, no preprocessing will be done. Will likely be updated for new modalities.
+            D- Number of Random Fourier Features used to calculate Z. Should be a positive integer.
             feature_set- Numpy array containing the names of all features
             sigma_array- Numpy array with 'kernel widths' used for calculating the distribution for projection.
-            kernel_type- String to determine which kernel function to approximate. Currently on Gaussian, Laplacian, and Cauchy are supported.
+            kernel_type- String to determine which kernel function to approximate. Currently only Gaussian, Laplacian, and Cauchy are supported.
             seed_obj- Numpy random state used for random processes. Can be specified for reproducubility or set by default.
     Output:
             Z_train- Approximate kernel for training of shape N x 2*D*G for N training samples, D Random Fourier Features, and G groups
@@ -95,6 +96,7 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
     '''
     assert kernel_type.lower() in ['gaussian', 'cauchy', 'laplacian'], 'Kernel function must be Gaussian, Cauchy, or Laplacian'
     assert X_train.shape[1] == len(feature_set), 'Given features do not correspond with features in X'
+    assert isinstance(D, int) and D > 0, 'D should be a positive integer'
 
     #Number of groupings taking from group_dict
     N_pathway = len(group_dict.keys())
@@ -113,8 +115,8 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
         feature_indices = np.nonzero(np.in1d(feature_set, np.array(list(group_features))))[0]
 
         # Create data arrays containing only features within this group
-        train_features = X_train[0:, feature_indices]
-        test_features = X_test[0:, feature_indices]
+        train_features = X_train[:, feature_indices]
+        test_features = X_test[:, feature_indices]
 
         # Converts data to dense array
         if scipy.sparse.issparse(train_features):
@@ -128,7 +130,7 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
         train_features = train_features[:,variable_features]
         test_features = test_features[:, variable_features]
 
-        #Data processing- may be controlled by a flag in the future.
+        #Data processing according to assay
         if assay.lower() in ['rna', 'gene_scores']:
 
             train_features = np.log1p(train_features)
@@ -187,7 +189,7 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
 
 def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclidean', seed_obj = np.random.default_rng(100)) -> np.ndarray:
     '''
-    Function to calculate approximate kernels weights to inform distribution for project of Fourier Features. Calculates one sigma per group of features
+    Function to calculate approximate kernels widths to inform distribution for project of Fourier Features. Calculates one sigma per group of features
     Input:
             X- Matrix containing training data of cells x features.  Can be scipy sparse array or numpy array
             group_dict- Dictionary containing feature grouping information.
@@ -196,23 +198,23 @@ def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclide
                         If not rna, atac, or gene_scores, no preprocessing will be done. Will likely be updated for new modalities.
             feature_set- Numpy array containing the names of all features
             distance_metric- Pairwise distance metric to use. Must be from the list offered in scipy cdist function or a custom distance function.
-            seed_obj- Numpy random state used for random processes. Can be specified for reproducubility or set by default.
+            seed_obj- Numpy random state used for random processes. Can be specified for reproducibility or set by default.
     Output:
-            sigma_list- Numpy array of kernel widths in the order of the groups in the group_dict to be used in Calculate_Z() function.
+            sigma_list- Numpy array of approximate kernel widths in the order of the groups in the group_dict to be used in Calculate_Z() function.
 
     '''
     assert X.shape[1] == len(feature_set), 'Given features do not correspond with features in X'
  
     sigma_list = []
 
-    # Loop over every group
+    # Loop over every group in group_dict
     for group_name in group_dict.keys():
 
         # Select only features within that group
         group_features = group_dict[group_name] 
         feature_indices = np.nonzero(np.in1d(feature_set, np.array(list(group_features))))[0]
 
-        train_features = X[0:, feature_indices]
+        train_features = X[:, feature_indices]
 
         if scipy.sparse.issparse(train_features):
             train_features = train_features.toarray()
@@ -223,7 +225,7 @@ def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclide
         
         train_features = train_features[:,variable_features]
 
-        # Process data according to modality
+        # Process data according to assay
         if assay.lower() in ['rna', 'gene_scores']:
 
             train_features = np.log1p(train_features)
@@ -256,7 +258,7 @@ def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclide
 def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_type = 'Gaussian', seed_obj = np.random.default_rng(100), 
                    alpha = 1.9, sigma_adjustments = np.arange(0.1,2.1,0.3), k = 4) -> np.ndarray:
     '''
-    Function to perform k-fold cross-validation to optimize sigma (kernel widths) based on classification AUROC
+    Function to perform k-fold cross-validation to optimize sigma (kernel widths) based on classification AUROC of a validation set
     Inputs:
             X- Matrix containing data that will be split into training and testing data for cross validation.
             Best practice is to not include any data from the testing set.
@@ -284,6 +286,7 @@ def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_t
     assert kernel_type.lower() in ['gaussian', 'cauchy', 'laplacian'], 'Kernel function must be Gaussian, Cauchy, or Laplacian'
     assert isinstance(k, int) and k > 0, 'Must be a positive integer number of folds'
     
+    # Create train/validation sets with equal proportions of phenotypes
     positive_indices = np.where(y == np.unique(y)[0])[0]
     negative_indices = np.setdiff1d(np.arange(len(y)), positive_indices)
 
@@ -309,6 +312,7 @@ def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_t
             gl = Train_Model(Z_train, y_train, group_size= 2 * D, alpha = alpha)
             auc_array[i, fold] = Calculate_AUROC(gl, Z_test, y_test)
     
+    # Take AUROC mean across the k folds
     best_adj = sigma_adjustments[np.argmax(np.mean(auc_array, axis = 1))]
     optimized_sigma = sigma_list * best_adj
 
@@ -316,9 +320,9 @@ def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_t
 
 def Train_Model(X_train, y_train, group_size = 1, alpha = 0.9) -> celer.dropin_sklearn.GroupLasso:
     '''
-    Function to train and test grouplasso model
+    Function to fit a grouplasso model to the provided data.
     Inputs:
-            X_train- Training Data of samples by features.  Must be a numpy array
+            X_train- Training Data of samples x features.  Must be a numpy array
             y_train- Sample labels corresponding to training data. Must be binary
             group_size- Argument describing how the features are grouped. 
                     From Celer documentation:
@@ -336,18 +340,18 @@ def Train_Model(X_train, y_train, group_size = 1, alpha = 0.9) -> celer.dropin_s
 
     '''
     assert X_train.shape[0] == len(y_train), 'X and y must have the same number of samples'
+    assert alpha > 0, 'Alpha must be positive'
 
     cell_labels = np.unique(y_train)
 
     assert len(cell_labels) == 2, f'Sample labels must be binary for this algorithm. Expected 2 unique labels, input has {len(cell_labels)}.'
 
     # This is a regression algorithm. We need to make the labels 'continuous' for classification, but they will remain binary.
+    # Casts training labels to array of -1,1
     train_labels = np.ones(y_train.shape)
     train_labels[y_train == cell_labels[1]] = -1
 
-    # train_labels = (train_labels - np.mean(train_labels)) / np.std(train_labels)
-
-    # Alphamax is an attempt to regularize the effect of alpha (a sparsity parameter) across different data sets
+    # Alphamax is a calculation to regularize the effect of alpha (a sparsity parameter) across different data sets
     alphamax = np.max(np.abs(X_train.T.dot(train_labels))) / X_train.shape[0] * alpha
 
     # Instantiate celer Group Lasso Regression Model Object
@@ -363,8 +367,7 @@ def Optimize_Alpha(X_train, y_train, group_size, starting_alpha = 1.9, increment
     Iteratively train a grouplasso model and update alpha to find the parameter yielding the desired sparsity.
     This function is meant to find a good starting point for your model, and the alpha may need further fine tuning.
     Input:
-        X_train- Matrix containing data that will be split into training and testing data for cross validation.
-            Best practice is to not include any data from the testing set.
+        X_train- Matrix containing data to train a group lasso model
         y_train- Samples labels corresponding to X.
         group_size- Argument describing how the features are grouped. 
             From Celer documentation:
@@ -412,7 +415,7 @@ def Optimize_Alpha(X_train, y_train, group_size, starting_alpha = 1.9, increment
             if alpha + increment in sparsity_dict.keys():
                 increment /= 2
             alpha += increment
-        if num_selected == target:
+        elif num_selected == target:
             break
 
     optimal_alpha = list(sparsity_dict.keys())[np.argmin([np.abs(selected - target) for selected in sparsity_dict.values()])]
@@ -446,7 +449,7 @@ def Find_Selected_Pathways(model, group_names) -> np.ndarray:
 
 def TF_IDF_filter(X, mode = 'filter'):
     '''
-    Function to use Term Frequency Inverse Document Frequency filtering for atac data to find meaningful features (Needs to be optimized). 
+    Function to use Term Frequency Inverse Document Frequency filtering for atac data to find meaningful features. 
     If input is pandas data frame or scipy sparse array, it will be converted to a numpy array.
     Input:
             x- Data matrix of cell x feature.  Must be a Numpy array or Scipy sparse array.
@@ -461,19 +464,27 @@ def TF_IDF_filter(X, mode = 'filter'):
     
 
     if scipy.sparse.issparse(X):
-        X = X.toarray()
-    
-    doc_freq = np.array(np.sum(X > 0, axis=0)).flatten()
-    idf = np.log(X.shape[0] / (1 + doc_freq))
-    tf = X * 1 / np.sum(X, axis = 1, keepdims= True)
+        row_sum = np.array(X.sum(axis=1)).flatten()
+        tf = X / row_sum[:, np.newaxis]
+    else:
+        row_sum = np.sum(X, axis=1, keepdims=True)
+        tf = X / row_sum
+
+    if scipy.sparse.issparse(X):
+        doc_freq = np.array(np.sum(X > 0, axis=0)).flatten()
+    else:
+        doc_freq = np.sum(X > 0, axis=0)
+
+    idf = np.log1p((1 + X.shape[0]) / (1 + doc_freq))
     tfidf = tf * idf
 
     if mode == 'normalize':
         return tfidf
-    if mode == 'filter':
-        return np.where(np.sum(tfidf, axis = 0) > 0)[0]
+    elif mode == 'filter':
+        significant_features = np.where(np.sum(tfidf, axis=0) > 0)[0]
+        return significant_features
 
-def Filter_Features(X, feature_names, group_dict):
+def Filter_Features(X, feature_set, group_dict):
     '''
     Function to remove unused features from X matrix.  Any features not included in group_dict will be removed from the matrix.
     Input:
@@ -485,6 +496,7 @@ def Filter_Features(X, feature_names, group_dict):
             X- Data array containing data only for features in the group_dict
             feature_names- Numpy array of corresponding feature names from group_dict
     '''
+    assert X.shape[1] == len(feature_set), 'Given features do not correspond with features in X'    
 
     group_features = set()
 
@@ -493,13 +505,13 @@ def Filter_Features(X, feature_names, group_dict):
         group_features.update(set(group_dict[group]))
 
     # Find location of desired features in whole feature set
-    group_feature_indices = np.nonzero(np.isin(feature_names, np.array(list(group_features))))[0]
+    group_feature_indices = np.nonzero(np.isin(feature_set, np.array(list(group_features))))[0]
 
     # Subset only the desired features and their data
     X = X[:,group_feature_indices]
-    feature_names = feature_names[group_feature_indices]
+    feature_set = feature_set[group_feature_indices]
 
-    return X, feature_names
+    return X, feature_set
 
 def Combine_Modalities(Assay_1_name: str, Assay_2_name: str,
                        Assay_1_Z_train, Assay_2_Z_train, 
@@ -511,7 +523,7 @@ def Combine_Modalities(Assay_1_name: str, Assay_2_name: str,
             Assay_#_name: Name of assay to be added to group_names as a string
             Assay_#_Z_train: Numpy array containing train data
             Assay_#_Group_Names: Names of groups for the given data set
-            Assay_#_Z_test: Numpy array containing test.  Is None by default 
+            Assay_#_Z_test: Numpy array containing test.  Is empty by default and combined Z_test won't be returned if that's the case
     Output:
             combined_Z: Concatenated data matrices as numpy array
             combined_group_names = Concatenated group names of form assay+group_name
@@ -520,20 +532,21 @@ def Combine_Modalities(Assay_1_name: str, Assay_2_name: str,
 
     combined_Z_train = np.hstack((Assay_1_Z_train, Assay_2_Z_train))
 
-    Assay_1_Group_Names = [f'{Assay_1_name}_{name}' for name in Assay_1_Group_Names]
-    Assay_2_Group_Names = [f'{Assay_2_name}_{name}' for name in Assay_2_Group_Names]
+    # Make the group names unique if there's overlap between assays
+    if len(set(Assay_1_Group_Names).intersection(set(Assay_2_Group_Names))) > 0:
+        Assay_1_Group_Names = [f'{Assay_1_name}_{name}' for name in Assay_1_Group_Names]
+        Assay_2_Group_Names = [f'{Assay_2_name}_{name}' for name in Assay_2_Group_Names]
 
     combined_group_names = np.concatenate((Assay_1_Group_Names, Assay_2_Group_Names))
 
     if Assay_1_Z_test.shape[0] == 0 or Assay_2_Z_test.shape[0] == 0:
+        # If Z_test is not given, return only combined Z_train
         return combined_Z_train, combined_group_names
     else:
         combined_Z_test = np.hstack((Assay_1_Z_test, Assay_2_Z_test))
         return combined_Z_train, combined_Z_test, combined_group_names
 
 def Train_Test_Split(y, train_indices = None, seed_obj = np.random.default_rng(100), train_ratio = 0.8):
-
-
     '''
     Function to calculate training and testing indices for given dataset. If train indices are given, it will calculate the test indices.
         If train_indices == None, then it calculates both indices, preserving the ratio of each label in y
