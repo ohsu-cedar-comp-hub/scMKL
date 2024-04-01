@@ -1,32 +1,38 @@
 import numpy as np
-import scMKL_src as src
 from scipy.sparse import load_npz
 import argparse
 import os
 import pickle
 import time
 import tracemalloc
+import sys
+sys.path.insert(0, '..')
+import src.scMKL_src as src
 
 tracemalloc.start()
 
+
 parser = argparse.ArgumentParser(description='Unimodal classification of single cell data with hallmark prior information')
-parser.add_argument('-d', '--dataset', help = 'Which dataset to classify', choices = ['prostate',  'MCF7', 'T47D', 'lymphoma'], type = str)
+# parser.add_argument('-d', '--dataset', help = 'Which dataset to classify', choices = ['prostate',  'MCF7', 'T47D', 'lymphoma'], type = str)
 parser.add_argument('-a', '--assay', help = 'Which assay to use', type = str, choices = ['rna', 'atac', 'gene_scores'])
 parser.add_argument('-r', '--replication', help = 'Which replication to use', type = int, default = 1)
+parser.add_argument('-m', '--distance_metric', help = 'Which Scipy distance function to use to estimate sigma', type = str, default = 'euclidean')
 args = parser.parse_args()
 
-dataset = args.dataset
+# dataset = args.dataset
 assay = args.assay
 replication = args.replication
+distance_metric = args.distance_metric
 
+replication = 1
 seed_obj = np.random.default_rng(100*replication)
 
-X = load_npz(f'/home/groups/CEDAR/kupp/scMKL/data/scMM/{dataset}/{dataset}_{assay.upper()}_scipy.npz')
-feature_names = np.load(f'/home/groups/CEDAR/kupp/scMKL/data/scMM/{dataset}/{dataset}_{assay.upper()}_feature_names.npy', allow_pickle= True)
-cell_labels = np.load(f'/home/groups/CEDAR/kupp/scMKL/data/scMM/{dataset}/{dataset}_cell_metadata.npy', allow_pickle= True)
+X = load_npz(f'data/MCF7_{assay.upper()}_X.npz')
+feature_names = np.load(f'data/MCF7_{assay.upper()}_feature_names.npy', allow_pickle= True)
+cell_labels = np.load(f'data/MCF7_cell_labels.npy', allow_pickle= True)
 
-with open(f'/home/groups/CEDAR/kupp/scMKL/data/scMM/{dataset}/{dataset}_groupings.pkl', 'rb') as fin:
-    groupings = pickle.load(fin)
+with open(f'data/MCF7_feature_groupings.pkl', 'rb') as fin:
+    feature_groupings = pickle.load(fin)
 
 if assay == 'atac':
     feature_type = 'peaks'
@@ -36,8 +42,8 @@ else:
     kernel_func = 'Gaussian'
 
 group_dict = {}
-for pathway in groupings['hallmark'].keys():
-    group_dict[pathway] = groupings['hallmark'][pathway][feature_type]
+for pathway in feature_groupings.keys():
+    group_dict[pathway] = feature_groupings[pathway][feature_type]
 
 D = int(np.sqrt(len(cell_labels)) * np.log(np.log(len(cell_labels))))
 
@@ -51,7 +57,7 @@ X_test = X[test_indices,:]
 y_test = cell_labels[test_indices]
 
 print('Estimating Sigma', flush = True)
-sigmas = src.Estimate_Sigma(X = X_train, group_dict= group_dict, assay= assay, feature_set= feature_names, distance_metric= 'euclidean', seed_obj= seed_obj)
+sigmas = src.Estimate_Sigma(X = X_train, group_dict= group_dict, assay= assay, feature_set= feature_names, distance_metric= distance_metric, seed_obj= seed_obj)
 
 print('Optimizing Sigma', flush = True)
 sigmas = src.Optimize_Sigma(X_train, y_train, group_dict, assay, D, feature_names, sigmas, kernel_func, seed_obj)
@@ -59,9 +65,11 @@ sigmas = src.Optimize_Sigma(X_train, y_train, group_dict, assay, D, feature_name
 print('Calculating Z', flush = True)
 Z_train, Z_test = src.Calculate_Z(X_train, X_test, group_dict, assay, D, feature_names, sigmas, kernel_func, seed_obj)
 
-alpha_list = np.round(np.linspace(1.9,0.1,10), 2)
-if dataset == 'prostate':
-    alpha_list = np.round(np.linspace(3.6, 0.9, 10), 2)
+print('Finding Alpha', flush = True)
+_, sparse_alpha = src.Optimize_Alpha(X_train= Z_train, y_train= y_train, group_size= 2*D, starting_alpha=1.9, increment= 0.2, target = 1, n_iter = 10)
+_, nonsparse_alpha = src.Optimize_Alpha(X_train= Z_train, y_train= y_train, group_size= 2*D, starting_alpha=1.9, increment= 0.2, target = 50, n_iter = 10)
+
+alpha_list = np.round(np.linspace(sparse_alpha, nonsparse_alpha,10), 2)
 
 metric_dict = {}
 selected_pathways = {}
