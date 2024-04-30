@@ -74,7 +74,7 @@ def Calculate_AUROC(model, X_test, y_test)-> float:
     
     return(auc)
 
-def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_set, sigma_list, kernel_type = 'Gaussian', seed_obj = np.random.default_rng(100)) -> tuple:
+def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_set, sigma_list, kernel_type = 'Gaussian', seed_obj = np.random.default_rng(100), n_features = 5000) -> tuple:
     '''
     Function to calculate approximate kernels.
     Input:
@@ -113,6 +113,9 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
 
         #Find indices of group features in overall array
         feature_indices = np.nonzero(np.in1d(feature_set, np.array(list(group_features)), assume_unique = True))[0]
+        
+        if n_features < len(feature_indices):
+            feature_indices = seed_obj.choice(feature_indices, n_features, replace = False)
 
         # Create data arrays containing only features within this group
         train_features = X_train[:, feature_indices]
@@ -187,7 +190,7 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
 
     return Z_train, Z_test
 
-def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclidean', seed_obj = np.random.default_rng(100)) -> np.ndarray:
+def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclidean', seed_obj = np.random.default_rng(100), n_features = 200) -> np.ndarray:
     '''
     Function to calculate approximate kernels widths to inform distribution for project of Fourier Features. Calculates one sigma per group of features
     Input:
@@ -213,6 +216,11 @@ def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclide
         # Select only features within that group
         group_features = group_dict[group_name] 
         feature_indices = np.nonzero(np.in1d(feature_set, np.array(list(group_features)), assume_unique = True))[0]
+
+        # Reduces number of features in the group for scalability
+        if n_features < len(feature_indices):
+            original_shape = len(feature_indices)
+            feature_indices = seed_obj.choice(feature_indices, n_features, replace = False)
 
         train_features = X[:, feature_indices]
 
@@ -250,6 +258,9 @@ def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclide
 
         if sigma == 0:
             sigma += 1e-5
+
+        if n_features < len(feature_indices):
+            sigma = sigma * original_shape / n_features # Heuristic we calculated to account for fewer features used in distance calculation
 
         sigma_list.append(sigma)
         
