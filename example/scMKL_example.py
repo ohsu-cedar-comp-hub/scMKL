@@ -3,7 +3,7 @@ import pickle
 
 import sys
 
-sys.path.insert(0, './src')
+sys.path.insert(0, './src') # path to src file 
 import scMKL_src as src
 
 seed = np.random.default_rng(1)
