@@ -3,7 +3,7 @@ import pickle
 
 import sys
 
-sys.path.insert(0, '/mnt/c/Users/kupp/Documents/scMKL_pkg/scMKL/src')
+sys.path.insert(0, './src')
 import scMKL_src as src
 
 seed = np.random.default_rng(1)
@@ -26,7 +26,7 @@ X_test = X[test_indices,:]
 y_train = labels[train_indices]
 y_test = labels[test_indices]
 
-sigmas = src.Estimate_Sigma(X = X_train, group_dict = group_dict, assay = 'rna', feature_set = features, seed_obj = seed)
+sigmas = src.Estimate_Sigma(X = X_train, group_dict = group_dict, assay = 'rna', feature_set = features, seed_obj = seed, n_features = 100)
 
 sigmas = src.Optimize_Sigma(X = X_train, y = y_train, group_dict = group_dict, assay = 'rna', D = D, feature_set = features, 
                             sigma_list = sigmas, k = 2, sigma_adjustments = np.arange(0.1,2,0.1), seed_obj = seed)
