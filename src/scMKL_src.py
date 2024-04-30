@@ -1,7 +1,7 @@
 import numpy as np
 import scipy
-import celer
 import sklearn
+from sklearn.utils import issparse
 
 def Predict(model, X_test, y_test, metrics = None):
     '''
@@ -112,7 +112,7 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
         group_features = group_dict[group_name]
 
         #Find indices of group features in overall array
-        feature_indices = np.nonzero(np.in1d(feature_set, np.array(list(group_features))))[0]
+        feature_indices = np.nonzero(np.in1d(feature_set, np.array(list(group_features)), assume_unique = True))[0]
 
         # Create data arrays containing only features within this group
         train_features = X_train[:, feature_indices]
@@ -212,7 +212,7 @@ def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclide
 
         # Select only features within that group
         group_features = group_dict[group_name] 
-        feature_indices = np.nonzero(np.in1d(feature_set, np.array(list(group_features))))[0]
+        feature_indices = np.nonzero(np.in1d(feature_set, np.array(list(group_features)), assume_unique = True))[0]
 
         train_features = X[:, feature_indices]
 
@@ -318,7 +318,8 @@ def Optimize_Sigma(X, y, group_dict, assay, D, feature_set, sigma_list, kernel_t
 
     return optimized_sigma
 
-def Train_Model(X_train, y_train, group_size = 1, alpha = 0.9) -> celer.dropin_sklearn.GroupLasso:
+def Train_Model(X_train, y_train, group_size = 1, alpha = 0.9):
+    import celer
     '''
     Function to fit a grouplasso model to the provided data.
     Inputs:
@@ -466,13 +467,10 @@ def TF_IDF_filter(X, mode = 'filter'):
     if scipy.sparse.issparse(X):
         row_sum = np.array(X.sum(axis=1)).flatten()
         tf = X / row_sum[:, np.newaxis]
-    else:
-        row_sum = np.sum(X, axis=1, keepdims=True)
-        tf = X / row_sum
-
-    if scipy.sparse.issparse(X):
         doc_freq = np.array(np.sum(X > 0, axis=0)).flatten()
     else:
+        row_sum = np.sum(X, axis=1, keepdims=True)
+        tf = X / row_sum    
         doc_freq = np.sum(X > 0, axis=0)
 
     idf = np.log1p((1 + X.shape[0]) / (1 + doc_freq))
@@ -487,6 +485,7 @@ def TF_IDF_filter(X, mode = 'filter'):
 def Filter_Features(X, feature_set, group_dict):
     '''
     Function to remove unused features from X matrix.  Any features not included in group_dict will be removed from the matrix.
+    Also puts the features in the same relative order (of included features)
     Input:
             X- Data array. Can be Numpy array or Scipy Sparse Array
             feature_names- Numpy array of corresponding feature names
@@ -505,7 +504,7 @@ def Filter_Features(X, feature_set, group_dict):
         group_features.update(set(group_dict[group]))
 
     # Find location of desired features in whole feature set
-    group_feature_indices = np.nonzero(np.isin(feature_set, np.array(list(group_features))))[0]
+    group_feature_indices = np.nonzero(np.in1d(feature_set, np.array(list(group_features)), assume_unique = True))[0]
 
     # Subset only the desired features and their data
     X = X[:,group_feature_indices]
@@ -585,6 +584,7 @@ def Train_Test_Split(y, train_indices = None, seed_obj = np.random.default_rng(1
     return train_indices, test_indices
 
 def Sparse_Var(X, axis = None):
+
     '''
     Function to calculate variance on a sparse matrix.
     Input:
@@ -603,3 +603,64 @@ def Sparse_Var(X, axis = None):
     else:
         var = np.var(X, axis = axis)
     return var
+
+def Process_Data(X_train, X_test, data_type, return_dense = True):
+
+    '''
+    Function to preprocess data matrix according to type of data (counts- e.g. rna, or binary- atac)
+    Will process test data according to parameters calculated from test data
+
+    Input:
+        X_train- A scipy sparse or numpy array
+        X_train- A scipy sparse or numpy array
+        data_type- 'counts' or 'binary'.  Determines what preprocessing is applied to the data. 
+            Log transforms and standard scales counts data
+            TFIDF filters ATAC data to remove uninformative columns
+    Output:
+        X_train, X_test- Numpy arrays with the process train/test data respectively.
+    '''
+
+    # Remove features that have no variance in the training data (will be uniformative)
+    assert data_type in ['counts', 'binary'], 'Improper value given for data_type'
+
+    var = Sparse_Var(X_train, axis = 0)
+    variable_features = np.where(var > 1e-10)[0]
+    
+    X_train = X_train[:,variable_features]
+    X_test = X_test[:, variable_features]
+
+    #Data processing according to data type
+    if data_type.lower() == 'counts':
+
+        if scipy.sparse.issparse(X_train):
+            X_train = X_train.log1p()
+            X_test = X_train.log1p()
+        else:
+            X_train = np.log1p(X_train)
+            X_test = np.log1p(X_test)
+            
+        #Center and scale count data
+        train_means = np.mean(X_train, 0)
+        train_sds = np.sqrt(Sparse_Var(X_train, 0))
+
+        X_train = (X_train - train_means) / train_sds
+        X_test = (X_test - train_means) / train_sds
+    
+    elif data_type.lower() == 'binary':
+
+        # TFIDF filter binary peaks
+        non_empty_row = np.where(np.sum(X_train, axis = 1) > 0)[0]
+
+        if scipy.sparse.issparse(X_train):
+            non_0_cols = TF_IDF_filter(X_train.toarray()[non_empty_row,:], mode= 'filter')
+        else:
+            non_0_cols = TF_IDF_filter(X_train[non_empty_row,:], mode = 'filter')
+
+        X_train = X_train[:, non_0_cols]
+        X_test = X_test[:, non_0_cols]
+
+    if return_dense and scipy.sparse.issparse(X_train):
+        X_train = X_train.toarray()
+        X_test = X_test.toarray()
+
+    return X_train, X_test
