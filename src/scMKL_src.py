@@ -89,6 +89,7 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
             sigma_array- Numpy array with 'kernel widths' used for calculating the distribution for projection.
             kernel_type- String to determine which kernel function to approximate. Currently only Gaussian, Laplacian, and Cauchy are supported.
             seed_obj- Numpy random state used for random processes. Can be specified for reproducubility or set by default.
+            n_features- Number of random feature to use when calculating Z- used for scalability
     Output:
             Z_train- Approximate kernel for training of shape N x 2*D*G for N training samples, D Random Fourier Features, and G groups
             Z_test- Approximate kernel for testing of shape M x 2*D*G for M training samples, D Random Fourier Features, and G groups
@@ -109,10 +110,12 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
     for m, group_name in enumerate(group_dict.keys()):
         
         #Extract features from mth group
-        group_features = group_dict[group_name]
+        num_group_features = len(group_dict[group_name])
+        group_features = seed_obj.choice(np.array(list(group_dict[group_name])), min([n_features, num_group_features]), replace = False) 
+
 
         #Find indices of group features in overall array
-        feature_indices = np.nonzero(np.in1d(feature_set, np.array(list(group_features)), assume_unique = True))[0]
+        feature_indices = np.where(np.in1d(feature_set, group_features))[0]
         
         if n_features < len(feature_indices):
             feature_indices = seed_obj.choice(feature_indices, n_features, replace = False)
@@ -190,7 +193,7 @@ def Calculate_Z(X_train, X_test, group_dict: dict, assay: str, D: int, feature_s
 
     return Z_train, Z_test
 
-def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclidean', seed_obj = np.random.default_rng(100), n_features = 200) -> np.ndarray:
+def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclidean', seed_obj = np.random.default_rng(100), n_features = 5000) -> np.ndarray:
     '''
     Function to calculate approximate kernels widths to inform distribution for project of Fourier Features. Calculates one sigma per group of features
     Input:
@@ -202,6 +205,7 @@ def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclide
             feature_set- Numpy array containing the names of all features
             distance_metric- Pairwise distance metric to use. Must be from the list offered in scipy cdist function or a custom distance function.
             seed_obj- Numpy random state used for random processes. Can be specified for reproducibility or set by default.
+            n_features- Number of random features to include when estimating sigma.  Will be scaled for the whole pathway set according to a heuristic. Used for scalability
     Output:
             sigma_list- Numpy array of approximate kernel widths in the order of the groups in the group_dict to be used in Calculate_Z() function.
 
@@ -213,14 +217,11 @@ def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclide
     # Loop over every group in group_dict
     for group_name in group_dict.keys():
 
-        # Select only features within that group
-        group_features = group_dict[group_name] 
-        feature_indices = np.nonzero(np.in1d(feature_set, np.array(list(group_features)), assume_unique = True))[0]
+        # Select only features within that group and downsample for scalability
+        num_group_features = len(group_dict[group_name])
+        group_features = seed_obj.choice(np.array(list(group_dict[group_name])), min([n_features, num_group_features]), replace = False) 
+        feature_indices = np.where(np.in1d(feature_set, group_features))[0]
 
-        # Reduces number of features in the group for scalability
-        if n_features < len(feature_indices):
-            original_shape = len(feature_indices)
-            feature_indices = seed_obj.choice(feature_indices, n_features, replace = False)
 
         train_features = X[:, feature_indices]
 
@@ -259,8 +260,8 @@ def Estimate_Sigma(X, group_dict, assay, feature_set, distance_metric = 'euclide
         if sigma == 0:
             sigma += 1e-5
 
-        if n_features < len(feature_indices):
-            sigma = sigma * original_shape / n_features # Heuristic we calculated to account for fewer features used in distance calculation
+        if n_features < num_group_features:
+            sigma = sigma * num_group_features / n_features # Heuristic we calculated to account for fewer features used in distance calculation
 
         sigma_list.append(sigma)
         
@@ -613,7 +614,7 @@ def Sparse_Var(X, axis = None):
         var = np.array((X.power(2).mean(axis = axis)) - np.square(X.mean(axis = axis)))
     else:
         var = np.var(X, axis = axis)
-    return var
+    return var.ravel()
 
 def Process_Data(X_train, X_test, data_type, return_dense = True):
 
@@ -645,7 +646,7 @@ def Process_Data(X_train, X_test, data_type, return_dense = True):
 
         if scipy.sparse.issparse(X_train):
             X_train = X_train.log1p()
-            X_test = X_train.log1p()
+            X_test = X_test.log1p()
         else:
             X_train = np.log1p(X_train)
             X_test = np.log1p(X_test)

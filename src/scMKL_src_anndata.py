@@ -105,14 +105,17 @@ def Calculate_Z(adata, kernel_type = 'Gaussian', n_features = 5000) -> tuple:
         
         #Extract features from mth group
         num_group_features = len(group_features)
-        group_features = adata.uns['seed_obj'].choice(np.array(list(group_features)), min([n_features, num_group_features]), replace = False) 
+
+        # group_feature_indices = adata.uns['seed_obj'].integers(low = 0, high = num_group_features, size = np.min([n_features, num_group_features]))
+        # group_features = np.array(list(group_features))[group_feature_indices]
+        group_features = adata.uns['seed_obj'].choice(np.array(list(group_features)), np.min([n_features, num_group_features]), replace = False) 
 
         # Create data arrays containing only features within this group
-        X_train = adata[adata.uns['train_indices'], group_features].X
-        X_test = adata[adata.uns['test_indices'], group_features].X
+        X_train = adata[adata.uns['train_indices'],:][:, group_features].X
+        X_test = adata[adata.uns['test_indices'],:][:, group_features].X
 
-        X_train, X_test = Process_Data(X_train, X_test, adata.uns['data_type'], return_dense = True)
 
+        X_train, X_test = Process_Data(X_train = X_train, X_test = X_test, data_type = adata.uns['data_type'], return_dense = True)
 
         #Extract pre-calculated sigma used for approximating kernel
         adjusted_sigma = adata.uns['sigma'][m]
@@ -143,9 +146,6 @@ def Calculate_Z(adata, kernel_type = 'Gaussian', n_features = 5000) -> tuple:
         train_projection = np.matmul(X_train, W)
         test_projection = np.matmul(X_test, W)
         
-        if m == 1:
-            print(W[0:2,0:2])
-            print(train_projection[0:2,0:2])
 
         #Store group Z in whole-Z object.  Preserves order to be able to extract meaningful groups
         Z_train[0:, np.arange( m * 2 * D , (m + 1) * 2 * D)] = np.sqrt(1/D)*np.hstack((np.cos(train_projection), np.sin(train_projection)))
@@ -180,12 +180,7 @@ def Estimate_Sigma(adata, distance_metric = 'euclidean', n_features = 5000):
 
         X_train = adata[adata.uns['train_indices'], group_features].X
 
-        if scipy.sparse.issparse(X_train):
-            X_test = scipy.sparse.csc_array(np.zeros((0,X_train.shape[0])))
-        else:
-            X_test = np.zeros((0,X_train.shape[0]))
-
-        X_train, _ = Process_Data(X_train, X_test, adata.uns['data_type'], return_dense = True)
+        X_train = Process_Data(X_train = X_train, data_type = adata.uns['data_type'], return_dense = True)
         
         # Sample cells because distance calculation are costly and can be approximated
         distance_indices = adata.uns['seed_obj'].choice(np.arange(X_train.shape[0]), np.min((2000, X_train.shape[0])))
@@ -451,7 +446,7 @@ def Filter_Features(X, feature_names, group_dict):
     for group in group_dict.keys():
         group_features.update(set(group_dict[group]))
 
-        group_dict[group] = feature_set.intersection(set(group_dict[group]))
+        group_dict[group] = np.sort(np.array(list(feature_set.intersection(set(group_dict[group])))))
 
     # Find location of desired features in whole feature set
     group_feature_indices = np.where(np.in1d(feature_names, np.array(list(group_features)), assume_unique = True))[0]
@@ -552,9 +547,9 @@ def Sparse_Var(X, axis = None):
         var = np.array((X.power(2).mean(axis = axis)) - np.square(X.mean(axis = axis)))
     else:
         var = np.var(X, axis = axis)
-    return var
+    return var.ravel()
 
-def Process_Data(X_train, X_test, data_type, return_dense = True):
+def Process_Data(X_train, X_test = None, data_type = 'counts', return_dense = True):
 
 
     '''
@@ -574,9 +569,15 @@ def Process_Data(X_train, X_test, data_type, return_dense = True):
     # Remove features that have no variance in the training data (will be uniformative)
     assert data_type in ['counts', 'binary'], 'Improper value given for data_type'
 
+    if X_test == None:
+            X_test = X_train[:1,:] # Creates dummy matrix to for the sake of calculation without increasing computational time
+            orig_test = None
+    else:
+        orig_test = 'given'
+
     var = Sparse_Var(X_train, axis = 0)
-    variable_features = np.where(var > 1e-10)[1]
-    
+    variable_features = np.where(var > 1e-5)[0]
+
     X_train = X_train[:,variable_features]
     X_test = X_test[:, variable_features]
 
@@ -592,10 +593,9 @@ def Process_Data(X_train, X_test, data_type, return_dense = True):
             
         #Center and scale count data
         train_means = np.mean(X_train, 0)
-        train_sds = np.sqrt(Sparse_Var(X_train, 0))
 
-        X_train = (X_train - train_means) / train_sds
-        X_test = (X_test - train_means) / train_sds
+        X_train = (X_train - train_means) / var[variable_features]
+        X_test = (X_test - train_means) / var[variable_features]
     
     elif data_type.lower() == 'binary':
 
@@ -614,7 +614,10 @@ def Process_Data(X_train, X_test, data_type, return_dense = True):
         X_train = X_train.toarray()
         X_test = X_test.toarray()
 
-    return X_train, X_test
+    if orig_test == None:
+        return X_train
+    else:
+        return X_train, X_test
 
 def Create_Adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_dict: dict, data_type: str, train_test_split = None, D = 100, filter_features = False, random_state = 1):
 
