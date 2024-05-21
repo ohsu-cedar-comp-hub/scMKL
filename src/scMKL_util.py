@@ -1,6 +1,7 @@
 import numpy as np 
 import pandas as pd
 from plotnine import *
+import scMKL_src as src
 import re
 
 
@@ -73,7 +74,7 @@ def plot_classification_metrics(metric_dict):
         + scale_x_continuous(breaks = list(metric_dict.keys()))
         + theme_classic())
     
-    return bar_plotimport numpy as np
+    return bar_plot
 
 def Feature_Set_Enrichment(X: np.ndarray, y: np.ndarray, feature_names: np.ndarray, feature_groupings: dict, data_type: str, metric = 'correlation'):
 

@@ -6,8 +6,8 @@ import pickle
 import time
 import tracemalloc
 import sys
-sys.path.insert(0, '..')
-import src.scMKL_src as src
+sys.path.append('./src/')
+import scMKL_src as src
 
 tracemalloc.start()
 
@@ -27,11 +27,11 @@ distance_metric = args.distance_metric
 replication = 1
 seed_obj = np.random.default_rng(100*replication)
 
-X = load_npz(f'data/MCF7_{assay.upper()}_X.npz')
-feature_names = np.load(f'data/MCF7_{assay.upper()}_feature_names.npy', allow_pickle= True)
-cell_labels = np.load(f'data/MCF7_cell_labels.npy', allow_pickle= True)
+X = load_npz(f'example/data/MCF7_{assay.upper()}_X.npz')
+feature_names = np.load(f'example/data/MCF7_{assay.upper()}_feature_names.npy', allow_pickle= True)
+cell_labels = np.load(f'example/data/MCF7_cell_labels.npy', allow_pickle= True)
 
-with open(f'data/MCF7_feature_groupings.pkl', 'rb') as fin:
+with open(f'example/data/MCF7_feature_groupings.pkl', 'rb') as fin:
     feature_groupings = pickle.load(fin)
 
 if assay == 'atac':
@@ -60,7 +60,7 @@ print('Estimating Sigma', flush = True)
 sigmas = src.Estimate_Sigma(X = X_train, group_dict= group_dict, assay= assay, feature_set= feature_names, distance_metric= distance_metric, seed_obj= seed_obj)
 
 print('Optimizing Sigma', flush = True)
-sigmas = src.Optimize_Sigma(X_train, y_train, group_dict, assay, D, feature_names, sigmas, kernel_func, seed_obj)
+# sigmas = src.Optimize_Sigma(X_train, y_train, group_dict, assay, D, feature_names, sigmas, kernel_func, seed_obj)
 
 print('Calculating Z', flush = True)
 Z_train, Z_test = src.Calculate_Z(X_train, X_test, group_dict, assay, D, feature_names, sigmas, kernel_func, seed_obj)
