@@ -2,6 +2,7 @@ import numpy as np
 import scipy
 import sklearn
 import anndata as ad
+import tracemalloc
 
 def Predict(adata, metrics = None):
     '''
@@ -15,7 +16,7 @@ def Predict(adata, metrics = None):
             Dictionary containing AUROC, Accuracy, F1 Score, Precision, and/or Recall depending on metrics argument
 
     '''
-    y_test = adata.obs['labels'][adata.uns['test_indices']].ravel()
+    y_test = adata.obs['labels'].iloc[adata.uns['test_indices']].to_numpy()
     X_test = adata.uns['Z_test']
     assert X_test.shape[0] == len(y_test), 'X and y must have the same number of samples'
     assert all([metric in ['AUROC', 'Accuracy', 'F1-Score', 'Precision', 'Recall'] for metric in metrics]), 'Unknown metric provided.  Must be one or more of AUROC, Accuracy, F1-Score, Precision, Recall'
@@ -60,10 +61,9 @@ def Calculate_AUROC(adata)-> float:
             Calculated AUROC value
     '''
 
-    y_test = adata.obs['labels'][adata.uns['test_indices']]
+    y_test = adata.obs['labels'].iloc[adata.uns['test_indices']].to_numpy()
     X_test = adata.uns['Z_test']
 
-    y_test = y_test.ravel()
     assert X_test.shape[0] == len(y_test), f'X has {X_test.shape[0]} samples and y has {len(y_test)} samples.'
 
     # Sigmoid function to force probabilities into [0,1]
@@ -221,8 +221,9 @@ def Optimize_Sigma(adata, kernel_type = 'Gaussian', alpha = 1.9, sigma_adjustmen
     assert np.all(adata.uns['sigma'] > 0), 'Sigma must be positive'
     
     # Create train/validation sets with equal proportions of phenotypes
+    tracemalloc.start()
 
-    y = adata.obs['labels'][adata.uns['train_indices']]
+    y = adata.obs['labels'].iloc[adata.uns['train_indices']].to_numpy()
     cv_adata = adata[adata.uns['train_indices'],:]
 
     positive_indices = np.where(y == np.unique(y)[0])[0]
@@ -235,8 +236,15 @@ def Optimize_Sigma(adata, kernel_type = 'Gaussian', alpha = 1.9, sigma_adjustmen
     auc_array = np.zeros((len(sigma_adjustments), k))
 
     for fold in np.arange(k):
-        fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], negative_indices[np.where(negative_annotations != fold)[0]]))
-        fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], negative_indices[np.where(negative_annotations == fold)[0]]))
+        print(f'Fold {fold}:\n Memory Usage: {tracemalloc.get_traced_memory()[1] / 1e9} GB')
+
+        fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], 
+                                     negative_indices[np.where(negative_annotations != fold)[0]])).ravel()
+        fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], 
+                                    negative_indices[np.where(negative_annotations == fold)[0]])).ravel()
+
+        # del cv_adata.uns['train_indices']
+        # del cv_adata.uns['test_indices']
 
         cv_adata.uns['train_indices'] = fold_train
         cv_adata.uns['test_indices'] = fold_test
@@ -245,14 +253,16 @@ def Optimize_Sigma(adata, kernel_type = 'Gaussian', alpha = 1.9, sigma_adjustmen
 
         for i, adj in enumerate(sigma_adjustments):
             cv_adata.uns['sigma'] = sigma_list * adj
-            cv_adata = Calculate_Z(cv_adata, kernel_type, n_features = 2500)
+            cv_adata = Calculate_Z(cv_adata, kernel_type, n_features = 200)
 
-            adata = Train_Model(cv_adata, group_size= 2 * adata.uns['D'], alpha = alpha)
-            auc_array[i, fold] = Calculate_AUROC(adata)
+            cv_adata = Train_Model(cv_adata, group_size= 2 * adata.uns['D'], alpha = alpha)
+            auc_array[i, fold] = Calculate_AUROC(cv_adata)
     
     # Take AUROC mean across the k folds
     best_adj = sigma_adjustments[np.argmax(np.mean(auc_array, axis = 1))]
     adata.uns['sigma'] *= best_adj
+
+    print(best_adj)
 
     return adata
 
@@ -282,7 +292,7 @@ def Train_Model(adata, group_size = 1, alpha = 0.9):
     '''
     assert alpha > 0, 'Alpha must be positive'
 
-    y_train = adata.obs['labels'][adata.uns['train_indices']]
+    y_train = adata.obs['labels'].iloc[adata.uns['train_indices']]
     X_train = adata.uns['Z_train']
 
     cell_labels = np.unique(y_train)
