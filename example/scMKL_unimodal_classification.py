@@ -6,7 +6,7 @@ import pickle
 import time
 import tracemalloc
 import sys
-sys.path.append('./src/')
+sys.path.insert(0, './src')
 import scMKL_src as src
 
 tracemalloc.start()
@@ -24,7 +24,6 @@ assay = args.assay
 replication = args.replication
 distance_metric = args.distance_metric
 
-replication = 1
 seed_obj = np.random.default_rng(100*replication)
 
 X = load_npz(f'example/data/MCF7_{assay.upper()}_X.npz')
@@ -101,3 +100,5 @@ results['RAM_usage'] = f'{tracemalloc.get_traced_memory()[1] / 1e9} GB'
 
 print(f'Memory Usage: {tracemalloc.get_traced_memory()[1] / 1e9} GB')
 tracemalloc.stop()
+
+print(metric_dict)
