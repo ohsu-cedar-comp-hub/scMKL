@@ -1,3 +1,4 @@
+import tracemalloc
 import numpy as np
 import scipy
 import sklearn
@@ -15,7 +16,7 @@ def Predict(adata, metrics = None):
             Dictionary containing AUROC, Accuracy, F1 Score, Precision, and/or Recall depending on metrics argument
 
     '''
-    y_test = adata.obs['labels'].iloc[adata.uns['test_indices']].ravel()
+    y_test = adata.obs['labels'].iloc[adata.uns['test_indices']].to_numpy()
     X_test = adata.uns['Z_test']
     assert X_test.shape[0] == len(y_test), 'X and y must have the same number of samples'
     assert all([metric in ['AUROC', 'Accuracy', 'F1-Score', 'Precision', 'Recall'] for metric in metrics]), 'Unknown metric provided.  Must be one or more of AUROC, Accuracy, F1-Score, Precision, Recall'
@@ -60,7 +61,7 @@ def Calculate_AUROC(adata)-> float:
             Calculated AUROC value
     '''
 
-    y_test = adata.obs['labels'].iloc[adata.uns['test_indices']]
+    y_test = adata.obs['labels'].iloc[adata.uns['test_indices']].to_numpy()
     X_test = adata.uns['Z_test']
 
     y_test = y_test.ravel()
@@ -219,12 +220,15 @@ def Optimize_Sigma(adata, kernel_type = 'Gaussian', alpha = 1.9, sigma_adjustmen
     assert kernel_type.lower() in ['gaussian', 'cauchy', 'laplacian'], 'Kernel function must be Gaussian, Cauchy, or Laplacian'
     assert isinstance(k, int) and k > 0, 'Must be a positive integer number of folds'
     assert np.all(adata.uns['sigma'] > 0), 'Sigma must be positive'
+
+    import warnings 
+    warnings.filterwarnings('ignore') 
     
     # Create train/validation sets with equal proportions of phenotypes
 
     y = adata.obs['labels'].iloc[adata.uns['train_indices']].to_numpy()
-    cv_adata = adata[adata.uns['train_indices'],:]
 
+    
     positive_indices = np.where(y == np.unique(y)[0])[0]
     negative_indices = np.setdiff1d(np.arange(len(y)), positive_indices)
 
@@ -235,26 +239,33 @@ def Optimize_Sigma(adata, kernel_type = 'Gaussian', alpha = 1.9, sigma_adjustmen
     auc_array = np.zeros((len(sigma_adjustments), k))
 
     for fold in np.arange(k):
+        
+        print(f'Fold {fold}:\n Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
+
         fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], negative_indices[np.where(negative_annotations != fold)[0]]))
         fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], negative_indices[np.where(negative_annotations == fold)[0]]))
 
-        del cv_adata.uns['train_indices']
-        del cv_adata.uns['test_indices']
-
-        cv_adata.uns['train_indices'] = fold_train
-        cv_adata.uns['test_indices'] = fold_test
 
 
         for i, adj in enumerate(sigma_adjustments):
-            cv_adata.uns['sigma'] = sigma_list * adj
+
+            cv_adata = adata[adata.uns['train_indices'],:]
+            cv_adata.uns['train_indices'] = fold_train
+            cv_adata.uns['test_indices'] = fold_test
+
+            print(f' Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
+            cv_adata.uns['sigma'] *= adj
             cv_adata = Calculate_Z(cv_adata, kernel_type, n_features = 5000)
 
             cv_adata = Train_Model(cv_adata, group_size= 2 * adata.uns['D'], alpha = alpha)
             auc_array[i, fold] = Calculate_AUROC(cv_adata)
+
     
     # Take AUROC mean across the k folds
     best_adj = sigma_adjustments[np.argmax(np.mean(auc_array, axis = 1))]
     adata.uns['sigma'] *= best_adj
+
+    print(best_adj)
 
     return adata
 
@@ -596,9 +607,10 @@ def Process_Data(X_train, X_test = None, data_type = 'counts', return_dense = Tr
             
         #Center and scale count data
         train_means = np.mean(X_train, 0)
+        train_sds = np.sqrt(var[variable_features])
 
-        X_train = (X_train - train_means) / var[variable_features]
-        X_test = (X_test - train_means) / var[variable_features]
+        X_train = (X_train - train_means) / train_sds
+        X_test = (X_test - train_means) / train_sds
     
     elif data_type.lower() == 'binary':
 
