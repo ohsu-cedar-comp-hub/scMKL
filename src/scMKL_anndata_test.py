@@ -53,7 +53,7 @@ print('Estimating Sigma', flush = True)
 adata = src.Estimate_Sigma(adata, distance_metric = distance_metric, n_features = 200)
 
 print('Optimizing Sigma', flush = True)
-adata = src.Optimize_Sigma(adata, kernel_type = kernel_func)
+# adata = src.Optimize_Sigma(adata, kernel_type = kernel_func)
 
 print('Calculating Z', flush = True)
 adata = src.Calculate_Z(adata, kernel_type = kernel_func, n_features = 5000)

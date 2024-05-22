@@ -3,6 +3,7 @@ import numpy as np
 import scipy
 import sklearn
 import anndata as ad
+import sys
 
 def Predict(adata, metrics = None):
     '''
@@ -234,7 +235,6 @@ def Optimize_Sigma(adata, kernel_type = 'Gaussian', alpha = 1.9, sigma_adjustmen
 
     positive_annotations = np.arange(len(positive_indices)) % k
     negative_annotations = np.arange(len(negative_indices)) % k
-    sigma_list = adata.uns['sigma']
 
     auc_array = np.zeros((len(sigma_adjustments), k))
 
@@ -253,14 +253,27 @@ def Optimize_Sigma(adata, kernel_type = 'Gaussian', alpha = 1.9, sigma_adjustmen
             cv_adata.uns['train_indices'] = fold_train
             cv_adata.uns['test_indices'] = fold_test
 
-            print(f' Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
+            print(f'  1. Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
+            print(f'   Adata size: {sys.getsizeof(cv_adata) / 1e9}')
+
             cv_adata.uns['sigma'] *= adj
+            print(f'  2. Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
+            print(f'   Adata size: {sys.getsizeof(cv_adata) / 1e9}')
+
             cv_adata = Calculate_Z(cv_adata, kernel_type, n_features = 5000)
+            print(f'  3. Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
+            print(f'   Adata size: {sys.getsizeof(cv_adata) / 1e9}')
 
             cv_adata = Train_Model(cv_adata, group_size= 2 * adata.uns['D'], alpha = alpha)
-            auc_array[i, fold] = Calculate_AUROC(cv_adata)
+            print(f'  4. Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
+            print(f'   Adata size: {sys.getsizeof(cv_adata) / 1e9}')
 
-    
+            auc_array[i, fold] = Calculate_AUROC(cv_adata)
+            print(f'  5. Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
+            print(f'   Adata size: {sys.getsizeof(cv_adata) / 1e9}\n')
+
+            del cv_adata
+
     # Take AUROC mean across the k folds
     best_adj = sigma_adjustments[np.argmax(np.mean(auc_array, axis = 1))]
     adata.uns['sigma'] *= best_adj
@@ -422,7 +435,7 @@ def TF_IDF_filter(X, mode = 'filter'):
 
     if scipy.sparse.issparse(X):
         row_sum = np.array(X.sum(axis=1)).flatten()
-        tf = X / row_sum[:, np.newaxis]
+        tf = scipy.sparse.csc_array(X / row_sum[:, np.newaxis])
         doc_freq = np.array(np.sum(X > 0, axis=0)).flatten()
     else:
         row_sum = np.sum(X, axis=1, keepdims=True)
