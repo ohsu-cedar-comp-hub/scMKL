@@ -478,7 +478,7 @@ def TF_IDF_filter(X, mode = 'filter'):
 
     if scipy.sparse.issparse(X):
         row_sum = np.array(X.sum(axis=1)).flatten()
-        tf = X / row_sum[:, np.newaxis]
+        tf = scipy.sparse.csc_arracy(X / row_sum[:, np.newaxis])
         doc_freq = np.array(np.sum(X > 0, axis=0)).flatten()
     else:
         row_sum = np.sum(X, axis=1, keepdims=True)
