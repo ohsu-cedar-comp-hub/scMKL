@@ -3,7 +3,6 @@ import numpy as np
 import scipy
 import sklearn
 import anndata as ad
-import sys
 
 def Predict(adata, metrics = None):
     '''
@@ -330,13 +329,12 @@ def Train_Model(adata, group_size = 1, alpha = 0.9):
     adata.uns['model'] = model
     return adata
 
-def Optimize_Alpha(X_train, y_train, group_size, starting_alpha = 1.9, increment = 0.2, target = 1, n_iter = 10):
+def Optimize_Alpha(adata, group_size, starting_alpha = 1.9, increment = 0.2, target = 1, n_iter = 10):
     '''
     Iteratively train a grouplasso model and update alpha to find the parameter yielding the desired sparsity.
     This function is meant to find a good starting point for your model, and the alpha may need further fine tuning.
     Input:
-        X_train- Matrix containing data to train a group lasso model
-        y_train- Samples labels corresponding to X.
+        adata- Anndata object with Z_train and Z_test calculated
         group_size- Argument describing how the features are grouped. 
             From Celer documentation:
             "groupsint | list of ints | list of lists of ints.
@@ -354,10 +352,12 @@ def Optimize_Alpha(X_train, y_train, group_size, starting_alpha = 1.9, increment
         sparsity_dict- Dictionary with tested alpha as keys and the number of selected pathways as the values
         alpha- The alpha value yielding the number of selected groups closest to the target.
     '''
-    assert X_train.shape[0] == len(y_train), 'X and y must have the same number of samples'
     assert increment > 0 and increment < starting_alpha, 'Choose a positive increment less than alpha'
     assert target > 0 and isinstance(target, int), 'Choose an integer target number of groups that is greater than 0'
     assert n_iter > 0 and isinstance(n_iter, int), 'Choose an integer number of iterations that is greater than 0'
+
+    y_train = adata.obs['labels'].iloc[adata.uns['train_indices']].to_numpy()
+    X_train = adata.uns['Z_train']
 
     if isinstance(group_size, int):
         num_groups = int(X_train.shape[1]/group_size)
@@ -368,8 +368,8 @@ def Optimize_Alpha(X_train, y_train, group_size, starting_alpha = 1.9, increment
     alpha = starting_alpha
 
     for i in np.arange(n_iter):
-        model = Train_Model(X_train, y_train, group_size, alpha)
-        num_selected = len(Find_Selected_Pathways(model, np.arange(num_groups)))
+        model = Train_Model(adata, group_size, alpha)
+        num_selected = len(Find_Selected_Pathways(adata))
 
         sparsity_dict[np.round(alpha,4)] = num_selected
 
@@ -432,7 +432,6 @@ def TF_IDF_filter(X, mode = 'filter'):
 
     assert mode in ['filter', 'normalize'], 'mode must be "filter" or "normalize".'
     
-
     if scipy.sparse.issparse(X):
         row_sum = np.array(X.sum(axis=1)).flatten()
         tf = scipy.sparse.csc_array(X / row_sum[:, np.newaxis])
@@ -480,42 +479,60 @@ def Filter_Features(X, feature_names, group_dict):
 
     # Subset only the desired features and their data
     X = X[:,group_feature_indices]
-    feature_names = feature_names[group_feature_indices]
+    feature_names = np.array(list(feature_names))[group_feature_indices]
 
     return X, feature_names, group_dict
 
 def Combine_Modalities(Assay_1_name: str, Assay_2_name: str,
-                       Assay_1_Z_train, Assay_2_Z_train, 
-                       Assay_1_Group_Names, Assay_2_Group_Names,
-                       Assay_1_Z_test = np.zeros((0)), Assay_2_Z_test = np.zeros((0)),) -> tuple:
+                       Assay_1_adata, Assay_2_adata,
+                       combination = 'concatenate'):
     '''
     Combines data sets for multimodal classification.  Combined group names are assay+group_name
     Input:
-            Assay_#_name: Name of assay to be added to group_names as a string
-            Assay_#_Z_train: Numpy array containing train data
-            Assay_#_Group_Names: Names of groups for the given data set
-            Assay_#_Z_test: Numpy array containing test.  Is empty by default and combined Z_test won't be returned if that's the case
+            Assay_#_name: Name of assay to be added to group_names as a string if overlap
+            Assay_#_adata: Anndata object containing Z matrices and annotations
+            combination: How to combine the matrices, either sum or concatenate
     Output:
-            combined_Z: Concatenated data matrices as numpy array
-            combined_group_names = Concatenated group names of form assay+group_name
+            combined_adata: Adata object with the combined Z matrices and annotations.  Annotations will be assumed to match
     '''
-    assert Assay_1_Z_train.shape[0] == Assay_2_Z_train.shape[0] and Assay_1_Z_test.shape[0] == Assay_2_Z_test.shape[0], 'Cannot concatenate arrays with different number of rows.'
+    assert Assay_1_adata.shape[0] == Assay_2_adata.shape[0], 'Cannot combine data with different number of cells.'
+    assert Assay_1_name != Assay_2_name, 'Assay names must be distinct'
+    assert combination.lower() in ['sum', 'concatenate']
 
-    combined_Z_train = np.hstack((Assay_1_Z_train, Assay_2_Z_train))
+    assay1_groups = set(list(Assay_1_adata.uns['group_dict'].keys()))
+    assay2_groups = set(list(Assay_2_adata.uns['group_dict'].keys()))
 
-    # Make the group names unique if there's overlap between assays
-    if len(set(Assay_1_Group_Names).intersection(set(Assay_2_Group_Names))) > 0:
-        Assay_1_Group_Names = [f'{Assay_1_name}_{name}' for name in Assay_1_Group_Names]
-        Assay_2_Group_Names = [f'{Assay_2_name}_{name}' for name in Assay_2_Group_Names]
+    combined_adata = ad.AnnData(obs = Assay_1_adata.obs, uns = Assay_1_adata.uns)
 
-    combined_group_names = np.concatenate((Assay_1_Group_Names, Assay_2_Group_Names))
+    if combination == 'concatenate':
+        combined_adata.uns['Z_train'] = np.hstack((Assay_1_adata.uns['Z_train'], Assay_2_adata.uns['Z_train']))
+        combined_adata.uns['Z_test'] = np.hstack((Assay_1_adata.uns['Z_test'], Assay_2_adata.uns['Z_test']))
 
-    if Assay_1_Z_test.shape[0] == 0 or Assay_2_Z_test.shape[0] == 0:
-        # If Z_test is not given, return only combined Z_train
-        return combined_Z_train, combined_group_names
-    else:
-        combined_Z_test = np.hstack((Assay_1_Z_test, Assay_2_Z_test))
-        return combined_Z_train, combined_Z_test, combined_group_names
+    elif combination == 'sum':
+        assert Assay_1_adata.uns['Z_train'].shape == Assay_2_adata.uns['Z_train'].shape, 'Cannot sum Z matrices with different dimensions'
+        combined_adata.uns['Z_train'] = Assay_1_adata.uns['Z_train'] + Assay_2_adata.uns['Z_train']
+        combined_adata.uns['Z_test'] = Assay_1_adata.uns['Z_test'] + Assay_2_adata.uns['Z_test']
+
+    group_dict1 = Assay_1_adata.uns['group_dict']
+    group_dict2 = Assay_2_adata.uns['group_dict']
+
+    if len(assay1_groups.intersection(assay2_groups)) > 0:
+        new_dict = {}
+        for group, features in group_dict1.items():
+            new_dict[f'{Assay_1_name}-{group}'] = features
+    
+        group_dict1 = new_dict
+
+        new_dict = {}
+        for group, features in group_dict2.items():
+            new_dict[f'{Assay_2_name}-{group}'] = features
+    
+        group_dict2 = new_dict
+
+    group_dict = group_dict1 | group_dict2 #Combines the dictionaries
+    combined_adata.uns['group_dict'] = group_dict
+
+    return combined_adata
 
 def Train_Test_Split(y, train_indices = None, seed_obj = np.random.default_rng(100), train_ratio = 0.8):
     '''
