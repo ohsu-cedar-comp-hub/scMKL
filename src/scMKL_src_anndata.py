@@ -445,10 +445,66 @@ def TF_IDF_filter(X, mode = 'filter'):
     tfidf = tf * idf
 
     if mode == 'normalize':
+        if scipy.sparse.issparse(tfidf):
+            tfidf = scipy.sparse.csc_matrix(tfidf)
         return tfidf
     elif mode == 'filter':
         significant_features = np.where(np.sum(tfidf, axis=0) > 0)[0]
         return significant_features
+
+def TF_IDF_normalize(adata):
+
+    '''
+    Function to TF IDF normalize the data in an adata object
+    If train/test indices are included in the object, it will calculate the normalization separately for the training and testing data
+        Otherwise it will calculate it on the entire dataset
+    If any rows are entirely 0, that row and its metadata will be removed from the object
+
+    Input:
+        adata- adata object with data in adata.X to be normalized
+            Can have train/test indices included or not
+    Output:
+        adata- adata object with same attributes as before, but the TF IDF normalized matrix in place of adata.X
+                    Will now have the train data stacked on test data, and the indices will be adjusted accordingly
+    '''
+
+    row_sums = np.sum(adata.X, axis = 1)
+    X = adata[np.where(row_sums > 0)[0],:].X
+
+    if 'train_indices' in adata.uns_keys():
+
+        train_indices = adata.uns['train_indices']
+        test_indices = adata.uns['test_indices']
+
+        del adata.uns['train_indices'], adata.uns['test_indices']
+        
+        train_indices = train_indices[np.where(train_indices < X.shape[0])]
+        test_indices = test_indices[np.where(test_indices < X.shape[0])]
+
+        tfidf_train = TF_IDF_filter(X[train_indices,:], mode = 'normalize')
+        tfidf_test = TF_IDF_filter(X[test_indices,:], mode = 'normalize')
+
+        if scipy.sparse.issparse(adata.X):
+            tfidf_norm = scipy.sparse.vstack((tfidf_train, tfidf_test))
+        else:
+            tfidf_norm = np.vstack((tfidf_train, tfidf_test))
+
+        labels = np.concatenate((adata.obs['labels'][train_indices], adata.obs['labels'][test_indices]))
+        train_indices = np.arange(len(train_indices))
+        test_indices = np.arange(len(train_indices), len(train_indices) + len(test_indices))
+
+        adata.uns['train_indices'] = train_indices
+        adata.uns['test_indices'] = test_indices
+    else:
+        tfidf_norm = TF_IDF_filter(adata.X, mode = 'normalize')
+        labels = new_adata.obs['labels']
+
+    new_adata = ad.AnnData(tfidf_norm)
+    new_adata.obs['labels'] = labels
+    new_adata.var_names = adata.var_names.copy()
+    new_adata.uns = adata.uns.copy()
+
+    return new_adata
 
 def Filter_Features(X, feature_names, group_dict):
     '''
@@ -665,7 +721,7 @@ def Process_Data(X_train, X_test = None, data_type = 'counts', return_dense = Tr
         return X_train, X_test
 
 def Create_Adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_dict: dict, data_type: str, train_test_split = None, D = 100, filter_features = False, random_state = 1):
-
+    
     '''
     Function to create an AnnData object to carry all relevant information going forward
 
