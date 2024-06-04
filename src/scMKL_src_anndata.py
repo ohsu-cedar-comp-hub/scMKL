@@ -329,7 +329,7 @@ def Train_Model(adata, group_size = 1, alpha = 0.9):
     adata.uns['model'] = model
     return adata
 
-def Optimize_Alpha(adata, group_size, starting_alpha = 1.9, increment = 0.2, target = 1, n_iter = 10):
+def Optimize_Sparsity(adata, group_size, starting_alpha = 1.9, increment = 0.2, target = 1, n_iter = 10):
     '''
     Iteratively train a grouplasso model and update alpha to find the parameter yielding the desired sparsity.
     This function is meant to find a good starting point for your model, and the alpha may need further fine tuning.
@@ -389,6 +389,76 @@ def Optimize_Alpha(adata, group_size, starting_alpha = 1.9, increment = 0.2, tar
     optimal_alpha = list(sparsity_dict.keys())[np.argmin([np.abs(selected - target) for selected in sparsity_dict.values()])]
     return sparsity_dict, optimal_alpha
 
+def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1, 10)), k = 4):
+    '''
+    Iteratively train a grouplasso model and update alpha to find the parameter yielding the desired sparsity.
+    This function is meant to find a good starting point for your model, and the alpha may need further fine tuning.
+    Input:
+        adata- Anndata object with Z_train and Z_test calculated
+        group_size- Argument describing how the features are grouped. 
+            From Celer documentation:
+            "groupsint | list of ints | list of lists of ints.
+                Partition of features used in the penalty on w. 
+                    If an int is passed, groups are contiguous blocks of features, of size groups. 
+                    If a list of ints is passed, groups are assumed to be contiguous, group number g being of size groups[g]. 
+                    If a list of lists of ints is passed, groups[g] contains the feature indices of the group number g."
+            If 1, model will behave identically to Lasso Regression.
+        starting_alpha- The alpha value to start the search at.
+        increment- amount to adjust alpha by between iterations
+        target- The desired number of groups selected by the model.
+        n_iter- The maximum number of iterations to run
+            
+    Output:
+        sparsity_dict- Dictionary with tested alpha as keys and the number of selected pathways as the values
+        alpha- The alpha value yielding the number of selected groups closest to the target.
+    '''
+
+    assert isinstance(k, int) and k > 0, 'Must be a positive integer number of folds'
+
+    import warnings 
+    warnings.filterwarnings('ignore')
+
+    y = adata.obs['labels'].iloc[adata.uns['train_indices']].to_numpy()
+    
+    positive_indices = np.where(y == np.unique(y)[0])[0]
+    negative_indices = np.setdiff1d(np.arange(len(y)), positive_indices)
+
+    positive_annotations = np.arange(len(positive_indices)) % k
+    negative_annotations = np.arange(len(negative_indices)) % k
+
+    auc_array = np.zeros((len(alpha_array), k))
+
+    cv_adata = adata[adata.uns['train_indices'],:]
+  
+    del cv_adata.uns['train_indices']
+    del cv_adata.uns['test_indices']
+
+
+    for fold in np.arange(k):
+        
+        print(f'Fold {fold + 1}:\n Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
+
+        fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], negative_indices[np.where(negative_annotations != fold)[0]]))
+        fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], negative_indices[np.where(negative_annotations == fold)[0]]))
+
+        for i, alpha in enumerate(alpha_array):
+
+            cv_adata.uns['train_indices'] = fold_train
+            cv_adata.uns['test_indices'] = fold_test
+            cv_adata.uns['Z_train'] = adata.uns['Z_train'][fold_train]
+            cv_adata.uns['Z_test'] = adata.uns['Z_train'][fold_test]
+
+            cv_adata = Train_Model(cv_adata, group_size, alpha = alpha)
+
+            auc_array[i, fold] = Calculate_AUROC(cv_adata)
+
+    # Take AUROC mean across the k folds
+    alpha_star = alpha_array[np.argmax(np.mean(auc_array, axis = 1))]
+
+    print(alpha_star)
+
+    return alpha_star
+
 def Find_Selected_Pathways(adata) -> np.ndarray:
 
     '''
@@ -433,12 +503,12 @@ def TF_IDF_filter(X, mode = 'filter'):
     assert mode in ['filter', 'normalize'], 'mode must be "filter" or "normalize".'
     
     if scipy.sparse.issparse(X):
-        row_sum = np.array(X.sum(axis=1)).flatten()
-        tf = scipy.sparse.csc_array(X / row_sum[:, np.newaxis])
+        # row_sum = np.array(X.sum(axis=1)).flatten()
+        tf = scipy.sparse.csc_array(X)# / row_sum[:, np.newaxis])
         doc_freq = np.array(np.sum(X > 0, axis=0)).flatten()
     else:
-        row_sum = np.sum(X, axis=1, keepdims=True)
-        tf = X / row_sum    
+        # row_sum = np.sum(X, axis=1, keepdims=True)
+        tf = X# / row_sum    
         doc_freq = np.sum(X > 0, axis=0)
 
     idf = np.log1p((1 + X.shape[0]) / (1 + doc_freq))
@@ -452,7 +522,7 @@ def TF_IDF_filter(X, mode = 'filter'):
         significant_features = np.where(np.sum(tfidf, axis=0) > 0)[0]
         return significant_features
 
-def TF_IDF_normalize(adata):
+def TF_IDF_normalize(adata, binarize = False):
 
     '''
     Function to TF IDF normalize the data in an adata object
@@ -463,13 +533,17 @@ def TF_IDF_normalize(adata):
     Input:
         adata- adata object with data in adata.X to be normalized
             Can have train/test indices included or not
+        binarize- Boolean option to binarize the data
     Output:
         adata- adata object with same attributes as before, but the TF IDF normalized matrix in place of adata.X
                     Will now have the train data stacked on test data, and the indices will be adjusted accordingly
     '''
 
     row_sums = np.sum(adata.X, axis = 1)
-    X = adata[np.where(row_sums > 0)[0],:].X
+    X = adata[np.where(row_sums > 0)[0],:].X.copy()
+
+    if binarize:
+        X[X>0] = 1
 
     if 'train_indices' in adata.uns_keys():
 
