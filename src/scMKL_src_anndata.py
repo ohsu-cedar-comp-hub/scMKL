@@ -3,6 +3,7 @@ import numpy as np
 import scipy
 import sklearn
 import anndata as ad
+import sys
 
 def Predict(adata, metrics = None):
     '''
@@ -217,7 +218,6 @@ def Optimize_Sigma(adata, kernel_type = 'Gaussian', alpha = 1.9, sigma_adjustmen
     '''
 
     assert np.all(sigma_adjustments > 0), 'Adjustment values must be positive'
-    assert kernel_type.lower() in ['gaussian', 'cauchy', 'laplacian'], 'Kernel function must be Gaussian, Cauchy, or Laplacian'
     assert isinstance(k, int) and k > 0, 'Must be a positive integer number of folds'
     assert np.all(adata.uns['sigma'] > 0), 'Sigma must be positive'
 
@@ -227,7 +227,6 @@ def Optimize_Sigma(adata, kernel_type = 'Gaussian', alpha = 1.9, sigma_adjustmen
     # Create train/validation sets with equal proportions of phenotypes
 
     y = adata.obs['labels'].iloc[adata.uns['train_indices']].to_numpy()
-
     
     positive_indices = np.where(y == np.unique(y)[0])[0]
     negative_indices = np.setdiff1d(np.arange(len(y)), positive_indices)
@@ -378,7 +377,7 @@ def Optimize_Sparsity(adata, group_size, starting_alpha = 1.9, increment = 0.2, 
             if alpha - increment in sparsity_dict.keys():
                 # Make increment smaller so the model can't go back and forth between alpha values
                 increment /= 2
-            alpha = np.max([alpha - increment, 1e-3]) #Ensures that alpha will never be negative
+            alpha = np.max([alpha - increment, 1e-1]) #Ensures that alpha will never be negative
         elif num_selected > target:
             if alpha + increment in sparsity_dict.keys():
                 increment /= 2
@@ -389,7 +388,7 @@ def Optimize_Sparsity(adata, group_size, starting_alpha = 1.9, increment = 0.2, 
     optimal_alpha = list(sparsity_dict.keys())[np.argmin([np.abs(selected - target) for selected in sparsity_dict.values()])]
     return sparsity_dict, optimal_alpha
 
-def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1, 10)), k = 4):
+def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4):
     '''
     Iteratively train a grouplasso model and update alpha to find the parameter yielding the desired sparsity.
     This function is meant to find a good starting point for your model, and the alpha may need further fine tuning.
@@ -404,9 +403,8 @@ def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1
                     If a list of lists of ints is passed, groups[g] contains the feature indices of the group number g."
             If 1, model will behave identically to Lasso Regression.
         starting_alpha- The alpha value to start the search at.
-        increment- amount to adjust alpha by between iterations
-        target- The desired number of groups selected by the model.
-        n_iter- The maximum number of iterations to run
+        alpha_array- Numpy array of all alpha values to be tested
+        k- number of folds to perform cross validation over
             
     Output:
         sparsity_dict- Dictionary with tested alpha as keys and the number of selected pathways as the values
@@ -415,6 +413,7 @@ def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1
 
     assert isinstance(k, int) and k > 0, 'Must be a positive integer number of folds'
 
+    import gc
     import warnings 
     warnings.filterwarnings('ignore')
 
@@ -429,10 +428,14 @@ def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1
     auc_array = np.zeros((len(alpha_array), k))
 
     cv_adata = adata[adata.uns['train_indices'],:]
-  
-    del cv_adata.uns['train_indices']
-    del cv_adata.uns['test_indices']
 
+    cv_adata.uns['train_indices'] = None
+    cv_adata.uns['test_indices'] = None
+
+    Z_train = adata.uns['Z_train'].copy()
+
+    adata = None
+    gc.collect()
 
     for fold in np.arange(k):
         
@@ -445,18 +448,27 @@ def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1
 
             cv_adata.uns['train_indices'] = fold_train
             cv_adata.uns['test_indices'] = fold_test
-            cv_adata.uns['Z_train'] = adata.uns['Z_train'][fold_train]
-            cv_adata.uns['Z_test'] = adata.uns['Z_train'][fold_test]
+            cv_adata.uns['Z_train'] = Z_train[fold_train]
+            cv_adata.uns['Z_test'] = Z_train[fold_test]
+
+
+            # print(f'  1. Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
+            # print(f'   Adata size: {sys.getsizeof(cv_adata) / 1e9}')
 
             cv_adata = Train_Model(cv_adata, group_size, alpha = alpha)
 
+            # print(f'  2. Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
+            # print(f'   Adata size: {sys.getsizeof(cv_adata) / 1e9}')
+
             auc_array[i, fold] = Calculate_AUROC(cv_adata)
+
+            # print(f'  3. Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
+            # print(f'   Adata size: {sys.getsizeof(cv_adata) / 1e9}')
+        gc.collect()
 
     # Take AUROC mean across the k folds
     alpha_star = alpha_array[np.argmax(np.mean(auc_array, axis = 1))]
-
-    print(alpha_star)
-
+    cv_adata = None
     return alpha_star
 
 def Find_Selected_Pathways(adata) -> np.ndarray:
