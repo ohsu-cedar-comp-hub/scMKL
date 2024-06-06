@@ -388,7 +388,7 @@ def Optimize_Sparsity(adata, group_size, starting_alpha = 1.9, increment = 0.2, 
     optimal_alpha = list(sparsity_dict.keys())[np.argmin([np.abs(selected - target) for selected in sparsity_dict.values()])]
     return sparsity_dict, optimal_alpha
 
-def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4):
+def Optimize_Alpha(adata, group_size, kernel_type = 'Gaussian', alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4):
     '''
     Iteratively train a grouplasso model and update alpha to find the parameter yielding the desired sparsity.
     This function is meant to find a good starting point for your model, and the alpha may need further fine tuning.
@@ -432,7 +432,6 @@ def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1
     cv_adata.uns['train_indices'] = None
     cv_adata.uns['test_indices'] = None
 
-    Z_train = adata.uns['Z_train'].copy()
 
     adata = None
     gc.collect()
@@ -444,14 +443,15 @@ def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1
         fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], negative_indices[np.where(negative_annotations != fold)[0]]))
         fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], negative_indices[np.where(negative_annotations == fold)[0]]))
 
+        cv_adata.uns['train_indices'] = fold_train
+        cv_adata.uns['test_indices'] = fold_test
+
+
+        cv_adata = Calculate_Z(adata = cv_adata, kernel_type= kernel_type, n_features= 5000)
+
         for i, alpha in enumerate(alpha_array):
 
-            cv_adata.uns['train_indices'] = fold_train
-            cv_adata.uns['test_indices'] = fold_test
-            cv_adata.uns['Z_train'] = Z_train[fold_train]
-            cv_adata.uns['Z_test'] = Z_train[fold_test]
-
-
+            
             # print(f'  1. Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
             # print(f'   Adata size: {sys.getsizeof(cv_adata) / 1e9}')
 
@@ -464,7 +464,7 @@ def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1
 
             # print(f'  3. Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
             # print(f'   Adata size: {sys.getsizeof(cv_adata) / 1e9}')
-        gc.collect()
+            gc.collect()
 
     # Take AUROC mean across the k folds
     alpha_star = alpha_array[np.argmax(np.mean(auc_array, axis = 1))]
