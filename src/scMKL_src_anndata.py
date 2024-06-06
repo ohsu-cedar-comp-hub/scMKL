@@ -449,6 +449,8 @@ def Optimize_Alpha(adata, group_size, kernel_type = 'Gaussian', alpha_array = np
 
         cv_adata = Calculate_Z(adata = cv_adata, kernel_type= kernel_type, n_features= 5000)
 
+        gc.collect()
+
         for i, alpha in enumerate(alpha_array):
 
             
@@ -469,6 +471,8 @@ def Optimize_Alpha(adata, group_size, kernel_type = 'Gaussian', alpha_array = np
     # Take AUROC mean across the k folds
     alpha_star = alpha_array[np.argmax(np.mean(auc_array, axis = 1))]
     cv_adata = None
+    gc.collect()
+    
     return alpha_star
 
 def Find_Selected_Pathways(adata) -> np.ndarray:
