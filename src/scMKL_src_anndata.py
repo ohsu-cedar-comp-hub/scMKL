@@ -79,7 +79,7 @@ def Calculate_AUROC(adata)-> float:
     
     return(auc)
 
-def Calculate_Z(adata, kernel_type = 'Gaussian', n_features = 5000) -> tuple:
+def Calculate_Z(adata, n_features = 5000) -> tuple:
     '''
     Function to calculate approximate kernels.
     Input:
@@ -91,7 +91,6 @@ def Calculate_Z(adata, kernel_type = 'Gaussian', n_features = 5000) -> tuple:
             adata_object with Z matrices accessible with- adata.uns['Z_train'] and adata.uns['Z_test'] respectively
 
     '''
-    assert kernel_type.lower() in ['gaussian', 'cauchy', 'laplacian'], 'Kernel function must be Gaussian, Cauchy, or Laplacian'
     assert np.all(adata.uns['sigma'] > 0), 'Sigma must be positive'
 
     #Number of groupings taking from group_dict
@@ -124,20 +123,20 @@ def Calculate_Z(adata, kernel_type = 'Gaussian', n_features = 5000) -> tuple:
 
         #Calculates approximate kernel according to chosen kernel function- may add more functions in the future
         #Distribution data comes from Fourier Transform of original kernel function
-        if kernel_type.lower() == 'gaussian':
+        if adata.uns['kernel_type'].lower() == 'gaussian':
 
             gamma = 1/(2*adjusted_sigma**2)
             sigma_p = 0.5*np.sqrt(2*gamma)
 
             W = adata.uns['seed_obj'].normal(0, sigma_p, X_train.shape[1]*D).reshape((X_train.shape[1]),D)
 
-        elif kernel_type.lower() == 'laplacian':
+        elif adata.uns['kernel_type'].lower() == 'laplacian':
 
             gamma = 1/(2*adjusted_sigma)
 
             W = gamma * adata.uns['seed_obj'].standard_cauchy(X_train.shape[1]*D).reshape((X_train.shape[1],D))
 
-        elif kernel_type.lower() == 'cauchy':
+        elif adata.uns['kernel_type'].lower() == 'cauchy':
 
             gamma = 1/(2*adjusted_sigma**2)
             b = 0.5*np.sqrt(gamma)
@@ -159,7 +158,7 @@ def Calculate_Z(adata, kernel_type = 'Gaussian', n_features = 5000) -> tuple:
 
     return adata
 
-def Estimate_Sigma(adata, distance_metric = 'euclidean', n_features = 5000):
+def Estimate_Sigma(adata, n_features = 5000):
     '''
     Function to calculate approximate kernels widths to inform distribution for project of Fourier Features. Calculates one sigma per group of features
     Input:
@@ -188,7 +187,7 @@ def Estimate_Sigma(adata, distance_metric = 'euclidean', n_features = 5000):
         distance_indices = adata.uns['seed_obj'].choice(np.arange(X_train.shape[0]), np.min((2000, X_train.shape[0])))
 
         # Calculate Distance Matrix with specified metric
-        sigma = np.mean(scipy.spatial.distance.cdist(X_train[distance_indices,:], X_train[distance_indices,:], distance_metric))
+        sigma = np.mean(scipy.spatial.distance.cdist(X_train[distance_indices,:], X_train[distance_indices,:], adata.uns['distance_metric']))
 
         if sigma == 0:
             sigma += 1e-5
@@ -388,7 +387,7 @@ def Optimize_Sparsity(adata, group_size, starting_alpha = 1.9, increment = 0.2, 
     optimal_alpha = list(sparsity_dict.keys())[np.argmin([np.abs(selected - target) for selected in sparsity_dict.values()])]
     return sparsity_dict, optimal_alpha
 
-def Optimize_Alpha(adata, group_size, kernel_type = 'Gaussian', alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4):
+def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4):
     '''
     Iteratively train a grouplasso model and update alpha to find the parameter yielding the desired sparsity.
     This function is meant to find a good starting point for your model, and the alpha may need further fine tuning.
@@ -429,11 +428,7 @@ def Optimize_Alpha(adata, group_size, kernel_type = 'Gaussian', alpha_array = np
 
     cv_adata = adata[adata.uns['train_indices'],:]
 
-    cv_adata.uns['train_indices'] = None
-    cv_adata.uns['test_indices'] = None
-
-
-    adata = None
+    # adata = None
     gc.collect()
 
     for fold in np.arange(k):
@@ -446,8 +441,8 @@ def Optimize_Alpha(adata, group_size, kernel_type = 'Gaussian', alpha_array = np
         cv_adata.uns['train_indices'] = fold_train
         cv_adata.uns['test_indices'] = fold_test
 
-
-        cv_adata = Calculate_Z(adata = cv_adata, kernel_type= kernel_type, n_features= 5000)
+        cv_adata = Estimate_Sigma(cv_adata, n_features = 200)
+        cv_adata = Calculate_Z(cv_adata, n_features= 1000)
 
         gc.collect()
 
@@ -810,7 +805,8 @@ def Process_Data(X_train, X_test = None, data_type = 'counts', return_dense = Tr
     else:
         return X_train, X_test
 
-def Create_Adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_dict: dict, data_type: str, train_test_split = None, D = 100, filter_features = False, random_state = 1):
+def Create_Adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_dict: dict, data_type: str, train_test_split = None, D = 100, 
+                 filter_features = False, distance_metric = 'euclidean', kernel_type = 'Gaussian', random_state = 1):
     
     '''
     Function to create an AnnData object to carry all relevant information going forward
@@ -849,6 +845,7 @@ def Create_Adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
     assert len(np.unique(cell_labels)) == 2, 'cell_labels must contain 2 classes'
     assert data_type in ['counts', 'binary'], 'data_type must be either "counts" or "binary"'
     assert isinstance(D, int) and D > 0, 'D must be a positive integer'
+    assert kernel_type.lower() in ['gaussian', 'laplacian', 'cauchy'], 'Given kernel type not implemented. Gaussian, Laplacian, and Cauchy are the acceptable types.'
 
     if filter_features:
         X, feature_names, group_dict = Filter_Features(X, feature_names, group_dict)
@@ -860,6 +857,8 @@ def Create_Adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
     adata.uns['seed_obj'] = np.random.default_rng(100 * random_state)
     adata.uns['data_type'] = data_type
     adata.uns['D'] = D
+    adata.uns['kernel_type'] = kernel_type
+    adata.uns['distance_metric'] = distance_metric
 
     if train_test_split == None:
         train_indices, test_indices = Train_Test_Split(cell_labels, seed_obj = adata.uns['seed_obj'])
