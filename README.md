@@ -18,7 +18,7 @@ seed = np.random.default_rng(1)
 #### Inputs for scMKL
 There are 4 required pieces of data (per modality) required for scMKL
 - The data matrix itself with cells as rows and features as columns.
-    - Can be either a Numpy Array or Scipy Sparse array (scipy.sparse.csc_array is the recommended format).  
+    - Can be either a Numpy Array or Scipy Sparse array.  
 - The sample labels in a Numpy Array.  To perform group lasso, these labels must be binary.
 - Feature names in a Numpy Array. These are the names of the features corresponding with the data matrix
 - A dictionary with grouping data.  The keys are the names of the groups, and the values are the corresponding features.
