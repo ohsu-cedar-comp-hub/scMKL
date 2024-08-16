@@ -64,6 +64,7 @@ sigmas = src.Optimize_Sigma(X = X_train, y = y_train, group_dict = group_dict, a
 Below, we calculate approximate kernels for each group in the grouping information.
 
 Then we train the model to view the distinguishing feature groups between phenotypes and evaluate on a test set to quantify classification performance.
+Looking at group normalized weights can reveal insights into underlying biology.
 
 
 ```python
