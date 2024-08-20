@@ -4,6 +4,7 @@ import scipy
 import sklearn
 import anndata as ad
 import sys
+import gc
 
 def Predict(adata, metrics = None):
     '''
@@ -84,8 +85,7 @@ def Calculate_Z(adata, n_features = 5000) -> tuple:
     Function to calculate approximate kernels.
     Input:
             adata- Adata obj as created by `Create_Adata`
-            Sigma can be calculated with Estimate_Sigma or a heuristic but must be positive.
-            kernel_type- String to determine which kernel function to approximate. Currently only Gaussian, Laplacian, and Cauchy are supported.
+                Sigma can be calculated with Estimate_Sigma or a heuristic but must be positive.
             n_features- Number of random feature to use when calculating Z- used for scalability
     Output:
             adata_object with Z matrices accessible with- adata.uns['Z_train'] and adata.uns['Z_test'] respectively
@@ -163,7 +163,6 @@ def Estimate_Sigma(adata, n_features = 5000):
     Function to calculate approximate kernels widths to inform distribution for project of Fourier Features. Calculates one sigma per group of features
     Input:
             adata- Adata obj as created by `Create_Adata`
-            distance_metric- Pairwise distance metric to use. Must be from the list offered in scipy cdist function or a custom distance function.
             n_features- Number of random features to include when estimating sigma.  Will be scaled for the whole pathway set according to a heuristic. Used for scalability
     Output:
             adata object with sigma values.  Sigmas accessible by adata.uns['sigma']
@@ -387,7 +386,7 @@ def Optimize_Sparsity(adata, group_size, starting_alpha = 1.9, increment = 0.2, 
     optimal_alpha = list(sparsity_dict.keys())[np.argmin([np.abs(selected - target) for selected in sparsity_dict.values()])]
     return sparsity_dict, optimal_alpha
 
-def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4):
+def Optimize_Alpha(adata, group_size, tfidf = False, alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4):
     '''
     Iteratively train a grouplasso model and update alpha to find the parameter yielding the desired sparsity.
     This function is meant to find a good starting point for your model, and the alpha may need further fine tuning.
@@ -401,6 +400,7 @@ def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1
                     If a list of ints is passed, groups are assumed to be contiguous, group number g being of size groups[g]. 
                     If a list of lists of ints is passed, groups[g] contains the feature indices of the group number g."
             If 1, model will behave identically to Lasso Regression.
+        tfidf- Boolean value to determine if TFIDF normalization should be run at each fold. True means that it will be performed.
         starting_alpha- The alpha value to start the search at.
         alpha_array- Numpy array of all alpha values to be tested
         k- number of folds to perform cross validation over
@@ -412,7 +412,6 @@ def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1
 
     assert isinstance(k, int) and k > 0, 'Must be a positive integer number of folds'
 
-    import gc
     import warnings 
     warnings.filterwarnings('ignore')
 
@@ -426,14 +425,13 @@ def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1
 
     auc_array = np.zeros((len(alpha_array), k))
 
-    cv_adata = adata[adata.uns['train_indices'],:]
-
-    # adata = None
     gc.collect()
 
     for fold in np.arange(k):
         
         print(f'Fold {fold + 1}:\n Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
+
+        cv_adata = adata[adata.uns['train_indices'],:]
 
         fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], negative_indices[np.where(negative_annotations != fold)[0]]))
         fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], negative_indices[np.where(negative_annotations == fold)[0]]))
@@ -441,8 +439,11 @@ def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1
         cv_adata.uns['train_indices'] = fold_train
         cv_adata.uns['test_indices'] = fold_test
 
+        if tfidf:
+            cv_adata = TF_IDF_normalize(cv_adata, binarize= True)
+
         cv_adata = Estimate_Sigma(cv_adata, n_features = 200)
-        cv_adata = Calculate_Z(cv_adata, n_features= 1000)
+        cv_adata = Calculate_Z(cv_adata, n_features= 5000)
 
         gc.collect()
 
@@ -463,9 +464,10 @@ def Optimize_Alpha(adata, group_size, alpha_array = np.round(np.linspace(1.9,0.1
             # print(f'   Adata size: {sys.getsizeof(cv_adata) / 1e9}')
             gc.collect()
 
+        del cv_adata
+        gc.collect()
     # Take AUROC mean across the k folds
     alpha_star = alpha_array[np.argmax(np.mean(auc_array, axis = 1))]
-    cv_adata = None
     gc.collect()
     
     return alpha_star
@@ -550,46 +552,43 @@ def TF_IDF_normalize(adata, binarize = False):
                     Will now have the train data stacked on test data, and the indices will be adjusted accordingly
     '''
 
-    row_sums = np.sum(adata.X, axis = 1)
-    X = adata[np.where(row_sums > 0)[0],:].X.copy()
+    X = adata.X.copy()
+    row_sums = np.sum(X, axis = 1)
+    assert np.all(row_sums > 0), 'TFIDF requires all row sums be positive'
 
     if binarize:
         X[X>0] = 1
 
     if 'train_indices' in adata.uns_keys():
 
-        train_indices = adata.uns['train_indices']
-        test_indices = adata.uns['test_indices']
-
-        del adata.uns['train_indices'], adata.uns['test_indices']
-        
-        train_indices = train_indices[np.where(train_indices < X.shape[0])]
-        test_indices = test_indices[np.where(test_indices < X.shape[0])]
+        train_indices = adata.uns['train_indices'].copy()
+        test_indices = adata.uns['test_indices'].copy()
 
         tfidf_train = TF_IDF_filter(X[train_indices,:], mode = 'normalize')
-        tfidf_test = TF_IDF_filter(X[test_indices,:], mode = 'normalize')
+        tfidf_test = TF_IDF_filter(X, mode = 'normalize')[test_indices,:]
 
-        if scipy.sparse.issparse(adata.X):
+        if scipy.sparse.issparse(X):
             tfidf_norm = scipy.sparse.vstack((tfidf_train, tfidf_test))
         else:
             tfidf_norm = np.vstack((tfidf_train, tfidf_test))
 
-        labels = np.concatenate((adata.obs['labels'][train_indices], adata.obs['labels'][test_indices]))
-        train_indices = np.arange(len(train_indices))
-        test_indices = np.arange(len(train_indices), len(train_indices) + len(test_indices))
-
+        ## I'm not sure why this reassignment is necessary, but without, the values will be saved as 0s in adata
         adata.uns['train_indices'] = train_indices
         adata.uns['test_indices'] = test_indices
+
+        combined_indices = np.concatenate((train_indices, test_indices))
+
+        adata_index = adata.obs_names[combined_indices].astype(int)
+        tfidf_norm = tfidf_norm[np.argsort(adata_index),:]
+
     else:
-        tfidf_norm = TF_IDF_filter(adata.X, mode = 'normalize')
-        labels = new_adata.obs['labels']
 
-    new_adata = ad.AnnData(tfidf_norm)
-    new_adata.obs['labels'] = labels
-    new_adata.var_names = adata.var_names.copy()
-    new_adata.uns = adata.uns.copy()
+        tfidf_norm = TF_IDF_filter(X, mode = 'normalize')
 
-    return new_adata
+    adata.X = tfidf_norm.copy()
+    # adata = adata[adata.obs_names,:]
+
+    return adata
 
 def Filter_Features(X, feature_names, group_dict):
     '''
@@ -634,7 +633,7 @@ def Combine_Modalities(Assay_1_name: str, Assay_2_name: str,
             Assay_#_adata: Anndata object containing Z matrices and annotations
             combination: How to combine the matrices, either sum or concatenate
     Output:
-            combined_adata: Adata object with the combined Z matrices and annotations.  Annotations will be assumed to match
+            combined_adata: Adata object with the combined Z matrices and annotations.  Annotations must match
     '''
     assert Assay_1_adata.shape[0] == Assay_2_adata.shape[0], 'Cannot combine data with different number of cells.'
     assert Assay_1_name != Assay_2_name, 'Assay names must be distinct'
@@ -643,16 +642,30 @@ def Combine_Modalities(Assay_1_name: str, Assay_2_name: str,
     assay1_groups = set(list(Assay_1_adata.uns['group_dict'].keys()))
     assay2_groups = set(list(Assay_2_adata.uns['group_dict'].keys()))
 
-    combined_adata = ad.AnnData(obs = Assay_1_adata.obs, uns = Assay_1_adata.uns)
+    if not np.all(Assay_1_adata.uns['train_indices'] == Assay_2_adata.uns['train_indices']):
 
-    if combination == 'concatenate':
-        combined_adata.uns['Z_train'] = np.hstack((Assay_1_adata.uns['Z_train'], Assay_2_adata.uns['Z_train']))
-        combined_adata.uns['Z_test'] = np.hstack((Assay_1_adata.uns['Z_test'], Assay_2_adata.uns['Z_test']))
+        Assay_1_adata = ad.concat((Assay_1_adata[Assay_1_adata.uns['train_indices']], Assay_1_adata[Assay_1_adata.uns['test_indices']]), uns_merge = 'same')
+        Assay_2_adata = ad.concat((Assay_2_adata[Assay_2_adata.uns['train_indices']], Assay_2_adata[Assay_2_adata.uns['test_indices']]), uns_merge = 'same')
 
-    elif combination == 'sum':
-        assert Assay_1_adata.uns['Z_train'].shape == Assay_2_adata.uns['Z_train'].shape, 'Cannot sum Z matrices with different dimensions'
-        combined_adata.uns['Z_train'] = Assay_1_adata.uns['Z_train'] + Assay_2_adata.uns['Z_train']
-        combined_adata.uns['Z_test'] = Assay_1_adata.uns['Z_test'] + Assay_2_adata.uns['Z_test']
+        Assay_1_adata.uns['train_indices'] = np.arange(len(Assay_1_adata.uns['train_indices']))
+        Assay_1_adata.uns['test_indices'] = np.arange(len(Assay_1_adata.uns['train_indices']), 
+                                                      len(Assay_1_adata.uns['train_indices']) + len(Assay_1_adata.uns['test_indices']))
+        
+        Assay_2_adata.uns['train_indices'] = Assay_1_adata.uns['train_indices'].copy()
+        Assay_2_adata.uns['test_indices'] = Assay_1_adata.uns['test_indices'].copy()
+
+    combined_adata = ad.concat((Assay_1_adata, Assay_2_adata), uns_merge = 'same', axis = 1, label = 'labels')
+    combined_adata.obs = Assay_1_adata.obs
+
+    if 'Z_train' in Assay_1_adata.uns and 'Z_train' in Assay_2_adata.uns:
+        if combination == 'concatenate':
+            combined_adata.uns['Z_train'] = np.hstack((Assay_1_adata.uns['Z_train'], Assay_2_adata.uns['Z_train']))
+            combined_adata.uns['Z_test'] = np.hstack((Assay_1_adata.uns['Z_test'], Assay_2_adata.uns['Z_test']))
+
+        elif combination == 'sum':
+            assert Assay_1_adata.uns['Z_train'].shape == Assay_2_adata.uns['Z_train'].shape, 'Cannot sum Z matrices with different dimensions'
+            combined_adata.uns['Z_train'] = Assay_1_adata.uns['Z_train'] + Assay_2_adata.uns['Z_train']
+            combined_adata.uns['Z_test'] = Assay_1_adata.uns['Z_test'] + Assay_2_adata.uns['Z_test']
 
     group_dict1 = Assay_1_adata.uns['group_dict']
     group_dict2 = Assay_2_adata.uns['group_dict']
@@ -672,6 +685,14 @@ def Combine_Modalities(Assay_1_name: str, Assay_2_name: str,
 
     group_dict = group_dict1 | group_dict2 #Combines the dictionaries
     combined_adata.uns['group_dict'] = group_dict
+
+    if 'seed_obj' in Assay_1_adata.uns_keys():
+        combined_adata.uns['seed_obj'] = Assay_1_adata.uns['seed_obj']
+    else:
+        print('No random seed present in Adata, it is recommended for reproducibility.')
+
+    del Assay_1_adata, Assay_2_adata
+    gc.collect()
 
     return combined_adata
 
@@ -871,3 +892,152 @@ def Create_Adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
 
 
     return adata
+
+def Multimodal_Processing(assay1: str, assay2: str ,adata1, adata2, tfidf: list, calculate_z = False):
+    '''
+    Function to remove rows from both modalities when there is no signal present in at least 1.
+
+    Input:
+        assay<N>- Name of assay data contained in adata<N>
+        adata<N>- adata object created as above.
+        tfidf- list of boolean values whether to tfidf the respective matrices
+        calculate_z- Boolean value whether to calculate sigma and Z on the adata before combining
+                        Allows for individual kernel functions for each
+    Output:
+        adata- Concatenated adata objects with empty rows removed and matching order
+    '''
+
+    import warnings 
+    warnings.filterwarnings('ignore')
+
+    assert adata1.shape[0] == adata2.shape[0], 'Different number of cells present in each object'
+    assert np.all(adata1.uns['train_indices'] == adata2.uns['train_indices']), 'Different train indices'
+    assert np.all(adata1.uns['test_indices'] == adata2.uns['test_indices']), 'Different test indices'
+
+    non_empty_rows1 = np.where(np.sum(adata1.X, axis = 1) > 0)[0]
+    non_empty_rows2 = np.where(np.sum(adata2.X, axis = 1) > 0)[0]
+
+    train_test = np.repeat('train', adata1.shape[0])
+    train_test[adata1.uns['test_indices']] = 'test'
+
+    non_empty_rows = np.intersect1d(non_empty_rows1, non_empty_rows2)
+
+    train_test = train_test[non_empty_rows]
+    train_indices = np.where(train_test == 'train')[0]
+    test_indices = np.where(train_test == 'test')[0]
+
+    adata1.uns['train_indices'] = train_indices
+    adata2.uns['train_indices'] = train_indices
+    adata1.uns['test_indices'] = test_indices
+    adata2.uns['test_indices'] = test_indices
+
+    adata1 = adata1[non_empty_rows, :]
+    adata2 = adata2[non_empty_rows, :]
+
+    if tfidf[0]:
+        adata1 = TF_IDF_normalize(adata1, binarize= True)
+    if tfidf[1]:
+        adata2 = TF_IDF_normalize(adata2, binarize= True)
+
+    if calculate_z:
+        print('Estimating Sigma', flush = True)
+        adata1 = Estimate_Sigma(adata1, n_features= 200)
+        adata2 = Estimate_Sigma(adata2, n_features= 200)
+        
+        print('Calculating Z', flush = True)
+        adata1 = Calculate_Z(adata1, n_features = 5000)
+        adata2 = Calculate_Z(adata2, n_features= 5000)
+
+    if 'labels' in adata1.obs:
+        assert np.all(adata1.obs['labels'] == adata2.obs['labels']), 'Cell labels do not match between adata objects'
+
+    adata = Combine_Modalities(assay1, assay2, adata1, adata2, 'concatenate')
+
+    del adata1, adata2
+    gc.collect()
+
+    return adata    
+
+def Multimodal_Optimize_Alpha(adata1, adata2, group_size = 1, tfidf_list = [False, False], alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4):
+    '''
+    Iteratively train a grouplasso model and update alpha to find the parameter yielding the desired sparsity.
+    This function is meant to find a good starting point for your model, and the alpha may need further fine tuning.
+    Input:
+        adataX- Anndata objects with Z_train and Z_test calculated
+        group_size- Argument describing how the features are grouped. 
+            From Celer documentation:
+            "groupsint | list of ints | list of lists of ints.
+                Partition of features used in the penalty on w. 
+                    If an int is passed, groups are contiguous blocks of features, of size groups. 
+                    If a list of ints is passed, groups are assumed to be contiguous, group number g being of size groups[g]. 
+                    If a list of lists of ints is passed, groups[g] contains the feature indices of the group number g."
+            If 1, model will behave identically to Lasso Regression.
+        tifidf_list- a boolean mask where tfidf_list[0] and tfidf_list[1] are respective to adata1 and adata2
+            If True, tfidf normalization will be applied to the respective adata during cross validation
+        starting_alpha- The alpha value to start the search at.
+        alpha_array- Numpy array of all alpha values to be tested
+        k- number of folds to perform cross validation over
+            
+    Output:
+        sparsity_dict- Dictionary with tested alpha as keys and the number of selected pathways as the values
+        alpha- The alpha value yielding the number of selected groups closest to the target.
+    '''
+
+    assert isinstance(k, int) and k > 0, 'Must be a positive integer number of folds'
+
+    import warnings 
+    warnings.filterwarnings('ignore')
+
+    y = adata1.obs['labels'].iloc[adata1.uns['train_indices']].to_numpy()
+    
+    positive_indices = np.where(y == np.unique(y)[0])[0]
+    negative_indices = np.setdiff1d(np.arange(len(y)), positive_indices)
+
+    positive_annotations = np.arange(len(positive_indices)) % k
+    negative_annotations = np.arange(len(negative_indices)) % k
+
+    auc_array = np.zeros((len(alpha_array), k))
+
+    cv_adata1 = adata1[adata1.uns['train_indices'],:]
+    cv_adata2 = adata2[adata2.uns['train_indices'],:]
+
+    del adata1, adata2
+    gc.collect()
+
+    for fold in np.arange(k):
+        
+        print(f'Fold {fold + 1}:\n Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
+
+        fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], negative_indices[np.where(negative_annotations != fold)[0]]))
+        fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], negative_indices[np.where(negative_annotations == fold)[0]]))
+
+        cv_adata1.uns['train_indices'] = fold_train
+        cv_adata1.uns['test_indices'] = fold_test
+        cv_adata2.uns['train_indices'] = fold_train
+        cv_adata2.uns['test_indices'] = fold_test
+
+        cv_adata = Multimodal_Processing('assay1', 'assay2', cv_adata1, cv_adata2, tfidf_list, calculate_z= True)
+        cv_adata.uns['seed_obj'] = cv_adata1.uns['seed_obj']
+
+        gc.collect()
+
+
+
+        for i, alpha in enumerate(alpha_array):
+
+            cv_adata = Train_Model(cv_adata, group_size, alpha = alpha)
+
+            auc_array[i, fold] = Calculate_AUROC(cv_adata)
+
+            # gc.collect()
+        del cv_adata
+        gc.collect()
+    # Take AUROC mean across the k folds
+    alpha_star = alpha_array[np.argmax(np.mean(auc_array, axis = 1))]
+    del cv_adata1, cv_adata2
+    gc.collect()
+    
+    return alpha_star
+
+
+

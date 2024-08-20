@@ -219,7 +219,7 @@ def get_ATAC_groupings(gene_library : dict, feature_names : list | np.ndarray | 
     Output:
         ATAC_group_dict : a grouping dictionary with gene set names from gene_library as keys and an array of regions as values.
     '''
-    assert ('chr' and 'start' and 'end' and 'gene_name') in gene_annotations.columns, "gene_annotations argument must have column names ['chr', 'start', 'end', 'gene_name']"
+    assert ('chr' and 'start' and 'end' and 'gene_name') in gene_annotations.columns, "gene_annotations argument must be a dataframe with columns ['chr', 'start', 'end', 'gene_name']"
 
     # Variables for region comparison and grouping creation
     peak_gene_dict = {}
