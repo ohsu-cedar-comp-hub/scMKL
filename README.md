@@ -2,6 +2,29 @@
 This is an introduction to single cell Multiple Kernel Learning. scMKL is a classification algorithm utilizing prior information to group features to enhance classification and aid understanding of distinguishing features in multi-omic data sets.
 
 
+#### Installation
+To install scMKL into you env, do the following:
+```bash
+# Create a conda env with python=3.11 and celer
+conda create -n test_scMKL python=3.11.2 conda-forge::celer=0.7.3
+conda activate test_scMKL
+
+# Go to your copy of the scMKL repo
+cd scMKL 
+git pull
+
+# Navigate to dist directory
+cd dist/
+pip install scmkl-0.1.0.tar.gz
+```
+Once scMKL is installed, you can use any of the scripts as follows:
+```python
+import scmkl
+
+adata = scmkl.create_adata(X = X, ...)
+```
+
+#### Workflow
 ```python
 # Packages needed to import data
 import numpy as np
