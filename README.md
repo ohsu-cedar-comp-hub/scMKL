@@ -6,7 +6,7 @@ This is an introduction to single cell Multiple Kernel Learning. scMKL is a clas
 To install scMKL into you env, do the following:
 ```bash
 # Create a conda env with python=3.11 and celer
-conda create -n test_scMKL python3.11.2 celer=0.7.3
+conda create -n test_scMKL python=3.11.2 conda-forge::celer=0.7.3
 conda activate test_scMKL
 
 # Go to your copy of the scMKL repo
