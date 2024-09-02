@@ -1,42 +1,42 @@
+import scmkl
 import numpy as np
-import pickle
+import scipy
 
-import sys
+# Setting number of dimensions
+D = 100
 
-sys.path.insert(0, './src') # path to src file 
-import scMKL_src as src
+# Creating AnnData object with cell labels, feature names, grouping dictionary, and data matrix
+adata = scmkl.create_adata(X = scipy.sparse.load_npz('./data/MCF7_RNA_X.npz'), 
+                         feature_names = np.load('./data/MCF7_RNA_feature_names.npy', allow_pickle = True), 
+                         cell_labels = np.load('./data/MCF7_cell_labels.npy', allow_pickle = True), 
+                         group_dict = np.load('example/data/RNA_hallmark_groupings.pkl', allow_pickle = True),
+                         data_type = 'counts', 
+                         split_data = None,
+                         D = D, 
+                         remove_features = True, 
+                         random_state = 100
+                         )
 
-seed = np.random.default_rng(1)
+# Estimating kernel widths
+adata = scmkl.estimate_sigma(adata, n_features = 200)
 
-X = np.load('example/data/TCGA-ESCA.npy', allow_pickle = True)
-labels = np.load('example/data/TCGA-ESCA_cell_metadata.npy', allow_pickle = True)
-features = np.load('example/data/TCGA-ESCA_RNA_feature_names.npy', allow_pickle = True)
+# Creating Z matrix
+adata = scmkl.calculate_z(adata, n_features = 5000)
 
-with open('example/data/RNA_hallmark_groupings.pkl', 'rb') as fin:
-    group_dict = pickle.load(fin)
+# Setting a list of alphas to test in cross validation
+alpha_list = np.round(np.linspace(2.2,0.05,10), 2)
 
-D = int(np.sqrt(len(labels)) * np.log(np.log(len(labels))))
+# Finding best performing alpha value from trainind data
+alpha_star = scmkl.optimize_alpha(adata = adata, group_size = 2 * D, tfidf = False, alpha_array = alpha_list, k = 4)
 
-X, features = src.Filter_Features(X, features, group_dict)
+# Training model
+adata = scmkl.train_model(adata, group_size= 2 * D, alpha = alpha_star)
 
-train_indices, test_indices = src.Train_Test_Split(labels, seed_obj = seed)
+# Testing model
+predictions, metrics = scmkl.predict(adata, metrics = ['AUROC','F1-Score', 'Accuracy', 'Precision', 'Recall'])
 
-X_train = X[train_indices,:]
-X_test = X[test_indices,:]
-y_train = labels[train_indices]
-y_test = labels[test_indices]
-
-sigmas = src.Estimate_Sigma(X = X_train, group_dict = group_dict, assay = 'rna', feature_set = features, seed_obj = seed, n_features = 100)
-
-sigmas = src.Optimize_Sigma(X = X_train, y = y_train, group_dict = group_dict, assay = 'rna', D = D, feature_set = features, 
-                            sigma_list = sigmas, k = 2, sigma_adjustments = np.arange(0.1,2,0.1), seed_obj = seed)
-
-Z_train, Z_test = src.Calculate_Z(X_train = X_train, X_test = X_test, group_dict = group_dict, assay = 'rna', D = D, 
-                                  feature_set = features, sigma_list = sigmas, seed_obj = seed)
-
-gl = src.Train_Model(Z_train, y_train, 2 * D, alpha = 1.1)
-predictions, metrics = src.Predict(gl, Z_test, y_test, metrics = ['AUROC', 'F1-Score', 'Accuracy', 'Precision', 'Recall'])
-selected_groups = src.Find_Selected_Pathways(gl, group_names= list(group_dict.keys()))
+# Finding selected pathways
+selected_groups = scmkl.find_selected_groups(adata)
 
 print(metrics)
 print(selected_groups)
