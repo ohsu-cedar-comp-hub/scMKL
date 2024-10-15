@@ -16,8 +16,8 @@ This is an introduction to single cell Multiple Kernel Learning (scMKL). scMKL i
     ```
 3) Install scMKL distribution with pip:
     ```bash
-    # Navigate to dist directory
-    cd dist/
+    # Navigate to dist directory in repo
+    cd scMKL/dist/
     pip install scmkl-0.1.0.tar.gz
     ```
 
