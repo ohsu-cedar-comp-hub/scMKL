@@ -1,0 +1,15 @@
+Metadata-Version: 2.1
+Name: scmkl
+Version: 0.1.1
+Summary: Multiple kernel learning for single-cell data
+Author: Sam Kupp, Ian VanGordon, Cigdem Ak
+Author-email: kupp@ohsu.edu, vangordi@ohsu.edu, ak@ohsu.edu
+Requires-Python: >3.11.1
+License-File: LICENSE
+Requires-Dist: wheel==0.41.2
+Requires-Dist: anndata==0.10.8
+Requires-Dist: celer==0.7.3
+Requires-Dist: numpy==1.26.0
+Requires-Dist: pandas==2.2.2
+Requires-Dist: scikit-learn==1.3.2
+Requires-Dist: scipy==1.14.1

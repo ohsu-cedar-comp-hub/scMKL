@@ -90,6 +90,7 @@ def optimize_alpha(adata, group_size, tfidf = False, alpha_array = np.round(np.l
 
         del cv_adata
         gc.collect()
+        
     # Take AUROC mean across the k folds
     alpha_star = alpha_array[np.argmax(np.mean(auc_array, axis = 1))]
     gc.collect()
@@ -159,12 +160,12 @@ def optimize_sparsity(adata, group_size, starting_alpha = 1.9, increment = 0.2, 
     return sparsity_dict, optimal_alpha
 
 
-def multimodal_optimize_alpha(adata1, adata2, group_size = 1, tfidf_list = [False, False], alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4):
+def multimodal_optimize_alpha(adatas : list, group_size = 1, tfidf = [False, False], alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4):
     '''
     Iteratively train a grouplasso model and update alpha to find the parameter yielding the desired sparsity.
     This function is meant to find a good starting point for your model, and the alpha may need further fine tuning.
     Input:
-        adataX- Anndata objects with Z_train and Z_test calculated
+        adatas- a list of AnnData objects where each object is one modality and Z_train and Z_test are calculated
         group_size- Argument describing how the features are grouped. 
             From Celer documentation:
             "groupsint | list of ints | list of lists of ints.
@@ -189,7 +190,7 @@ def multimodal_optimize_alpha(adata1, adata2, group_size = 1, tfidf_list = [Fals
     import warnings 
     warnings.filterwarnings('ignore')
 
-    y = adata1.obs['labels'].iloc[adata1.uns['train_indices']].to_numpy()
+    y = adatas[0].obs['labels'].iloc[adatas[0].uns['train_indices']].to_numpy()
     
     positive_indices = np.where(y == np.unique(y)[0])[0]
     negative_indices = np.setdiff1d(np.arange(len(y)), positive_indices)
@@ -199,10 +200,12 @@ def multimodal_optimize_alpha(adata1, adata2, group_size = 1, tfidf_list = [Fals
 
     auc_array = np.zeros((len(alpha_array), k))
 
-    cv_adata1 = adata1[adata1.uns['train_indices'],:]
-    cv_adata2 = adata2[adata2.uns['train_indices'],:]
+    cv_adatas = []
 
-    del adata1, adata2
+    for adata in adatas:
+        cv_adatas.append(adata[adata.uns['train_indices'],:].copy())
+
+    del adatas
     gc.collect()
 
     for fold in np.arange(k):
@@ -212,30 +215,30 @@ def multimodal_optimize_alpha(adata1, adata2, group_size = 1, tfidf_list = [Fals
         fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], negative_indices[np.where(negative_annotations != fold)[0]]))
         fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], negative_indices[np.where(negative_annotations == fold)[0]]))
 
-        cv_adata1.uns['train_indices'] = fold_train
-        cv_adata1.uns['test_indices'] = fold_test
-        cv_adata2.uns['train_indices'] = fold_train
-        cv_adata2.uns['test_indices'] = fold_test
+        for i, cv_adata in enumerate(cv_adatas):
+            cv_adatas[i].uns['train_indices'] = fold_train
+            cv_adatas[i].uns['test_indices'] = fold_test
 
-        cv_adata = multimodal_processing('assay1', 'assay2', cv_adata1, cv_adata2, tfidf_list, z_calculation = True)
-        cv_adata.uns['seed_obj'] = cv_adata1.uns['seed_obj']
+        # Creating dummy names for cv
+        dummy_names = [f'mod{i}' for i in range(len(cv_adatas))]
+
+        fold_cv_adata = multimodal_processing(adatas = cv_adatas, names = dummy_names, tfidf = tfidf, z_calculation = True)
+        fold_cv_adata.uns['seed_obj'] = cv_adatas[0].uns['seed_obj']
 
         gc.collect()
-
-
 
         for i, alpha in enumerate(alpha_array):
 
-            cv_adata = train_model(cv_adata, group_size, alpha = alpha)
+            fold_cv_adata = train_model(fold_cv_adata, group_size, alpha = alpha)
 
-            auc_array[i, fold] = calculate_auroc(cv_adata)
+            auc_array[i, fold] = calculate_auroc(fold_cv_adata)
 
-            # gc.collect()
-        del cv_adata
+        del fold_cv_adata
         gc.collect()
+
     # Take AUROC mean across the k folds
     alpha_star = alpha_array[np.argmax(np.mean(auc_array, axis = 1))]
-    del cv_adata1, cv_adata2
+    del cv_adatas
     gc.collect()
     
     return alpha_star
