@@ -171,6 +171,7 @@ def process_data(X_train, X_test = None, data_type = 'counts', return_dense = Tr
     else:
         return X_train, X_test
 
+
 def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_dict: dict, data_type: str, split_data = None, D = 100, 
                  remove_features = False, distance_metric = 'euclidean', kernel_type = 'Gaussian', random_state = 1):
     
@@ -234,7 +235,6 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
 
     adata.uns['train_indices'] = train_indices
     adata.uns['test_indices'] = test_indices
-
 
     return adata
 
