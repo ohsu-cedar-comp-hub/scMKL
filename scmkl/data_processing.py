@@ -118,7 +118,10 @@ def process_data(X_train, X_test = None, data_type = 'counts', return_dense = Tr
     '''
 
     # Remove features that have no variance in the training data (will be uniformative)
-    assert data_type in ['counts', 'binary'], 'Improper value given for data_type'
+    if data_type not in ['counts', 'binary']:
+        print('Data will not be normalized for gene expression data')
+        print('Columns with zero summed columns will not be removed')
+        print('To change this behavior, set data_type to counts or binary')
 
     if X_test == None:
             X_test = X_train[:1,:] # Creates dummy matrix to for the sake of calculation without increasing computational time
