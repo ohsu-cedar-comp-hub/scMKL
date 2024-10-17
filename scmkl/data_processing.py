@@ -213,7 +213,6 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
     assert X.shape[0] == len(cell_labels), 'Different number of cells than labels'
     assert X.shape[1] == len(feature_names), 'Different number of features in X than feature names'
     assert len(np.unique(cell_labels)) == 2, 'cell_labels must contain 2 classes'
-    assert data_type in ['counts', 'binary'], 'data_type must be either "counts" or "binary"'
     assert isinstance(D, int) and D > 0, 'D must be a positive integer'
     assert kernel_type.lower() in ['gaussian', 'laplacian', 'cauchy'], 'Given kernel type not implemented. Gaussian, Laplacian, and Cauchy are the acceptable types.'
 
