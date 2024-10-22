@@ -2,7 +2,6 @@ import numpy as np
 import sklearn
 
 
-
 def predict(adata, metrics = None):
     '''
     Function to return predicted labels and calculate any of AUROC, Accuracy, F1 Score, Precision, Recall for a classification. 
@@ -35,7 +34,8 @@ def predict(adata, metrics = None):
 
     if metrics == None:
         return y_pred
-
+    
+    # Calculate and save metrics given in metrics
     if 'AUROC' in metrics:
         fpr, tpr, _ = sklearn.metrics.roc_curve(y, probabilities)
         metric_dict['AUROC'] = sklearn.metrics.auc(fpr, tpr)
@@ -67,13 +67,14 @@ def find_selected_groups(adata) -> np.ndarray:
     group_size = adata.uns['model'].get_params()['groups']
     group_names = np.array(list(adata.uns['group_dict'].keys()))
 
-
+    # Loop over the model weights associated with each group and calculate the L2 norm.
     for i, group in enumerate(group_names):
         if not isinstance(group_size, (list, set, np.ndarray, tuple)):
             group_norm = np.linalg.norm(coefficients[np.arange(i * group_size, (i+1) * group_size - 1)])
         else: 
             group_norm = np.linalg.norm(coefficients[group_size[i]])
 
+        # Only include the group if the model weights are > 0 
         if group_norm != 0:
             selected_groups.append(group)
 

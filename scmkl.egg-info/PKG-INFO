@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: scmkl
-Version: 0.1.1
+Version: 0.1.2
 Summary: Multiple kernel learning for single-cell data
 Author: Sam Kupp, Ian VanGordon, Cigdem Ak
 Author-email: kupp@ohsu.edu, vangordi@ohsu.edu, ak@ohsu.edu

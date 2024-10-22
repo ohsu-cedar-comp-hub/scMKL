@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'scmkl',
-    version = '0.1.1',
+    version = '0.1.2',
     description = "Multiple kernel learning for single-cell data",
     author = 'Sam Kupp, Ian VanGordon, Cigdem Ak',
     author_email = 'kupp@ohsu.edu, vangordi@ohsu.edu, ak@ohsu.edu',
