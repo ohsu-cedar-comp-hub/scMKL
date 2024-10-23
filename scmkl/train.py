@@ -1,7 +1,6 @@
 import numpy as np
 import celer
-import gc
-import tracemalloc
+
 
 
 def train_model(adata, group_size = 1, alpha = 0.9):

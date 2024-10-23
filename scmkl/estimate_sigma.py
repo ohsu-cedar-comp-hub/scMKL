@@ -18,14 +18,14 @@ def estimate_sigma(adata, n_features = 5000):
     sigma_list = []
 
     # Loop over every group in group_dict
-    for group_name, group_features in adata.uns['group_dict'].items():
+    for group_features in adata.uns['group_dict'].values():
 
         # Select only features within that group and downsample for scalability
         num_group_features = len(group_features)
         group_features = adata.uns['seed_obj'].choice(np.array(list(group_features)), min([n_features, num_group_features]), replace = False) 
 
+        # Use on the train data to estimate sigma
         X_train = adata[adata.uns['train_indices'], group_features].X
-
         X_train = process_data(X_train = X_train, data_type = adata.uns['data_type'], return_dense = True)
         
         # Sample cells because distance calculation are costly and can be approximated
@@ -34,6 +34,8 @@ def estimate_sigma(adata, n_features = 5000):
         # Calculate Distance Matrix with specified metric
         sigma = np.mean(scipy.spatial.distance.cdist(X_train[distance_indices,:], X_train[distance_indices,:], adata.uns['distance_metric']))
 
+        # sigma = 0 is numerically unusable in later steps
+        # Using such a small sigma will result in wide distribution, and typically a non-predictive Z
         if sigma == 0:
             sigma += 1e-5
 

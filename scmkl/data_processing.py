@@ -1,10 +1,6 @@
-import tracemalloc
 import numpy as np
 import scipy
 import anndata as ad
-import gc
-
-from scmkl.tfidf import tfidf_filter
 
 
 def filter_features(X, feature_names, group_dict):
@@ -25,10 +21,12 @@ def filter_features(X, feature_names, group_dict):
     group_features = set()
     feature_set = set(feature_names)
 
-    # Store all objects in dictionary in array
+    # Store all objects in dictionary in set
     for group in group_dict.keys():
         group_features.update(set(group_dict[group]))
 
+        # Finds intersection between group features and features in data
+        # Converts to numpy array and sorts to preserve order of feature names
         group_dict[group] = np.sort(np.array(list(feature_set.intersection(set(group_dict[group])))))
 
     # Find location of desired features in whole feature set
@@ -56,7 +54,7 @@ def train_test_split(y, train_indices = None, seed_obj = np.random.default_rng(1
     '''
 
     # If train indices aren't provided
-    if train_indices == None:
+    if train_indices is None:
 
         unique_labels = np.unique(y)
         train_indices = []
@@ -82,7 +80,7 @@ def train_test_split(y, train_indices = None, seed_obj = np.random.default_rng(1
 def sparse_var(X, axis = None):
 
     '''
-    Function to calculate variance on a sparse matrix.
+    Function to calculate variance on a scipy sparse matrix.
     Input:
         X- A scipy sparse or numpy array
         axis- Determines which axis variance is calculated on. Same usage as Numpy
@@ -117,18 +115,18 @@ def process_data(X_train, X_test = None, data_type = 'counts', return_dense = Tr
         X_train, X_test- Numpy arrays with the process train/test data respectively.
     '''
 
-    # Remove features that have no variance in the training data (will be uniformative)
     if data_type not in ['counts', 'binary']:
         print('Data will not be normalized for gene expression data')
         print('Columns with zero summed columns will not be removed')
         print('To change this behavior, set data_type to counts or binary')
 
-    if X_test == None:
+    if X_test is None:
             X_test = X_train[:1,:] # Creates dummy matrix to for the sake of calculation without increasing computational time
             orig_test = None
     else:
         orig_test = 'given'
 
+    # Remove features that have no variance in the training data (will be uniformative)
     var = sparse_var(X_train, axis = 0)
     variable_features = np.where(var > 1e-5)[0]
 
@@ -149,21 +147,9 @@ def process_data(X_train, X_test = None, data_type = 'counts', return_dense = Tr
         train_means = np.mean(X_train, 0)
         train_sds = np.sqrt(var[variable_features])
 
+        # Perform transformation on test data according to parameters of the training data
         X_train = (X_train - train_means) / train_sds
         X_test = (X_test - train_means) / train_sds
-    
-    elif data_type.lower() == 'binary':
-
-        # TFIDF filter binary peaks
-        non_empty_row = np.where(np.sum(X_train, axis = 1) > 0)[0]
-
-        if scipy.sparse.issparse(X_train):
-            non_0_cols = tfidf_filter(X_train.toarray()[non_empty_row,:], mode= 'filter')
-        else:
-            non_0_cols = tfidf_filter(X_train[non_empty_row,:], mode = 'filter')
-
-        X_train = X_train[:, non_0_cols]
-        X_test = X_test[:, non_0_cols]
 
     if return_dense and scipy.sparse.issparse(X_train):
         X_train = X_train.toarray()
@@ -176,7 +162,7 @@ def process_data(X_train, X_test = None, data_type = 'counts', return_dense = Tr
 
 
 def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_dict: dict, data_type: str, split_data = None, D = 100, 
-                 remove_features = False, distance_metric = 'euclidean', kernel_type = 'Gaussian', random_state = 1):
+                 remove_features = True, distance_metric = 'euclidean', kernel_type = 'Gaussian', random_state = 1):
     
     '''
     Function to create an AnnData object to carry all relevant information going forward
@@ -195,7 +181,11 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
         D- Number of Random Fourier Features used to calculate Z. Should be a positive integer.
                 Higher values of D will increase classification accuracy at the cost of computation time
         remove_features- Bool whether to filter the features from the dataset.
-                Will remove features from X, feature_names not in group_dict and remove features from groupings not in feature_names
+                Will remove features from X and feature_names not in group_dict and remove features from groupings not in feature_names
+        distance_metric- The pairwise distance metric used to estimate sigma.  
+                Must be one of the options used in scipy.spatial.distance.cdist
+        kernel_type- The approximated kernel function used to calculate Zs
+                Must be one of Gaussian, Laplacian, or Cauchy
         random_state- Integer random_state used to set the seed for reproducibilty.
     Output:
         AnnData object with: 
@@ -207,6 +197,8 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
             seed_obj with seed equal to 100 * random_state- accessible with adata.uns['seed_obj']
             D- accessible with adata.uns['D']
             Type of data to determine preprocessing steps- accessible with adata.uns['data_type']
+            Distance metric as given- accessible with adata.uns['distance_metric']
+            Kernel function as given- accessible with adata.uns['kernel_type']
 
     '''
 
@@ -219,8 +211,11 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
     if remove_features:
         X, feature_names, group_dict = filter_features(X, feature_names, group_dict)
 
+    # Create adata object and add column names
     adata = ad.AnnData(X)
     adata.var_names = feature_names
+
+    # Add metadata to adata object
     adata.obs['labels'] = cell_labels
     adata.uns['group_dict'] = group_dict
     adata.uns['seed_obj'] = np.random.default_rng(100 * random_state)
