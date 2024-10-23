@@ -1,6 +1,8 @@
+<h1 align="center">
 <img src="scMKL_logo.png" alt="drawing" width="400"/>
+</h1><br>
 
-This is an introduction to single cell Multiple Kernel Learning (scMKL). scMKL is a classification algorithm utilizing prior information to group features to enhance classification and aid understanding of distinguishing features in multi-omic data sets.
+Single-cell Multiple Kernel Learning, scMKL, is a classification algorithm utilizing prior information to group features to enhance classification and aid understanding of distinguishing features in multi-omic data sets.
 
 
 ## Installation
@@ -18,12 +20,12 @@ This is an introduction to single cell Multiple Kernel Learning (scMKL). scMKL i
     ```bash
     # Navigate to dist directory in repo
     cd scMKL/dist/
-    pip install scmkl-0.1.1.tar.gz
+    pip install scmkl-0.1.2.tar.gz
     ```
 
 ## Usage
 scMKL takes advantage of AnnData objects and can be implemented with just four pieces of data:
-1) scRNA and/or scATAC matrices (can be a csc_matrix)
+1) scRNA and/or scATAC matrices (can be a `scipy.sparse` matrix)
 2) An array of cell labels
 3) An array of feature names (eg. gene symbols for RNA or peaks for ATAC)
 4) A grouping dictionary where {'group_1' : [feature_5, feature_16], 'group_2' : [feature_1, feature_4, feature_9]}
