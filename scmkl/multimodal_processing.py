@@ -43,6 +43,8 @@ def combine_modalities(adatas : list,
 
 
     elif combination == 'sum':
+
+        #Check that the dimensions of all Z's are the same before concatentation
         dims = [adata.uns['Z_train'].shape for adata in adatas]
         dims = all([dim == dims[0] for dim in dims])
         assert dims, 'Cannot sum Z matrices with different dimensions'
@@ -73,7 +75,7 @@ def multimodal_processing(adatas : list, names : list, tfidf: list, z_calculatio
         names: a list of string names for each modality repective to each object in adatas
         tfidf- list of boolean values whether to tfidf the respective matrices
         z_calculation- Boolean value whether to calculate sigma and Z on the adata before combining
-                        Allows for individual kernel functions for each
+                        Allows for individual kernel functions for each adata
     Output:
         adata- Concatenated adata objects with empty rows removed and matching order
     '''
@@ -88,6 +90,7 @@ def multimodal_processing(adatas : list, names : list, tfidf: list, z_calculatio
     # Getting a list of the rows that are not empty across all of the input modalities
     # Creates a boolean array for each modality of cells with non-empty rows
     non_empty_rows = [np.array((np.sum(adata.X, axis = 1) > 0)).ravel() for adata in adatas]
+
     # Compares all nonempty boolean arrays and returns a 1d array where sample feature sums
     #   across all modalities are more than 0
     non_empty_rows = np.logical_and(*non_empty_rows).squeeze()
@@ -106,7 +109,7 @@ def multimodal_processing(adatas : list, names : list, tfidf: list, z_calculatio
         adata.uns['train_indices'] = train_indices
         adata.uns['test_indices'] = test_indices
         adata = adata[non_empty_rows, :]
-        # tfidf normalizing if cooresponding element in tfidf is True
+        # tfidf normalizing if corresponding element in tfidf is True
         if tfidf[i]:
             adata = tfidf_normalize(adata)
 

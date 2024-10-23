@@ -2,7 +2,7 @@ import numpy as np
 import scipy
 
 
-def tfidf_filter(X, mode = 'filter'):
+def _tfidf(X, mode = 'filter'):
     '''
     Function to use Term Frequency Inverse Document Frequency filtering for atac data to find meaningful features. 
     If input is pandas data frame or scipy sparse array, it will be converted to a numpy array.
@@ -18,12 +18,10 @@ def tfidf_filter(X, mode = 'filter'):
     assert mode in ['filter', 'normalize'], 'mode must be "filter" or "normalize".'
     
     if scipy.sparse.issparse(X):
-        # row_sum = np.array(X.sum(axis=1)).flatten()
-        tf = scipy.sparse.csc_array(X)# / row_sum[:, np.newaxis])
+        tf = scipy.sparse.csc_array(X)
         doc_freq = np.array(np.sum(X > 0, axis=0)).flatten()
     else:
-        # row_sum = np.sum(X, axis=1, keepdims=True)
-        tf = X# / row_sum    
+        tf = X
         doc_freq = np.sum(X > 0, axis=0)
 
     idf = np.log1p((1 + X.shape[0]) / (1 + doc_freq))
@@ -67,9 +65,13 @@ def tfidf_normalize(adata, binarize = False):
         train_indices = adata.uns['train_indices'].copy()
         test_indices = adata.uns['test_indices'].copy()
 
-        tfidf_train = tfidf_filter(X[train_indices,:], mode = 'normalize')
-        tfidf_test = tfidf_filter(X, mode = 'normalize')[test_indices,:]
+        # Calculate the train TFIDF matrix on just the training data so it is not biased by testing data
+        tfidf_train = _tfidf(X[train_indices,:], mode = 'normalize')
 
+        # Calculate the test TFIDF by calculating it on the train and test data and index the test data
+        tfidf_test = _tfidf(X, mode = 'normalize')[test_indices,:]
+
+        # Impossible to add rows back to original location so we need to stack the matrices to maintain train/test
         if scipy.sparse.issparse(X):
             tfidf_norm = scipy.sparse.vstack((tfidf_train, tfidf_test))
         else:
@@ -81,14 +83,14 @@ def tfidf_normalize(adata, binarize = False):
 
         combined_indices = np.concatenate((train_indices, test_indices))
 
+        # Anndata indexes by "rownames" not position so we need to rename the rows to properly index
         adata_index = adata.obs_names[combined_indices].astype(int)
         tfidf_norm = tfidf_norm[np.argsort(adata_index),:]
 
     else:
 
-        tfidf_norm = tfidf_filter(X, mode = 'normalize')
+        tfidf_norm = _tfidf(X, mode = 'normalize')
 
     adata.X = tfidf_norm.copy()
-    # adata = adata[adata.obs_names,:]
 
     return adata

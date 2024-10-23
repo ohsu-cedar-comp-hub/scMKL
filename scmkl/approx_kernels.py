@@ -1,5 +1,4 @@
 import numpy as np
-import scipy
 
 from scmkl.data_processing import process_data
 
@@ -31,15 +30,17 @@ def calculate_z(adata, n_features = 5000) -> tuple:
         #Extract features from mth group
         num_group_features = len(group_features)
 
-        # group_feature_indices = adata.uns['seed_obj'].integers(low = 0, high = num_group_features, size = np.min([n_features, num_group_features]))
-        # group_features = np.array(list(group_features))[group_feature_indices]
+        # Sample up to n_features features- important for scalability if using large groupings
+        # Will use all features if the grouping contains fewer than n_features
         group_features = adata.uns['seed_obj'].choice(np.array(list(group_features)), np.min([n_features, num_group_features]), replace = False) 
 
         # Create data arrays containing only features within this group
         X_train = adata[adata.uns['train_indices'],:][:, group_features].X
         X_test = adata[adata.uns['test_indices'],:][:, group_features].X
 
-
+        # Perform data filtering, and transformation according to given data_type
+        # Will remove low variance (< 1e5) features regardless of data_type
+        # If given data_type is 'counts' (like RNA) will log scale and z-score the data
         X_train, X_test = process_data(X_train = X_train, X_test = X_test, data_type = adata.uns['data_type'], return_dense = True)
 
         #Extract pre-calculated sigma used for approximating kernel
