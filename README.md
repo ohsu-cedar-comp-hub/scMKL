@@ -1,5 +1,5 @@
 <h1 align="center">
-<img src="scMKL_logo.png" alt="drawing" width="400"/>
+<img src="https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/scMKL_logo.png?raw=true" width="400"/>
 </h1><br>
 
 Single-cell Multiple Kernel Learning, scMKL, is a classification algorithm utilizing prior information to group features to enhance classification and aid understanding of distinguishing features in multi-omic data sets.
