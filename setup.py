@@ -1,9 +1,15 @@
 from setuptools import setup, find_packages
 
+from pathlib import Path
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
 setup(
     name = 'scmkl',
     version = '0.1.2',
     description = "Multiple kernel learning for single-cell data",
+    long_description = long_description,
+    long_description_content_type = 'text/markdown',
     author = 'Sam Kupp, Ian VanGordon, Cigdem Ak',
     author_email = 'kupp@ohsu.edu, vangordi@ohsu.edu, ak@ohsu.edu',
     packages = find_packages(),
