@@ -3,6 +3,7 @@ README.md
 setup.py
 scmkl/__init__.py
 scmkl/approx_kernels.py
+scmkl/atac_grouping.py
 scmkl/data_processing.py
 scmkl/estimate_sigma.py
 scmkl/multimodal_processing.py
