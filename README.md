@@ -6,11 +6,11 @@ Single-cell analysis using Multiple Kernel Learning, scMKL, is a binary classifi
 
 
 ## Installation with pip
-First, create a virtual environment with a version of python >= 3.11.1.
+First, create a virtual environment with a version of python >= 3.11.1 and <3.13.
 
 Then, install scMKL with:
 ```{bash}
-# activate your new env with python>=3.11.1
+# activate your new env with python>=3.11.1 and <3.13
 pip install scmkl
 ```
 
