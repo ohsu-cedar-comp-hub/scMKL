@@ -98,7 +98,7 @@ def sparse_var(X, axis = None):
         var = np.var(X, axis = axis)
     return var.ravel()
 
-def process_data(X_train, X_test = None, data_type = 'counts', return_dense = True):
+def process_data(X_train, X_test = None, scale_data = True, return_dense = True):
 
 
     '''
@@ -115,10 +115,6 @@ def process_data(X_train, X_test = None, data_type = 'counts', return_dense = Tr
         X_train, X_test- Numpy arrays with the process train/test data respectively.
     '''
 
-    if data_type not in ['counts', 'binary']:
-        print('Data will not be normalized for gene expression data')
-        print('Columns with zero summed columns will not be removed')
-        print('To change this behavior, set data_type to counts or binary')
 
     if X_test is None:
             X_test = X_train[:1,:] # Creates dummy matrix to for the sake of calculation without increasing computational time
@@ -134,7 +130,7 @@ def process_data(X_train, X_test = None, data_type = 'counts', return_dense = Tr
     X_test = X_test[:, variable_features]
 
     #Data processing according to data type
-    if data_type.lower() == 'counts':
+    if scale_data:
 
         if scipy.sparse.issparse(X_train):
             X_train = X_train.log1p()
@@ -161,7 +157,7 @@ def process_data(X_train, X_test = None, data_type = 'counts', return_dense = Tr
         return X_train, X_test
 
 
-def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_dict: dict, data_type: str, split_data = None, D = 100, 
+def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_dict: dict, scale_data: bool = True, split_data = None, D = 100, 
                  remove_features = True, distance_metric = 'euclidean', kernel_type = 'Gaussian', random_state = 1):
     
     '''
@@ -219,7 +215,7 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
     adata.obs['labels'] = cell_labels
     adata.uns['group_dict'] = group_dict
     adata.uns['seed_obj'] = np.random.default_rng(100 * random_state)
-    adata.uns['data_type'] = data_type
+    adata.uns['scale_data'] = scale_data
     adata.uns['D'] = D
     adata.uns['kernel_type'] = kernel_type
     adata.uns['distance_metric'] = distance_metric
@@ -232,6 +228,11 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
 
     adata.uns['train_indices'] = train_indices
     adata.uns['test_indices'] = test_indices
+
+    if not scale_data:
+        print('WARNING: Data will not be log transformed and scaled')
+        print('         Columns with zero summed columns will not be removed')
+        print('         To change this behavior, set scale_data to True')
 
     return adata
 

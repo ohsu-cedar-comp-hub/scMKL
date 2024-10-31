@@ -164,7 +164,7 @@ def run(adata : ad.AnnData, alpha_list : np.ndarray,
     predicted = {}
     group_norms = {}
     metric_dict = {}
-    selected_pathways = {}
+    selected_groups = {}
     train_time = {}
     models = {}
 
@@ -180,7 +180,7 @@ def run(adata : ad.AnnData, alpha_list : np.ndarray,
         adata = train_model(adata, group_size= 2*D, alpha = alpha)
         predicted[alpha], metric_dict[alpha] = predict(adata, 
                                                             metrics = metrics)
-        selected_pathways[alpha] = find_selected_groups(adata)
+        selected_groups[alpha] = find_selected_groups(adata)
 
         kernel_weights = adata.uns['model'].coef_
         group_norms[alpha] = [
@@ -196,7 +196,7 @@ def run(adata : ad.AnnData, alpha_list : np.ndarray,
     # Combining results into one object
     results = {}
     results['Metrics'] = metric_dict
-    results['Selected_pathways'] = selected_pathways
+    results['Selected_groups'] = selected_groups
     results['Norms'] = group_norms
     results['Predictions'] = predicted
     results['Observed'] = adata.obs['labels'].iloc[adata.uns['test_indices']]
