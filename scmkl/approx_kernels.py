@@ -41,7 +41,7 @@ def calculate_z(adata, n_features = 5000) -> tuple:
         # Perform data filtering, and transformation according to given data_type
         # Will remove low variance (< 1e5) features regardless of data_type
         # If given data_type is 'counts' (like RNA) will log scale and z-score the data
-        X_train, X_test = process_data(X_train = X_train, X_test = X_test, data_type = adata.uns['data_type'], return_dense = True)
+        X_train, X_test = process_data(X_train = X_train, X_test = X_test, scale_data = adata.uns['scale_data'], return_dense = True)
 
         #Extract pre-calculated sigma used for approximating kernel
         adjusted_sigma = adata.uns['sigma'][m]

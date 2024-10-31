@@ -6,13 +6,29 @@ from scmkl.data_processing import process_data
 
 def estimate_sigma(adata, n_features = 5000):
     '''
-    Function to calculate approximate kernels widths to inform distribution for project of Fourier Features. Calculates one sigma per group of features
-    Input:
-            adata- Adata obj as created by `Create_Adata`
-            n_features- Number of random features to include when estimating sigma.  Will be scaled for the whole pathway set according to a heuristic. Used for scalability
-    Output:
-            adata object with sigma values.  Sigmas accessible by adata.uns['sigma']
+    Calculate kernels widths to inform distribution for project of 
+    Fourier Features. Calculates one sigma per group of features.
 
+    Parameters
+    ----------
+    *adata* : `AnnData`  
+        > Created by `create_adata`
+
+    *n_features* : `int`  
+        > Number of random features to include when estimating sigma. 
+        Will be scaled for the whole pathway set according to a 
+        heuristic. Used for scalability.
+    
+    Returns
+    -------
+    *adata* : `AnnData`
+        > Key added `adata.uns['sigma']`
+
+    Examples
+    --------
+    >>> adata = scmkl.estimate_sigma(adata)
+    >>> adata.uns['sigma']
+    array([10.4640895 , 10.82011454,  6.16769438,  9.86156855, ...])
     '''
  
     sigma_list = []
@@ -26,7 +42,7 @@ def estimate_sigma(adata, n_features = 5000):
 
         # Use on the train data to estimate sigma
         X_train = adata[adata.uns['train_indices'], group_features].X
-        X_train = process_data(X_train = X_train, data_type = adata.uns['data_type'], return_dense = True)
+        X_train = process_data(X_train = X_train, scale_data = adata.uns['scale_data'], return_dense = True)
         
         # Sample cells because distance calculation are costly and can be approximated
         distance_indices = adata.uns['seed_obj'].choice(np.arange(X_train.shape[0]), np.min((2000, X_train.shape[0])))

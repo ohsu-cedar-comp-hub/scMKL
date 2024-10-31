@@ -25,7 +25,6 @@ def optimize_alpha(adata, group_size, tfidf = False, alpha_array = np.round(np.l
                     If a list of lists of ints is passed, groups[g] contains the feature indices of the group number g."
             If 1, model will behave identically to Lasso Regression.
         tfidf- Boolean value to determine if TFIDF normalization should be run at each fold. True means that it will be performed.
-        starting_alpha- The alpha value to start the search at.
         alpha_array- Numpy array of all alpha values to be tested
         k- number of folds to perform cross validation over
             
@@ -53,8 +52,6 @@ def optimize_alpha(adata, group_size, tfidf = False, alpha_array = np.round(np.l
     gc.collect()
 
     for fold in np.arange(k):
-        
-        print(f'Fold {fold + 1}:\n Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
 
         cv_adata = adata[adata.uns['train_indices'],:]
 
