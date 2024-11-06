@@ -44,7 +44,7 @@ def _eval_labels(cell_labels : np.ndarray, train_indices : np.ndarray,
 
 
 def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray, 
-              tfidf : list, D : int, remove_labels = False) -> dict:
+              tfidf : list, D : int) -> dict:
     '''
     For each cell class, creates model(s) comparing that class to all 
     others. Then, predicts on the training data using `scmkl.run()`.
@@ -99,8 +99,7 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
     # Checking and capturing cell labels
     uniq_labels = _eval_labels(  cell_labels = adatas[0].obs['labels'], 
                                 train_indices = train_indices,
-                                 test_indices = test_indices,
-                                remove_labels = remove_labels)
+                                 test_indices = test_indices)
 
 
     # Calculating Z matrices, method depends on whether there are multiple 
