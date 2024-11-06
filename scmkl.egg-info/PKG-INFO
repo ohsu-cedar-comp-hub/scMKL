@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: scmkl
-Version: 0.1.3
+Version: 0.1.4
 Summary: Single-cell analysis using Multiple Kernel Learning
 Home-page: https://github.com/ohsu-cedar-comp-hub/scMKL/tree/main
 Author: Sam Kupp, Ian VanGordon, Cigdem Ak
@@ -8,15 +8,15 @@ Author-email: kupp@ohsu.edu, vangordi@ohsu.edu, ak@ohsu.edu
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
 Classifier: Operating System :: OS Independent
-Requires-Python: >=3.11.1, <=3.13
+Requires-Python: >=3.11.1, <3.13
 Description-Content-Type: text/markdown
 License-File: LICENSE
 Requires-Dist: wheel==0.41.2
 Requires-Dist: anndata==0.10.8
 Requires-Dist: celer==0.7.3
-Requires-Dist: numpy==1.26.0
+Requires-Dist: numpy==1.26.4
 Requires-Dist: pandas==2.2.2
-Requires-Dist: scikit-learn==1.3.2
+Requires-Dist: scikit-learn==1.5.1
 Requires-Dist: scipy==1.14.1
 
 <h1 align="center">
@@ -30,7 +30,7 @@ Single-cell analysis using Multiple Kernel Learning, scMKL, is a binary classifi
 First, create a virtual environment with a version of python >= 3.11.1 and <3.13.
 
 Then, install scMKL with:
-```{bash}
+```
 # activate your new env with python>=3.11.1 and <3.13
 pip install scmkl
 ```
@@ -39,9 +39,13 @@ If wheels do not build correctly, ensure ```gcc``` and ```g++``` are installed. 
 
 ## Usage
 scMKL takes advantage of AnnData objects and can be implemented with just four pieces of data:
+
 1) scRNA and/or scATAC matrices (can be `scipy.sparse` matrix)
+
 2) An array of cell labels
+
 3) An array of feature names (eg. gene symbols for RNA or peaks for ATAC)
+
 4) A grouping dictionary where {'group_1' : [feature_5, feature_16], 'group_2' : [feature_1, feature_4, feature_9]}
 
 For more information on formatting/creating the grouping dictionaries, see our example for creating an [RNA grouping](https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/example/getting_RNA_groupings.ipynb) or [ATAC grouping](https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/example/getting_ATAC_groupings.ipynb).

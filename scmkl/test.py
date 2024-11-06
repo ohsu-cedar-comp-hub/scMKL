@@ -4,15 +4,38 @@ import sklearn
 
 def predict(adata, metrics = None):
     '''
-    Function to return predicted labels and calculate any of AUROC, Accuracy, F1 Score, Precision, Recall for a classification. 
-    Input:  
-            adata- adata object with trained model and Z matrices in uns
-            metrics- Which metrics to calculate on the predicted values
+    Function to return predicted labels and calculate any of AUROC, 
+    Accuracy, F1 Score, Precision, Recall for a classification. 
+    
+    Parameters
+    ----------  
+    **adata** : *AnnData*
+        > Has keys `'model'`, `'Z_train'`, and `'Z_test'` in 
+        `adata.uns`.
 
-    Output:
-            Values predicted by the model
-            Dictionary containing AUROC, Accuracy, F1 Score, Precision, and/or Recall depending on metrics argument
+    **metrics** : *list[str]*
+        > Which metrics to calculate on the predicted values. Options
+        are `'AUROC'`, `'Accuracy'`, `'F1-Score'`, `'Precision'`, and 
+        `'Recall'`.
 
+    Returns
+    -------
+    **metrics_dict** : *dict*
+        > Contains `'AUROC'`, `'Accuracy'`, `'F1-Score'`, 
+        `'Precision'`, and/or `'Recall'` keys depending on metrics 
+        argument.
+
+    Examples
+    --------
+    >>> adata = scmkl.estimate_sigma(adata)
+    >>> adata = scmkl.calculate_z(adata)
+    >>> adata = scmkl.train_model(adata, metrics = ['AUROC', 'F1-Score', 
+    ...                                             'Accuracy', 'Precision', 
+    ...                                             'Recall'])
+    >>>
+    >>> metrics_dict = scmkl.predict(adata)
+    >>> metrics_dict.keys()
+    dict_keys(['AUROC', 'Accuracy', 'F1-Score', 'Precision', 'Recall'])
     '''
     y_test = adata.obs['labels'].iloc[adata.uns['test_indices']].to_numpy()
     X_test = adata.uns['Z_test']
@@ -52,14 +75,31 @@ def predict(adata, metrics = None):
 
 
 def find_selected_groups(adata) -> np.ndarray:
-
     '''
-    Function to find feature groups selected by the model during training.  If feature weight assigned by the model is non-0, then the group containing that feature is selected.
-    Inputs:
-        model- A trained celer.GroupLasso model.
-        group_names- An iterable object containing the group_names in the same order as the feature groupings from Data array.
-    Outpus:
-        Numpy array containing the names of the groups selected by the model.
+    Find feature groups selected by the model during training. If 
+    feature weight assigned by the model is non-0, then the group 
+    containing that feature is selected.
+
+    Parameters
+    ----------
+    **adata** : *AnnData*
+        > Has *celer.GroupLasso* object in `adata.uns['model']`.
+
+    Returns
+    -------
+    **selected_groups** : *np.ndarray*
+        > Array containing the names of the groups with nonzero kernel 
+        weights.
+
+    Examples
+    --------
+    >>> adata = scmkl.estimate_sigma(adata)
+    >>> adata = scmkl.calculate_z(adata)
+    >>> adata = scmkl.train_model(adata)
+    >>>
+    >>> selected_groups = scmkl.find_selected_groups(adata)
+    >>> selected_groups
+    np.ndarray(['HALLMARK_ESTROGEN_RESPONSE_EARLY', 'HALLMARK_HYPOXIA'])
     '''
 
     selected_groups = []
@@ -79,37 +119,3 @@ def find_selected_groups(adata) -> np.ndarray:
             selected_groups.append(group)
 
     return np.array(selected_groups)
-
-
-def calculate_auroc(adata)-> float:
-    '''
-    Function to calculate the AUROC for a classification. 
-    Designed as a helper function.  Recommended to use Predict() for model evaluation.
-    Input:  
-            adata- adata object with trained model and Z matrices in uns
-    Output:
-            Calculated AUROC value
-    '''
-
-    y_test = adata.obs['labels'].iloc[adata.uns['test_indices']].to_numpy()
-    X_test = adata.uns['Z_test']
-
-    y_test = y_test.ravel()
-    assert X_test.shape[0] == len(y_test), f'X has {X_test.shape[0]} samples and y has {len(y_test)} samples.'
-
-    # Sigmoid function to force probabilities into [0,1]
-    probabilities = 1 / (1 + np.exp(-adata.uns['model'].predict(X_test)))
-    # Group Lasso requires 'continous' y values need to re-descritize it
-
-    y = np.zeros((len(y_test)))
-    y[y_test == np.unique(y_test)[0]] = 1
-    fpr, tpr, _ = sklearn.metrics.roc_curve(y, probabilities)
-    auc = sklearn.metrics.auc(fpr, tpr)
-    
-    return(auc)
-
-
-def extract_kernel_weights():
-    '''
-    '''
-    pass
