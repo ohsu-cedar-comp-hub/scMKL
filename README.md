@@ -37,7 +37,7 @@ Repo: [GitHub Repository](https://github.com/ohsu-cedar-comp-hub/scMKL)
 
 PyPI: [Python Package Repository](https://pypi.org/project/scmkl/)
 
-API: [scMKL Documentation](https://github.io/ohsu-cedar-comp-hub/scMKL/docs)
+API: [scMKL Documentation](https://ohsu-cedar-comp-hub.github.io/scMKL/)
 
 
 ## Citation
