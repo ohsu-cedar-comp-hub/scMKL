@@ -9,7 +9,7 @@ Single-cell analysis using Multiple Kernel Learning, scMKL, is a binary classifi
 First, create a virtual environment with a version of python >= 3.11.1 and <3.13.
 
 Then, install scMKL with:
-```{bash}
+```
 # activate your new env with python>=3.11.1 and <3.13
 pip install scmkl
 ```
@@ -18,9 +18,13 @@ If wheels do not build correctly, ensure ```gcc``` and ```g++``` are installed. 
 
 ## Usage
 scMKL takes advantage of AnnData objects and can be implemented with just four pieces of data:
+
 1) scRNA and/or scATAC matrices (can be `scipy.sparse` matrix)
+
 2) An array of cell labels
+
 3) An array of feature names (eg. gene symbols for RNA or peaks for ATAC)
+
 4) A grouping dictionary where {'group_1' : [feature_5, feature_16], 'group_2' : [feature_1, feature_4, feature_9]}
 
 For more information on formatting/creating the grouping dictionaries, see our example for creating an [RNA grouping](https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/example/getting_RNA_groupings.ipynb) or [ATAC grouping](https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/example/getting_ATAC_groupings.ipynb).
@@ -32,6 +36,8 @@ For implementing scMKL, see our examples for your use case in [examples](https:/
 Repo: [GitHub Repository](https://github.com/ohsu-cedar-comp-hub/scMKL)
 
 PyPI: [Python Package Repository](https://pypi.org/project/scmkl/)
+
+API: [scMKL Documentation](https://github.io/ohsu-cedar-comp-hub/scMKL/docs)
 
 
 ## Citation

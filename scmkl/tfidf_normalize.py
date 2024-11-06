@@ -37,20 +37,37 @@ def _tfidf(X, mode = 'filter'):
         
 
 def tfidf_normalize(adata, binarize = False):
-
     '''
-    Function to TF IDF normalize the data in an adata object
-    If train/test indices are included in the object, it will calculate the normalization separately for the training and testing data
-        Otherwise it will calculate it on the entire dataset
-    If any rows are entirely 0, that row and its metadata will be removed from the object
+    Function to TFIDF normalize the data in an adata object. If any 
+    rows are entirely 0, that row and its metadata will be removed from
+    the object.
 
-    Input:
-        adata- adata object with data in adata.X to be normalized
-            Can have train/test indices included or not
-        binarize- Boolean option to binarize the data
-    Output:
-        adata- adata object with same attributes as before, but the TF IDF normalized matrix in place of adata.X
-                    Will now have the train data stacked on test data, and the indices will be adjusted accordingly
+    Parameters
+    ----------
+    **adata** : *AnnData* 
+        > `adata.X` to be normalized. If `'train_indices'` and 
+        `'test_indices'` in `'adata.uns.keys()'`, normalization will be
+        done separately for the training and testing data. Otherwise, 
+        it will calculate it on the entire dataset.
+
+    **binarize** : *bool* 
+        > If `True`, all values in `adata.X` greater than 1 will become 
+        1.
+
+    Returns
+    -------
+    **adata** : *AnnData* 
+        > adata with adata.X TFIDF normalized. Will now have the train 
+        data stacked on test data, and the indices will be adjusted 
+        accordingly.
+
+    Examples
+    --------
+    >>> adata = scmkl.create_adata(X = data_mat, 
+    ...                            feature_names = gene_names, 
+    ...                            group_dict = group_dict)
+    >>> 
+    >>> adata = scmkl.tfidf_normalize(adata)
     '''
 
     X = adata.X.copy()

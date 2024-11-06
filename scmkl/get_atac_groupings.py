@@ -221,25 +221,61 @@ def get_atac_groupings(gene_anno : pd.DataFrame, gene_sets : dict,
                        feature_names : np.ndarray | pd.Series | list | set,
                        len_up : int = 5000, len_down : int = 5000) -> dict:
     '''
-    Takes processed gene annotations in GTF format, and gene set 
-    library, and feature names from a single-cell ATAC data matrix
-    and creates an ATAC region set to be used with scMKL.
-    Args:
-        gene_anno - gene annotations in GTF format as a pd.DataFrame 
-            with columns ['chr', 'start', 'end', 'strand', 'gene_name']
-        gene_sets - a dictionary with gene_set names as keys and an 
-            iterable object of gene_names as values.
-        feature_names - an iterable, one dimension object containing 
-            feature names corresponding to a single_cell ATAC data 
-            matrix.
-    Returns:
-        A dictionary where keys are the names from gene_sets and values
-        are a list of regions from feature_names that overlap with 
-        promotor regions respective to genes in gene sets (i.e., if 
-        ATAC feature in feature_names overlaps with promotor region 
-        from a gene in a gene set from gene_sets, that region will be
+    Creates a peak set from a gene set.
+
+    Parameters
+    ----------
+    **gene_anno** : *pd.DataFrame*
+        > Gene annotations in GTF format as a pd.DataFrame 
+        with columns ['chr', 'start', 'end', 'strand', 'gene_name']
+
+    **gene_sets** : *dict*
+        > Gene set names as keys and an iterable object of gene names
+        as values.
+
+    **feature_names** : *np.ndarray* | *pd.Series* | *list* | *set*
+        > Feature names corresponding to a single_cell ATAC data 
+        matrix.
+
+    Returns
+    -------
+    **atac_grouping** : *dict*
+        > Keys are the names from `gene_sets` and values
+        are a list of regions from `feature_names` that overlap with 
+        promotor regions respective to genes in `gene_sets` (i.e., if 
+        ATAC feature in `feature_names` overlaps with promotor region 
+        from a gene in a gene set from `gene_sets`, that region will be
         added to the new dictionary under the respective gene set 
         name).
+
+    Examples
+    --------
+    >>> # Reading in a gene set and the peak names from scATAC dataset
+    >>> gene_sets = np.load("data/RNA_hallmark_groupings.pkl", allow_pickle = True)
+    >>> assay_peaks = np.load("data/MCF7_ATAC_feature_names.npy", allow_pickle = True)
+    >>> 
+    >>> # Reading in GTF file
+    >>> gene_annotations = pd.read_csv("data/hg38_subset_protein_coding.annotation.gtf", 
+    ...                                 sep = "\t", header = None, skip_blank_lines=True, 
+    ...                                 comment = "#")
+    >>> # Naming columns
+    >>> gene_annotations.columns = ['chr', 'source', 'feature', 'start', 'end', 'score', 
+    ...                             'strand', 'frame', 'attribute']
+    >>> # Subsetting to only protein coding genes
+    >>> gene_annotations = gene_annotations[gene_annotations['attribute'].str.contains(
+    ...                                                                     'protein_coding')]
+    >>> gene_annotations = gene_annotations[gene_annotations['feature'] == 'gene']
+    >>> 
+    >>> # Capturing gene name from attributes column
+    >>> gene_annotations['gene_name'] = [re.findall(r'(?<=gene_name ")[A-z0-9]+', attr)[0] 
+    ...                                  for attr in gene_annotations['attribute']]
+    >>>
+    >>> atac_grouping = scmkl.get_atac_groupings(gene_anno = gene_annotations,
+    ...                                         gene_sets = gene_sets,
+    ...                                         feature_names = assay_peaks)
+    >>>
+    >>> atac_grouping.keys()
+    dict_keys(['HALLMARK_TNFA_SIGNALING_VIA_NFKB', 'HALLMARK_HYPOXIA', ...])
     '''
     # Getting a unique set of gene names from gene_sets
     all_genes = {gene for group in gene_sets.keys()
@@ -262,7 +298,7 @@ def get_atac_groupings(gene_anno : pd.DataFrame, gene_sets : dict,
     peak_gene_dict, ga_regions = _create_region_dicts(gene_anno)
 
     # Capturing the separator type used in assay
-    chr_sep = '-' if '-' in feature_names[0] else ':'
+    chr_sep = ':' if ':' in feature_names[0] else '-'
 
     atac_groupings = _compare_regions(feature_dict = feature_dict,
                                      ga_regions = ga_regions,

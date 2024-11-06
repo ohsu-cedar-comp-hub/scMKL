@@ -2,12 +2,12 @@ import numpy as np
 import anndata as ad
 import gc
 
-from scmkl.tfidf import tfidf_normalize
+from scmkl.tfidf_normalize import tfidf_normalize
 from scmkl.estimate_sigma import estimate_sigma
-from scmkl.approx_kernels import calculate_z
+from scmkl.calculate_z import calculate_z, _sparse_var
 
 
-def combine_modalities(adatas : list,
+def _combine_modalities(adatas : list,
                        names : list,
                        combination = 'concatenate'):
     '''
@@ -68,16 +68,49 @@ def combine_modalities(adatas : list,
 
 def multimodal_processing(adatas : list, names : list, tfidf: list, z_calculation = False):
     '''
-    Function to remove rows from both modalities when there is no signal present in at least 1.
+    Combines and processes a list of adata objects
 
-    Input:
-        adatas: a list of AnnData objects where each object is a different modality
-        names: a list of string names for each modality repective to each object in adatas
-        tfidf- list of boolean values whether to tfidf the respective matrices
-        z_calculation- Boolean value whether to calculate sigma and Z on the adata before combining
-                        Allows for individual kernel functions for each adata
-    Output:
-        adata- Concatenated adata objects with empty rows removed and matching order
+    Parameters
+    ----------
+    **adatas** : *list[AnnData]* 
+        > List of AnnData objects where each object is a different 
+        modality for the same cells.
+
+    **names** : *list[str]*
+        > List of string names for each modality repective to each 
+        object in `adatas`.
+    
+    **tfidf** : *bool* 
+        > List where if element i is `True`, adata[i] will be TFIDF 
+        normalized.
+    
+    **z_calculation** : *bool*
+        > If `True`, will calculate Z matrices for training and testing 
+        in each object in `adata`.
+
+    Returns
+    -------
+    **adata** : *AnnData* 
+        > Concatenated from objects from `adatas`.
+
+    Examples
+    --------
+    >>> rna_adata = scmkl.create_adata(X = mcf7_rna_mat, feature_names = gene_names, 
+    ...                                 scale_data = True, cell_labels = cell_labels, 
+    ...                                 group_dict = rna_grouping)
+    >>> atac_adata = scmkl.create_adata(X = mcf7_atac_mat, feature_names = peak_names, 
+    ...                                 scale_data = False, cell_labels = cell_labels, 
+    ...                                 group_dict = atac_grouping)
+    >>>
+    >>> adata = scmkl.multimodal_processing(adatas = [rna_adata, atac_adata], 
+    ...                                     names = ['rna', 'atac'],
+    ...                                     tfidf = [False, True], z_calculation = True)
+    >>> adata
+    AnnData object with n_obs × n_vars = 1000 × 12676
+    obs: 'labels'
+    var: 'labels'
+    uns: 'D', 'kernel_type', 'distance_metric', 'train_indices', 'test_indices', 'Z_train', 
+    'Z_test', 'group_dict', 'seed_obj'
     '''
 
     import warnings 
@@ -89,7 +122,7 @@ def multimodal_processing(adatas : list, names : list, tfidf: list, z_calculatio
 
     # Getting a list of the rows that are not empty across all of the input modalities
     # Creates a boolean array for each modality of cells with non-empty rows
-    non_empty_rows = [np.array((np.sum(adata.X, axis = 1) > 0)).ravel() for adata in adatas]
+    non_empty_rows = [np.array(_sparse_var(adata.X, axis = 1) != 0).ravel() for adata in adatas]
 
     # Compares all nonempty boolean arrays and returns a 1d array where sample feature sums
     #   across all modalities are more than 0
@@ -111,7 +144,7 @@ def multimodal_processing(adatas : list, names : list, tfidf: list, z_calculatio
         adata = adata[non_empty_rows, :]
         # tfidf normalizing if corresponding element in tfidf is True
         if tfidf[i]:
-            adata = tfidf_normalize(adata)
+            adatas[i] = tfidf_normalize(adata)
 
         if z_calculation:
             # AnnData update must be pointing at the object in list
@@ -126,7 +159,7 @@ def multimodal_processing(adatas : list, names : list, tfidf: list, z_calculatio
         for i in range(1, len(all_labels)):
             assert np.all(all_labels[0] == all_labels[i]), f'Cell labels between AnnData object in position 0 and position {i} in adatas do not match'
 
-    adata = combine_modalities(adatas = adatas,
+    adata = _combine_modalities(adatas = adatas,
                                names = names,
                                 combination = 'concatenate')
 
