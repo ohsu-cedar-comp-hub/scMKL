@@ -139,9 +139,9 @@ def multimodal_processing(adatas : list, names : list, tfidf: list, z_calculatio
 
     # Adding train test split arrays to AnnData objects and filtering out empty samples
     for i, adata in enumerate(adatas):
-        adata.uns['train_indices'] = train_indices
-        adata.uns['test_indices'] = test_indices
-        adata = adata[non_empty_rows, :]
+        adatas[i].uns['train_indices'] = train_indices
+        adatas[i].uns['test_indices'] = test_indices
+        adatas[i] = adata[non_empty_rows, :]
         # tfidf normalizing if corresponding element in tfidf is True
         if tfidf[i]:
             adatas[i] = tfidf_normalize(adata)
