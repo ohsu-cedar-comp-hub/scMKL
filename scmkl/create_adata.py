@@ -125,7 +125,7 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
 
     **distance_metric** : *str* 
         > The pairwise distance metric used to estimate sigma. Must
-        be one of the options used in scipy.spatial.distance.cdist
+        be one of the options used in scipy.spatial.distance.cdist.
 
     **kernel_type** : *str*
         > The approximated kernel function used to calculate Zs.
@@ -140,7 +140,7 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
     **adata** : *AnnData*
     > *AnnData* with the following attributes and keys:
 
-    > `adata.X` : the data matrix
+    > `adata.X` : the data matrix.
     
     > `adata.var_names` : the feature names corresponding to
     `adata.X`.
@@ -159,7 +159,7 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
 
     > `with adata.uns['D']` : Number of dimensions to scMKL with.
 
-    > `adata.uns['data_type']` : *bool* for wether or not data
+    > `adata.uns['scale_data']` : *bool* for wether or not data
     is log transformed and scaled.
 
     > `adata.uns['distance_metric']` : Distance metric as given.

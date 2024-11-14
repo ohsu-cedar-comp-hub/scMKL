@@ -6,7 +6,7 @@ from scmkl.calculate_z import _process_data
 
 def estimate_sigma(adata, n_features = 5000):
     '''
-    Calculate kernels widths to inform distribution for project of 
+    Calculate kernel widths to inform distribution for projection of 
     Fourier Features. Calculates one sigma per group of features.
 
     Parameters
@@ -22,7 +22,7 @@ def estimate_sigma(adata, n_features = 5000):
     Returns
     -------
     **adata** : *AnnData*
-        > Key added `adata.uns['sigma']`
+        > Key added `adata.uns['sigma']`.
 
     Examples
     --------

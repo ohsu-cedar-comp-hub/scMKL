@@ -22,7 +22,7 @@
   <path fill-rule="evenodd" d="M4.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H14.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z"/>
 </svg>                &nbsp;scmkl</a>
 
-            <img src="https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/scMKL_logo.png?raw=true" class="logo" alt="project logo"/>
+            <img src="scMKL/scMKL_logo.png" class="logo" alt="project logo"/>
 
             <input type="search" placeholder="Search..." role="searchbox" aria-label="search"
                    pattern=".+" required>
@@ -125,7 +125,7 @@
 </span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>
 </span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a><span class="k">def</span> <span class="nf">multimodal_processing</span><span class="p">(</span><span class="n">adatas</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">names</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">tfidf</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">z_calculation</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 </span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="sd">    Combines and processes a list of adata objects</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="sd">    Combines and processes a list of adata objects.</span>
 </span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a>
 </span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a><span class="sd">    Parameters</span>
 </span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a><span class="sd">    ----------</span>
@@ -196,9 +196,9 @@
 </span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>
 </span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>    <span class="c1"># Adding train test split arrays to AnnData objects and filtering out empty samples</span>
 </span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">adata</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">adatas</span><span class="p">):</span>
-</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>        <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_indices</span>
-</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>        <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_indices</span>
-</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[</span><span class="n">non_empty_rows</span><span class="p">,</span> <span class="p">:]</span>
+</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>        <span class="n">adatas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_indices</span>
+</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>        <span class="n">adatas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_indices</span>
+</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>        <span class="n">adatas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[</span><span class="n">non_empty_rows</span><span class="p">,</span> <span class="p">:]</span>
 </span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>        <span class="c1"># tfidf normalizing if corresponding element in tfidf is True</span>
 </span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>        <span class="k">if</span> <span class="n">tfidf</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
 </span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>            <span class="n">adatas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">tfidf_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
@@ -241,7 +241,7 @@
     <a class="headerlink" href="#multimodal_processing"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="multimodal_processing-70"><a href="#multimodal_processing-70"><span class="linenos"> 70</span></a><span class="k">def</span> <span class="nf">multimodal_processing</span><span class="p">(</span><span class="n">adatas</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">names</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">tfidf</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">z_calculation</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 </span><span id="multimodal_processing-71"><a href="#multimodal_processing-71"><span class="linenos"> 71</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-</span><span id="multimodal_processing-72"><a href="#multimodal_processing-72"><span class="linenos"> 72</span></a><span class="sd">    Combines and processes a list of adata objects</span>
+</span><span id="multimodal_processing-72"><a href="#multimodal_processing-72"><span class="linenos"> 72</span></a><span class="sd">    Combines and processes a list of adata objects.</span>
 </span><span id="multimodal_processing-73"><a href="#multimodal_processing-73"><span class="linenos"> 73</span></a>
 </span><span id="multimodal_processing-74"><a href="#multimodal_processing-74"><span class="linenos"> 74</span></a><span class="sd">    Parameters</span>
 </span><span id="multimodal_processing-75"><a href="#multimodal_processing-75"><span class="linenos"> 75</span></a><span class="sd">    ----------</span>
@@ -312,9 +312,9 @@
 </span><span id="multimodal_processing-140"><a href="#multimodal_processing-140"><span class="linenos">140</span></a>
 </span><span id="multimodal_processing-141"><a href="#multimodal_processing-141"><span class="linenos">141</span></a>    <span class="c1"># Adding train test split arrays to AnnData objects and filtering out empty samples</span>
 </span><span id="multimodal_processing-142"><a href="#multimodal_processing-142"><span class="linenos">142</span></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">adata</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">adatas</span><span class="p">):</span>
-</span><span id="multimodal_processing-143"><a href="#multimodal_processing-143"><span class="linenos">143</span></a>        <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_indices</span>
-</span><span id="multimodal_processing-144"><a href="#multimodal_processing-144"><span class="linenos">144</span></a>        <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_indices</span>
-</span><span id="multimodal_processing-145"><a href="#multimodal_processing-145"><span class="linenos">145</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[</span><span class="n">non_empty_rows</span><span class="p">,</span> <span class="p">:]</span>
+</span><span id="multimodal_processing-143"><a href="#multimodal_processing-143"><span class="linenos">143</span></a>        <span class="n">adatas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_indices</span>
+</span><span id="multimodal_processing-144"><a href="#multimodal_processing-144"><span class="linenos">144</span></a>        <span class="n">adatas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_indices</span>
+</span><span id="multimodal_processing-145"><a href="#multimodal_processing-145"><span class="linenos">145</span></a>        <span class="n">adatas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[</span><span class="n">non_empty_rows</span><span class="p">,</span> <span class="p">:]</span>
 </span><span id="multimodal_processing-146"><a href="#multimodal_processing-146"><span class="linenos">146</span></a>        <span class="c1"># tfidf normalizing if corresponding element in tfidf is True</span>
 </span><span id="multimodal_processing-147"><a href="#multimodal_processing-147"><span class="linenos">147</span></a>        <span class="k">if</span> <span class="n">tfidf</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
 </span><span id="multimodal_processing-148"><a href="#multimodal_processing-148"><span class="linenos">148</span></a>            <span class="n">adatas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">tfidf_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
@@ -343,7 +343,7 @@
 </span></pre></div>
 
 
-            <div class="docstring"><p>Combines and processes a list of adata objects</p>
+            <div class="docstring"><p>Combines and processes a list of adata objects.</p>
 
 <h2 id="parameters">Parameters</h2>
 
