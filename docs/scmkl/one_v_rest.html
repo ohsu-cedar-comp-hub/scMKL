@@ -22,7 +22,7 @@
   <path fill-rule="evenodd" d="M4.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H14.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z"/>
 </svg>                &nbsp;scmkl</a>
 
-            <img src="https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/scMKL_logo.png?raw=true" class="logo" alt="project logo"/>
+            <img src="scMKL/scMKL_logo.png" class="logo" alt="project logo"/>
 
             <input type="search" placeholder="Search..." role="searchbox" aria-label="search"
                    pattern=".+" required>
@@ -101,7 +101,7 @@
 </span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a>
 </span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a>
 </span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="k">def</span> <span class="nf">one_v_rest</span><span class="p">(</span><span class="n">adatas</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">names</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">alpha_list</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a>              <span class="n">tfidf</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">D</span> <span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">remove_labels</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a>              <span class="n">tfidf</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">D</span> <span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 </span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 </span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a><span class="sd">    For each cell class, creates model(s) comparing that class to all </span>
 </span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a><span class="sd">    others. Then, predicts on the training data using `scmkl.run()`.</span>
@@ -122,7 +122,7 @@
 </span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a><span class="sd">    **alpha_list** : *np.ndarray*</span>
 </span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a><span class="sd">        &gt; An array of alpha values to create each model with.</span>
 </span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>
-</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a><span class="sd">    **tfidf** : *bool* </span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a><span class="sd">    **tfidf** : *list[bool]* </span>
 </span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a><span class="sd">        &gt; List where if element i is `True`, adata[i] will be TFIDF </span>
 </span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a><span class="sd">        normalized.</span>
 </span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a>
@@ -156,43 +156,42 @@
 </span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>    <span class="c1"># Checking and capturing cell labels</span>
 </span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>    <span class="n">uniq_labels</span> <span class="o">=</span> <span class="n">_eval_labels</span><span class="p">(</span>  <span class="n">cell_labels</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">],</span> 
 </span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>                                <span class="n">train_indices</span> <span class="o">=</span> <span class="n">train_indices</span><span class="p">,</span>
-</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>                                 <span class="n">test_indices</span> <span class="o">=</span> <span class="n">test_indices</span><span class="p">,</span>
-</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>                                <span class="n">remove_labels</span> <span class="o">=</span> <span class="n">remove_labels</span><span class="p">)</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>                                 <span class="n">test_indices</span> <span class="o">=</span> <span class="n">test_indices</span><span class="p">)</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>
 </span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>
-</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>
-</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>    <span class="c1"># Calculating Z matrices, method depends on whether there are multiple </span>
-</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>    <span class="c1"># adatas (modalities)</span>
-</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">adatas</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">estimate_sigma</span><span class="p">(</span><span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">200</span><span class="p">)</span>
-</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">calculate_z</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">)</span>
-</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>    <span class="k">else</span><span class="p">:</span>
-</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">multimodal_processing</span><span class="p">(</span><span class="n">adatas</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">,</span> 
-</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>                                        <span class="n">names</span> <span class="o">=</span> <span class="n">names</span><span class="p">,</span> 
-</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>                                        <span class="n">tfidf</span> <span class="o">=</span> <span class="n">tfidf</span><span class="p">,</span> 
-</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>                                        <span class="n">z_calculation</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>
-</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>    <span class="k">del</span> <span class="n">adatas</span>
-</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
-</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>
-</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>    <span class="c1"># Initializing for capturing model outputs</span>
-</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>
-</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>    <span class="c1"># Capturing cell labels before overwriting</span>
-</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>    <span class="n">cell_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">])</span>
-</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>
-</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">uniq_labels</span><span class="p">:</span>
-</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Comparing </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> to other types&quot;</span><span class="p">,</span> <span class="n">flush</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>        <span class="n">cur_labels</span> <span class="o">=</span> <span class="n">cell_labels</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>        <span class="n">cur_labels</span><span class="p">[</span><span class="n">cell_labels</span> <span class="o">!=</span> <span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;other&#39;</span>
-</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>        
-</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>        <span class="c1"># Replacing cell labels for current cell type vs rest</span>
-</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_labels</span>
-</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>
-</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>        <span class="c1"># Running scMKL</span>
-</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>        <span class="n">results</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">alpha_list</span><span class="p">)</span>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>    <span class="c1"># Calculating Z matrices, method depends on whether there are multiple </span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>    <span class="c1"># adatas (modalities)</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">adatas</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">estimate_sigma</span><span class="p">(</span><span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">200</span><span class="p">)</span>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">calculate_z</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">)</span>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">multimodal_processing</span><span class="p">(</span><span class="n">adatas</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">,</span> 
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>                                        <span class="n">names</span> <span class="o">=</span> <span class="n">names</span><span class="p">,</span> 
+</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>                                        <span class="n">tfidf</span> <span class="o">=</span> <span class="n">tfidf</span><span class="p">,</span> 
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>                                        <span class="n">z_calculation</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>    <span class="k">del</span> <span class="n">adatas</span>
+</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>    <span class="c1"># Initializing for capturing model outputs</span>
+</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>    <span class="c1"># Capturing cell labels before overwriting</span>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>    <span class="n">cell_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">])</span>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">uniq_labels</span><span class="p">:</span>
+</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Comparing </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> to other types&quot;</span><span class="p">,</span> <span class="n">flush</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>        <span class="n">cur_labels</span> <span class="o">=</span> <span class="n">cell_labels</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>        <span class="n">cur_labels</span><span class="p">[</span><span class="n">cell_labels</span> <span class="o">!=</span> <span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;other&#39;</span>
+</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>        
+</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>        <span class="c1"># Replacing cell labels for current cell type vs rest</span>
+</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_labels</span>
+</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>
+</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>        <span class="c1"># Running scMKL</span>
+</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>        <span class="n">results</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">alpha_list</span><span class="p">)</span>
+</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>
 </span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>
-</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>
-</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>    <span class="k">return</span> <span class="n">results</span>
+</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>    <span class="k">return</span> <span class="n">results</span>
 </span></pre></div>
 
 
@@ -202,14 +201,14 @@
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">one_v_rest</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">adatas</span><span class="p">:</span> <span class="nb">list</span>,</span><span class="param">	<span class="n">names</span><span class="p">:</span> <span class="nb">list</span>,</span><span class="param">	<span class="n">alpha_list</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>,</span><span class="param">	<span class="n">tfidf</span><span class="p">:</span> <span class="nb">list</span>,</span><span class="param">	<span class="n">D</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">remove_labels</span><span class="o">=</span><span class="kc">False</span></span><span class="return-annotation">) -> <span class="nb">dict</span>:</span></span>
+        <span class="name">one_v_rest</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">adatas</span><span class="p">:</span> <span class="nb">list</span>,</span><span class="param">	<span class="n">names</span><span class="p">:</span> <span class="nb">list</span>,</span><span class="param">	<span class="n">alpha_list</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>,</span><span class="param">	<span class="n">tfidf</span><span class="p">:</span> <span class="nb">list</span>,</span><span class="param">	<span class="n">D</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="nb">dict</span>:</span></span>
 
                 <label class="view-source-button" for="one_v_rest-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#one_v_rest"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="one_v_rest-47"><a href="#one_v_rest-47"><span class="linenos"> 47</span></a><span class="k">def</span> <span class="nf">one_v_rest</span><span class="p">(</span><span class="n">adatas</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">names</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">alpha_list</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="one_v_rest-48"><a href="#one_v_rest-48"><span class="linenos"> 48</span></a>              <span class="n">tfidf</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">D</span> <span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">remove_labels</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="one_v_rest-48"><a href="#one_v_rest-48"><span class="linenos"> 48</span></a>              <span class="n">tfidf</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">D</span> <span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 </span><span id="one_v_rest-49"><a href="#one_v_rest-49"><span class="linenos"> 49</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 </span><span id="one_v_rest-50"><a href="#one_v_rest-50"><span class="linenos"> 50</span></a><span class="sd">    For each cell class, creates model(s) comparing that class to all </span>
 </span><span id="one_v_rest-51"><a href="#one_v_rest-51"><span class="linenos"> 51</span></a><span class="sd">    others. Then, predicts on the training data using `scmkl.run()`.</span>
@@ -230,7 +229,7 @@
 </span><span id="one_v_rest-66"><a href="#one_v_rest-66"><span class="linenos"> 66</span></a><span class="sd">    **alpha_list** : *np.ndarray*</span>
 </span><span id="one_v_rest-67"><a href="#one_v_rest-67"><span class="linenos"> 67</span></a><span class="sd">        &gt; An array of alpha values to create each model with.</span>
 </span><span id="one_v_rest-68"><a href="#one_v_rest-68"><span class="linenos"> 68</span></a>
-</span><span id="one_v_rest-69"><a href="#one_v_rest-69"><span class="linenos"> 69</span></a><span class="sd">    **tfidf** : *bool* </span>
+</span><span id="one_v_rest-69"><a href="#one_v_rest-69"><span class="linenos"> 69</span></a><span class="sd">    **tfidf** : *list[bool]* </span>
 </span><span id="one_v_rest-70"><a href="#one_v_rest-70"><span class="linenos"> 70</span></a><span class="sd">        &gt; List where if element i is `True`, adata[i] will be TFIDF </span>
 </span><span id="one_v_rest-71"><a href="#one_v_rest-71"><span class="linenos"> 71</span></a><span class="sd">        normalized.</span>
 </span><span id="one_v_rest-72"><a href="#one_v_rest-72"><span class="linenos"> 72</span></a>
@@ -264,43 +263,42 @@
 </span><span id="one_v_rest-100"><a href="#one_v_rest-100"><span class="linenos">100</span></a>    <span class="c1"># Checking and capturing cell labels</span>
 </span><span id="one_v_rest-101"><a href="#one_v_rest-101"><span class="linenos">101</span></a>    <span class="n">uniq_labels</span> <span class="o">=</span> <span class="n">_eval_labels</span><span class="p">(</span>  <span class="n">cell_labels</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">],</span> 
 </span><span id="one_v_rest-102"><a href="#one_v_rest-102"><span class="linenos">102</span></a>                                <span class="n">train_indices</span> <span class="o">=</span> <span class="n">train_indices</span><span class="p">,</span>
-</span><span id="one_v_rest-103"><a href="#one_v_rest-103"><span class="linenos">103</span></a>                                 <span class="n">test_indices</span> <span class="o">=</span> <span class="n">test_indices</span><span class="p">,</span>
-</span><span id="one_v_rest-104"><a href="#one_v_rest-104"><span class="linenos">104</span></a>                                <span class="n">remove_labels</span> <span class="o">=</span> <span class="n">remove_labels</span><span class="p">)</span>
+</span><span id="one_v_rest-103"><a href="#one_v_rest-103"><span class="linenos">103</span></a>                                 <span class="n">test_indices</span> <span class="o">=</span> <span class="n">test_indices</span><span class="p">)</span>
+</span><span id="one_v_rest-104"><a href="#one_v_rest-104"><span class="linenos">104</span></a>
 </span><span id="one_v_rest-105"><a href="#one_v_rest-105"><span class="linenos">105</span></a>
-</span><span id="one_v_rest-106"><a href="#one_v_rest-106"><span class="linenos">106</span></a>
-</span><span id="one_v_rest-107"><a href="#one_v_rest-107"><span class="linenos">107</span></a>    <span class="c1"># Calculating Z matrices, method depends on whether there are multiple </span>
-</span><span id="one_v_rest-108"><a href="#one_v_rest-108"><span class="linenos">108</span></a>    <span class="c1"># adatas (modalities)</span>
-</span><span id="one_v_rest-109"><a href="#one_v_rest-109"><span class="linenos">109</span></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">adatas</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-</span><span id="one_v_rest-110"><a href="#one_v_rest-110"><span class="linenos">110</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">estimate_sigma</span><span class="p">(</span><span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">200</span><span class="p">)</span>
-</span><span id="one_v_rest-111"><a href="#one_v_rest-111"><span class="linenos">111</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">calculate_z</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">)</span>
-</span><span id="one_v_rest-112"><a href="#one_v_rest-112"><span class="linenos">112</span></a>    <span class="k">else</span><span class="p">:</span>
-</span><span id="one_v_rest-113"><a href="#one_v_rest-113"><span class="linenos">113</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">multimodal_processing</span><span class="p">(</span><span class="n">adatas</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">,</span> 
-</span><span id="one_v_rest-114"><a href="#one_v_rest-114"><span class="linenos">114</span></a>                                        <span class="n">names</span> <span class="o">=</span> <span class="n">names</span><span class="p">,</span> 
-</span><span id="one_v_rest-115"><a href="#one_v_rest-115"><span class="linenos">115</span></a>                                        <span class="n">tfidf</span> <span class="o">=</span> <span class="n">tfidf</span><span class="p">,</span> 
-</span><span id="one_v_rest-116"><a href="#one_v_rest-116"><span class="linenos">116</span></a>                                        <span class="n">z_calculation</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-</span><span id="one_v_rest-117"><a href="#one_v_rest-117"><span class="linenos">117</span></a>
-</span><span id="one_v_rest-118"><a href="#one_v_rest-118"><span class="linenos">118</span></a>    <span class="k">del</span> <span class="n">adatas</span>
-</span><span id="one_v_rest-119"><a href="#one_v_rest-119"><span class="linenos">119</span></a>    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
-</span><span id="one_v_rest-120"><a href="#one_v_rest-120"><span class="linenos">120</span></a>
-</span><span id="one_v_rest-121"><a href="#one_v_rest-121"><span class="linenos">121</span></a>    <span class="c1"># Initializing for capturing model outputs</span>
-</span><span id="one_v_rest-122"><a href="#one_v_rest-122"><span class="linenos">122</span></a>    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="one_v_rest-123"><a href="#one_v_rest-123"><span class="linenos">123</span></a>
-</span><span id="one_v_rest-124"><a href="#one_v_rest-124"><span class="linenos">124</span></a>    <span class="c1"># Capturing cell labels before overwriting</span>
-</span><span id="one_v_rest-125"><a href="#one_v_rest-125"><span class="linenos">125</span></a>    <span class="n">cell_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">])</span>
-</span><span id="one_v_rest-126"><a href="#one_v_rest-126"><span class="linenos">126</span></a>
-</span><span id="one_v_rest-127"><a href="#one_v_rest-127"><span class="linenos">127</span></a>    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">uniq_labels</span><span class="p">:</span>
-</span><span id="one_v_rest-128"><a href="#one_v_rest-128"><span class="linenos">128</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Comparing </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> to other types&quot;</span><span class="p">,</span> <span class="n">flush</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-</span><span id="one_v_rest-129"><a href="#one_v_rest-129"><span class="linenos">129</span></a>        <span class="n">cur_labels</span> <span class="o">=</span> <span class="n">cell_labels</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span id="one_v_rest-130"><a href="#one_v_rest-130"><span class="linenos">130</span></a>        <span class="n">cur_labels</span><span class="p">[</span><span class="n">cell_labels</span> <span class="o">!=</span> <span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;other&#39;</span>
-</span><span id="one_v_rest-131"><a href="#one_v_rest-131"><span class="linenos">131</span></a>        
-</span><span id="one_v_rest-132"><a href="#one_v_rest-132"><span class="linenos">132</span></a>        <span class="c1"># Replacing cell labels for current cell type vs rest</span>
-</span><span id="one_v_rest-133"><a href="#one_v_rest-133"><span class="linenos">133</span></a>        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_labels</span>
-</span><span id="one_v_rest-134"><a href="#one_v_rest-134"><span class="linenos">134</span></a>
-</span><span id="one_v_rest-135"><a href="#one_v_rest-135"><span class="linenos">135</span></a>        <span class="c1"># Running scMKL</span>
-</span><span id="one_v_rest-136"><a href="#one_v_rest-136"><span class="linenos">136</span></a>        <span class="n">results</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">alpha_list</span><span class="p">)</span>
+</span><span id="one_v_rest-106"><a href="#one_v_rest-106"><span class="linenos">106</span></a>    <span class="c1"># Calculating Z matrices, method depends on whether there are multiple </span>
+</span><span id="one_v_rest-107"><a href="#one_v_rest-107"><span class="linenos">107</span></a>    <span class="c1"># adatas (modalities)</span>
+</span><span id="one_v_rest-108"><a href="#one_v_rest-108"><span class="linenos">108</span></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">adatas</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+</span><span id="one_v_rest-109"><a href="#one_v_rest-109"><span class="linenos">109</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">estimate_sigma</span><span class="p">(</span><span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">200</span><span class="p">)</span>
+</span><span id="one_v_rest-110"><a href="#one_v_rest-110"><span class="linenos">110</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">calculate_z</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">)</span>
+</span><span id="one_v_rest-111"><a href="#one_v_rest-111"><span class="linenos">111</span></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="one_v_rest-112"><a href="#one_v_rest-112"><span class="linenos">112</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">multimodal_processing</span><span class="p">(</span><span class="n">adatas</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">,</span> 
+</span><span id="one_v_rest-113"><a href="#one_v_rest-113"><span class="linenos">113</span></a>                                        <span class="n">names</span> <span class="o">=</span> <span class="n">names</span><span class="p">,</span> 
+</span><span id="one_v_rest-114"><a href="#one_v_rest-114"><span class="linenos">114</span></a>                                        <span class="n">tfidf</span> <span class="o">=</span> <span class="n">tfidf</span><span class="p">,</span> 
+</span><span id="one_v_rest-115"><a href="#one_v_rest-115"><span class="linenos">115</span></a>                                        <span class="n">z_calculation</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</span><span id="one_v_rest-116"><a href="#one_v_rest-116"><span class="linenos">116</span></a>
+</span><span id="one_v_rest-117"><a href="#one_v_rest-117"><span class="linenos">117</span></a>    <span class="k">del</span> <span class="n">adatas</span>
+</span><span id="one_v_rest-118"><a href="#one_v_rest-118"><span class="linenos">118</span></a>    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+</span><span id="one_v_rest-119"><a href="#one_v_rest-119"><span class="linenos">119</span></a>
+</span><span id="one_v_rest-120"><a href="#one_v_rest-120"><span class="linenos">120</span></a>    <span class="c1"># Initializing for capturing model outputs</span>
+</span><span id="one_v_rest-121"><a href="#one_v_rest-121"><span class="linenos">121</span></a>    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="one_v_rest-122"><a href="#one_v_rest-122"><span class="linenos">122</span></a>
+</span><span id="one_v_rest-123"><a href="#one_v_rest-123"><span class="linenos">123</span></a>    <span class="c1"># Capturing cell labels before overwriting</span>
+</span><span id="one_v_rest-124"><a href="#one_v_rest-124"><span class="linenos">124</span></a>    <span class="n">cell_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">])</span>
+</span><span id="one_v_rest-125"><a href="#one_v_rest-125"><span class="linenos">125</span></a>
+</span><span id="one_v_rest-126"><a href="#one_v_rest-126"><span class="linenos">126</span></a>    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">uniq_labels</span><span class="p">:</span>
+</span><span id="one_v_rest-127"><a href="#one_v_rest-127"><span class="linenos">127</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Comparing </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> to other types&quot;</span><span class="p">,</span> <span class="n">flush</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</span><span id="one_v_rest-128"><a href="#one_v_rest-128"><span class="linenos">128</span></a>        <span class="n">cur_labels</span> <span class="o">=</span> <span class="n">cell_labels</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="one_v_rest-129"><a href="#one_v_rest-129"><span class="linenos">129</span></a>        <span class="n">cur_labels</span><span class="p">[</span><span class="n">cell_labels</span> <span class="o">!=</span> <span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;other&#39;</span>
+</span><span id="one_v_rest-130"><a href="#one_v_rest-130"><span class="linenos">130</span></a>        
+</span><span id="one_v_rest-131"><a href="#one_v_rest-131"><span class="linenos">131</span></a>        <span class="c1"># Replacing cell labels for current cell type vs rest</span>
+</span><span id="one_v_rest-132"><a href="#one_v_rest-132"><span class="linenos">132</span></a>        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_labels</span>
+</span><span id="one_v_rest-133"><a href="#one_v_rest-133"><span class="linenos">133</span></a>
+</span><span id="one_v_rest-134"><a href="#one_v_rest-134"><span class="linenos">134</span></a>        <span class="c1"># Running scMKL</span>
+</span><span id="one_v_rest-135"><a href="#one_v_rest-135"><span class="linenos">135</span></a>        <span class="n">results</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">alpha_list</span><span class="p">)</span>
+</span><span id="one_v_rest-136"><a href="#one_v_rest-136"><span class="linenos">136</span></a>
 </span><span id="one_v_rest-137"><a href="#one_v_rest-137"><span class="linenos">137</span></a>
-</span><span id="one_v_rest-138"><a href="#one_v_rest-138"><span class="linenos">138</span></a>
-</span><span id="one_v_rest-139"><a href="#one_v_rest-139"><span class="linenos">139</span></a>    <span class="k">return</span> <span class="n">results</span>
+</span><span id="one_v_rest-138"><a href="#one_v_rest-138"><span class="linenos">138</span></a>    <span class="k">return</span> <span class="n">results</span>
 </span></pre></div>
 
 
@@ -332,7 +330,7 @@ Only labels in both training and testing will be run.</p>
   <p>An array of alpha values to create each model with.</p>
 </blockquote>
 
-<p><strong>tfidf</strong> : <em>bool</em> </p>
+<p><strong>tfidf</strong> : <em>list[bool]</em> </p>
 
 <blockquote>
   <p>List where if element i is <code>True</code>, adata[i] will be TFIDF 

@@ -65,7 +65,7 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
     **alpha_list** : *np.ndarray*
         > An array of alpha values to create each model with.
 
-    **tfidf** : *bool* 
+    **tfidf** : *list[bool]* 
         > List where if element i is `True`, adata[i] will be TFIDF 
         normalized.
 

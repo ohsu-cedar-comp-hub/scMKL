@@ -68,7 +68,7 @@ def _combine_modalities(adatas : list,
 
 def multimodal_processing(adatas : list, names : list, tfidf: list, z_calculation = False):
     '''
-    Combines and processes a list of adata objects
+    Combines and processes a list of adata objects.
 
     Parameters
     ----------

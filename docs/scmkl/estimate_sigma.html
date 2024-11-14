@@ -22,7 +22,7 @@
   <path fill-rule="evenodd" d="M4.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H14.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z"/>
 </svg>                &nbsp;scmkl</a>
 
-            <img src="https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/scMKL_logo.png?raw=true" class="logo" alt="project logo"/>
+            <img src="scMKL/scMKL_logo.png" class="logo" alt="project logo"/>
 
             <input type="search" placeholder="Search..." role="searchbox" aria-label="search"
                    pattern=".+" required>
@@ -63,7 +63,7 @@
 </span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a>
 </span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="k">def</span> <span class="nf">estimate_sigma</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">):</span>
 </span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="sd">    Calculate kernels widths to inform distribution for project of </span>
+</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="sd">    Calculate kernel widths to inform distribution for projection of </span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd">    Fourier Features. Calculates one sigma per group of features.</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>
 </span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="sd">    Parameters</span>
@@ -79,7 +79,7 @@
 </span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a><span class="sd">    Returns</span>
 </span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a><span class="sd">    -------</span>
 </span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a><span class="sd">    **adata** : *AnnData*</span>
-</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a><span class="sd">        &gt; Key added `adata.uns[&#39;sigma&#39;]`</span>
+</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a><span class="sd">        &gt; Key added `adata.uns[&#39;sigma&#39;]`.</span>
 </span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a>
 </span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a><span class="sd">    Examples</span>
 </span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a><span class="sd">    --------</span>
@@ -137,7 +137,7 @@
     <a class="headerlink" href="#estimate_sigma"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="estimate_sigma-8"><a href="#estimate_sigma-8"><span class="linenos"> 8</span></a><span class="k">def</span> <span class="nf">estimate_sigma</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">):</span>
 </span><span id="estimate_sigma-9"><a href="#estimate_sigma-9"><span class="linenos"> 9</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-</span><span id="estimate_sigma-10"><a href="#estimate_sigma-10"><span class="linenos">10</span></a><span class="sd">    Calculate kernels widths to inform distribution for project of </span>
+</span><span id="estimate_sigma-10"><a href="#estimate_sigma-10"><span class="linenos">10</span></a><span class="sd">    Calculate kernel widths to inform distribution for projection of </span>
 </span><span id="estimate_sigma-11"><a href="#estimate_sigma-11"><span class="linenos">11</span></a><span class="sd">    Fourier Features. Calculates one sigma per group of features.</span>
 </span><span id="estimate_sigma-12"><a href="#estimate_sigma-12"><span class="linenos">12</span></a>
 </span><span id="estimate_sigma-13"><a href="#estimate_sigma-13"><span class="linenos">13</span></a><span class="sd">    Parameters</span>
@@ -153,7 +153,7 @@
 </span><span id="estimate_sigma-23"><a href="#estimate_sigma-23"><span class="linenos">23</span></a><span class="sd">    Returns</span>
 </span><span id="estimate_sigma-24"><a href="#estimate_sigma-24"><span class="linenos">24</span></a><span class="sd">    -------</span>
 </span><span id="estimate_sigma-25"><a href="#estimate_sigma-25"><span class="linenos">25</span></a><span class="sd">    **adata** : *AnnData*</span>
-</span><span id="estimate_sigma-26"><a href="#estimate_sigma-26"><span class="linenos">26</span></a><span class="sd">        &gt; Key added `adata.uns[&#39;sigma&#39;]`</span>
+</span><span id="estimate_sigma-26"><a href="#estimate_sigma-26"><span class="linenos">26</span></a><span class="sd">        &gt; Key added `adata.uns[&#39;sigma&#39;]`.</span>
 </span><span id="estimate_sigma-27"><a href="#estimate_sigma-27"><span class="linenos">27</span></a>
 </span><span id="estimate_sigma-28"><a href="#estimate_sigma-28"><span class="linenos">28</span></a><span class="sd">    Examples</span>
 </span><span id="estimate_sigma-29"><a href="#estimate_sigma-29"><span class="linenos">29</span></a><span class="sd">    --------</span>
@@ -197,7 +197,7 @@
 </span></pre></div>
 
 
-            <div class="docstring"><p>Calculate kernels widths to inform distribution for project of 
+            <div class="docstring"><p>Calculate kernel widths to inform distribution for projection of 
 Fourier Features. Calculates one sigma per group of features.</p>
 
 <h2 id="parameters">Parameters</h2>
@@ -221,7 +221,7 @@ Fourier Features. Calculates one sigma per group of features.</p>
 <p><strong>adata</strong> : <em>AnnData</em></p>
 
 <blockquote>
-  <p>Key added <code>adata.uns['sigma']</code></p>
+  <p>Key added <code>adata.uns['sigma']</code>.</p>
 </blockquote>
 
 <h2 id="examples">Examples</h2>

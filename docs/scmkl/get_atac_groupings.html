@@ -22,7 +22,7 @@
   <path fill-rule="evenodd" d="M4.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H14.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z"/>
 </svg>                &nbsp;scmkl</a>
 
-            <img src="https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/scMKL_logo.png?raw=true" class="logo" alt="project logo"/>
+            <img src="scMKL/scMKL_logo.png" class="logo" alt="project logo"/>
 
             <input type="search" placeholder="Search..." role="searchbox" aria-label="search"
                    pattern=".+" required>
@@ -278,92 +278,96 @@
 </span><span id="L-221"><a href="#L-221"><span class="linenos">221</span></a>                       <span class="n">feature_names</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">set</span><span class="p">,</span>
 </span><span id="L-222"><a href="#L-222"><span class="linenos">222</span></a>                       <span class="n">len_up</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span> <span class="n">len_down</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 </span><span id="L-223"><a href="#L-223"><span class="linenos">223</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-</span><span id="L-224"><a href="#L-224"><span class="linenos">224</span></a><span class="sd">    Creates a peak set from a gene set.</span>
-</span><span id="L-225"><a href="#L-225"><span class="linenos">225</span></a>
-</span><span id="L-226"><a href="#L-226"><span class="linenos">226</span></a><span class="sd">    Parameters</span>
-</span><span id="L-227"><a href="#L-227"><span class="linenos">227</span></a><span class="sd">    ----------</span>
-</span><span id="L-228"><a href="#L-228"><span class="linenos">228</span></a><span class="sd">    **gene_anno** : *pd.DataFrame*</span>
-</span><span id="L-229"><a href="#L-229"><span class="linenos">229</span></a><span class="sd">        &gt; Gene annotations in GTF format as a pd.DataFrame </span>
-</span><span id="L-230"><a href="#L-230"><span class="linenos">230</span></a><span class="sd">        with columns [&#39;chr&#39;, &#39;start&#39;, &#39;end&#39;, &#39;strand&#39;, &#39;gene_name&#39;]</span>
-</span><span id="L-231"><a href="#L-231"><span class="linenos">231</span></a>
-</span><span id="L-232"><a href="#L-232"><span class="linenos">232</span></a><span class="sd">    **gene_sets** : *dict*</span>
-</span><span id="L-233"><a href="#L-233"><span class="linenos">233</span></a><span class="sd">        &gt; Gene set names as keys and an iterable object of gene names</span>
-</span><span id="L-234"><a href="#L-234"><span class="linenos">234</span></a><span class="sd">        as values.</span>
+</span><span id="L-224"><a href="#L-224"><span class="linenos">224</span></a><span class="sd">    Creates a peak set where keys are gene set names from `gene_sets` and </span>
+</span><span id="L-225"><a href="#L-225"><span class="linenos">225</span></a><span class="sd">    values are arrays of features pulled from `feature_names`. Features</span>
+</span><span id="L-226"><a href="#L-226"><span class="linenos">226</span></a><span class="sd">    are added to each peak set given overlap between regions in </span>
+</span><span id="L-227"><a href="#L-227"><span class="linenos">227</span></a><span class="sd">    single-cell data matrix and inferred gene promoter regions in </span>
+</span><span id="L-228"><a href="#L-228"><span class="linenos">228</span></a><span class="sd">    `gene_anno`.</span>
+</span><span id="L-229"><a href="#L-229"><span class="linenos">229</span></a>
+</span><span id="L-230"><a href="#L-230"><span class="linenos">230</span></a><span class="sd">    Parameters</span>
+</span><span id="L-231"><a href="#L-231"><span class="linenos">231</span></a><span class="sd">    ----------</span>
+</span><span id="L-232"><a href="#L-232"><span class="linenos">232</span></a><span class="sd">    **gene_anno** : *pd.DataFrame*</span>
+</span><span id="L-233"><a href="#L-233"><span class="linenos">233</span></a><span class="sd">        &gt; Gene annotations in GTF format as a pd.DataFrame with columns</span>
+</span><span id="L-234"><a href="#L-234"><span class="linenos">234</span></a><span class="sd">        [&#39;chr&#39;, &#39;start&#39;, &#39;end&#39;, &#39;strand&#39;, &#39;gene_name&#39;].</span>
 </span><span id="L-235"><a href="#L-235"><span class="linenos">235</span></a>
-</span><span id="L-236"><a href="#L-236"><span class="linenos">236</span></a><span class="sd">    **feature_names** : *np.ndarray* | *pd.Series* | *list* | *set*</span>
-</span><span id="L-237"><a href="#L-237"><span class="linenos">237</span></a><span class="sd">        &gt; Feature names corresponding to a single_cell ATAC data </span>
-</span><span id="L-238"><a href="#L-238"><span class="linenos">238</span></a><span class="sd">        matrix.</span>
+</span><span id="L-236"><a href="#L-236"><span class="linenos">236</span></a><span class="sd">    **gene_sets** : *dict*</span>
+</span><span id="L-237"><a href="#L-237"><span class="linenos">237</span></a><span class="sd">        &gt; Gene set names as keys and an iterable object of gene names</span>
+</span><span id="L-238"><a href="#L-238"><span class="linenos">238</span></a><span class="sd">        as values.</span>
 </span><span id="L-239"><a href="#L-239"><span class="linenos">239</span></a>
-</span><span id="L-240"><a href="#L-240"><span class="linenos">240</span></a><span class="sd">    Returns</span>
-</span><span id="L-241"><a href="#L-241"><span class="linenos">241</span></a><span class="sd">    -------</span>
-</span><span id="L-242"><a href="#L-242"><span class="linenos">242</span></a><span class="sd">    **atac_grouping** : *dict*</span>
-</span><span id="L-243"><a href="#L-243"><span class="linenos">243</span></a><span class="sd">        &gt; Keys are the names from `gene_sets` and values</span>
-</span><span id="L-244"><a href="#L-244"><span class="linenos">244</span></a><span class="sd">        are a list of regions from `feature_names` that overlap with </span>
-</span><span id="L-245"><a href="#L-245"><span class="linenos">245</span></a><span class="sd">        promotor regions respective to genes in `gene_sets` (i.e., if </span>
-</span><span id="L-246"><a href="#L-246"><span class="linenos">246</span></a><span class="sd">        ATAC feature in `feature_names` overlaps with promotor region </span>
-</span><span id="L-247"><a href="#L-247"><span class="linenos">247</span></a><span class="sd">        from a gene in a gene set from `gene_sets`, that region will be</span>
-</span><span id="L-248"><a href="#L-248"><span class="linenos">248</span></a><span class="sd">        added to the new dictionary under the respective gene set </span>
-</span><span id="L-249"><a href="#L-249"><span class="linenos">249</span></a><span class="sd">        name).</span>
-</span><span id="L-250"><a href="#L-250"><span class="linenos">250</span></a>
-</span><span id="L-251"><a href="#L-251"><span class="linenos">251</span></a><span class="sd">    Examples</span>
-</span><span id="L-252"><a href="#L-252"><span class="linenos">252</span></a><span class="sd">    --------</span>
-</span><span id="L-253"><a href="#L-253"><span class="linenos">253</span></a><span class="sd">    &gt;&gt;&gt; # Reading in a gene set and the peak names from scATAC dataset</span>
-</span><span id="L-254"><a href="#L-254"><span class="linenos">254</span></a><span class="sd">    &gt;&gt;&gt; gene_sets = np.load(&quot;data/RNA_hallmark_groupings.pkl&quot;, allow_pickle = True)</span>
-</span><span id="L-255"><a href="#L-255"><span class="linenos">255</span></a><span class="sd">    &gt;&gt;&gt; assay_peaks = np.load(&quot;data/MCF7_ATAC_feature_names.npy&quot;, allow_pickle = True)</span>
-</span><span id="L-256"><a href="#L-256"><span class="linenos">256</span></a><span class="sd">    &gt;&gt;&gt; </span>
-</span><span id="L-257"><a href="#L-257"><span class="linenos">257</span></a><span class="sd">    &gt;&gt;&gt; # Reading in GTF file</span>
-</span><span id="L-258"><a href="#L-258"><span class="linenos">258</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations = pd.read_csv(&quot;data/hg38_subset_protein_coding.annotation.gtf&quot;, </span>
-</span><span id="L-259"><a href="#L-259"><span class="linenos">259</span></a><span class="sd">    ...                                 sep = &quot;\t&quot;, header = None, skip_blank_lines=True, </span>
-</span><span id="L-260"><a href="#L-260"><span class="linenos">260</span></a><span class="sd">    ...                                 comment = &quot;#&quot;)</span>
-</span><span id="L-261"><a href="#L-261"><span class="linenos">261</span></a><span class="sd">    &gt;&gt;&gt; # Naming columns</span>
-</span><span id="L-262"><a href="#L-262"><span class="linenos">262</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations.columns = [&#39;chr&#39;, &#39;source&#39;, &#39;feature&#39;, &#39;start&#39;, &#39;end&#39;, &#39;score&#39;, </span>
-</span><span id="L-263"><a href="#L-263"><span class="linenos">263</span></a><span class="sd">    ...                             &#39;strand&#39;, &#39;frame&#39;, &#39;attribute&#39;]</span>
-</span><span id="L-264"><a href="#L-264"><span class="linenos">264</span></a><span class="sd">    &gt;&gt;&gt; # Subsetting to only protein coding genes</span>
-</span><span id="L-265"><a href="#L-265"><span class="linenos">265</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations = gene_annotations[gene_annotations[&#39;attribute&#39;].str.contains(</span>
-</span><span id="L-266"><a href="#L-266"><span class="linenos">266</span></a><span class="sd">    ...                                                                     &#39;protein_coding&#39;)]</span>
-</span><span id="L-267"><a href="#L-267"><span class="linenos">267</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations = gene_annotations[gene_annotations[&#39;feature&#39;] == &#39;gene&#39;]</span>
-</span><span id="L-268"><a href="#L-268"><span class="linenos">268</span></a><span class="sd">    &gt;&gt;&gt; </span>
-</span><span id="L-269"><a href="#L-269"><span class="linenos">269</span></a><span class="sd">    &gt;&gt;&gt; # Capturing gene name from attributes column</span>
-</span><span id="L-270"><a href="#L-270"><span class="linenos">270</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations[&#39;gene_name&#39;] = [re.findall(r&#39;(?&lt;=gene_name &quot;)[A-z0-9]+&#39;, attr)[0] </span>
-</span><span id="L-271"><a href="#L-271"><span class="linenos">271</span></a><span class="sd">    ...                                  for attr in gene_annotations[&#39;attribute&#39;]]</span>
-</span><span id="L-272"><a href="#L-272"><span class="linenos">272</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="L-273"><a href="#L-273"><span class="linenos">273</span></a><span class="sd">    &gt;&gt;&gt; atac_grouping = scmkl.get_atac_groupings(gene_anno = gene_annotations,</span>
-</span><span id="L-274"><a href="#L-274"><span class="linenos">274</span></a><span class="sd">    ...                                         gene_sets = gene_sets,</span>
-</span><span id="L-275"><a href="#L-275"><span class="linenos">275</span></a><span class="sd">    ...                                         feature_names = assay_peaks)</span>
+</span><span id="L-240"><a href="#L-240"><span class="linenos">240</span></a><span class="sd">    **feature_names** : *np.ndarray* | *pd.Series* | *list* | *set*</span>
+</span><span id="L-241"><a href="#L-241"><span class="linenos">241</span></a><span class="sd">        &gt; Feature names corresponding to a single_cell ATAC data </span>
+</span><span id="L-242"><a href="#L-242"><span class="linenos">242</span></a><span class="sd">        matrix.</span>
+</span><span id="L-243"><a href="#L-243"><span class="linenos">243</span></a>
+</span><span id="L-244"><a href="#L-244"><span class="linenos">244</span></a><span class="sd">    Returns</span>
+</span><span id="L-245"><a href="#L-245"><span class="linenos">245</span></a><span class="sd">    -------</span>
+</span><span id="L-246"><a href="#L-246"><span class="linenos">246</span></a><span class="sd">    **atac_grouping** : *dict*</span>
+</span><span id="L-247"><a href="#L-247"><span class="linenos">247</span></a><span class="sd">        &gt; Keys are the names from `gene_sets` and values</span>
+</span><span id="L-248"><a href="#L-248"><span class="linenos">248</span></a><span class="sd">        are a list of regions from `feature_names` that overlap with </span>
+</span><span id="L-249"><a href="#L-249"><span class="linenos">249</span></a><span class="sd">        promotor regions respective to genes in `gene_sets` (i.e., if </span>
+</span><span id="L-250"><a href="#L-250"><span class="linenos">250</span></a><span class="sd">        ATAC feature in `feature_names` overlaps with promotor region </span>
+</span><span id="L-251"><a href="#L-251"><span class="linenos">251</span></a><span class="sd">        from a gene in a gene set from `gene_sets`, that region will be</span>
+</span><span id="L-252"><a href="#L-252"><span class="linenos">252</span></a><span class="sd">        added to the new dictionary under the respective gene set </span>
+</span><span id="L-253"><a href="#L-253"><span class="linenos">253</span></a><span class="sd">        name).</span>
+</span><span id="L-254"><a href="#L-254"><span class="linenos">254</span></a>
+</span><span id="L-255"><a href="#L-255"><span class="linenos">255</span></a><span class="sd">    Examples</span>
+</span><span id="L-256"><a href="#L-256"><span class="linenos">256</span></a><span class="sd">    --------</span>
+</span><span id="L-257"><a href="#L-257"><span class="linenos">257</span></a><span class="sd">    &gt;&gt;&gt; # Reading in a gene set and the peak names from scATAC dataset</span>
+</span><span id="L-258"><a href="#L-258"><span class="linenos">258</span></a><span class="sd">    &gt;&gt;&gt; gene_sets = np.load(&quot;data/RNA_hallmark_groupings.pkl&quot;, allow_pickle = True)</span>
+</span><span id="L-259"><a href="#L-259"><span class="linenos">259</span></a><span class="sd">    &gt;&gt;&gt; assay_peaks = np.load(&quot;data/MCF7_ATAC_feature_names.npy&quot;, allow_pickle = True)</span>
+</span><span id="L-260"><a href="#L-260"><span class="linenos">260</span></a><span class="sd">    &gt;&gt;&gt; </span>
+</span><span id="L-261"><a href="#L-261"><span class="linenos">261</span></a><span class="sd">    &gt;&gt;&gt; # Reading in GTF file</span>
+</span><span id="L-262"><a href="#L-262"><span class="linenos">262</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations = pd.read_csv(&quot;data/hg38_subset_protein_coding.annotation.gtf&quot;, </span>
+</span><span id="L-263"><a href="#L-263"><span class="linenos">263</span></a><span class="sd">    ...                                 sep = &quot;\t&quot;, header = None, skip_blank_lines=True, </span>
+</span><span id="L-264"><a href="#L-264"><span class="linenos">264</span></a><span class="sd">    ...                                 comment = &quot;#&quot;)</span>
+</span><span id="L-265"><a href="#L-265"><span class="linenos">265</span></a><span class="sd">    &gt;&gt;&gt; # Naming columns</span>
+</span><span id="L-266"><a href="#L-266"><span class="linenos">266</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations.columns = [&#39;chr&#39;, &#39;source&#39;, &#39;feature&#39;, &#39;start&#39;, &#39;end&#39;, &#39;score&#39;, </span>
+</span><span id="L-267"><a href="#L-267"><span class="linenos">267</span></a><span class="sd">    ...                             &#39;strand&#39;, &#39;frame&#39;, &#39;attribute&#39;]</span>
+</span><span id="L-268"><a href="#L-268"><span class="linenos">268</span></a><span class="sd">    &gt;&gt;&gt; # Subsetting to only protein coding genes</span>
+</span><span id="L-269"><a href="#L-269"><span class="linenos">269</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations = gene_annotations[gene_annotations[&#39;attribute&#39;].str.contains(</span>
+</span><span id="L-270"><a href="#L-270"><span class="linenos">270</span></a><span class="sd">    ...                                                                     &#39;protein_coding&#39;)]</span>
+</span><span id="L-271"><a href="#L-271"><span class="linenos">271</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations = gene_annotations[gene_annotations[&#39;feature&#39;] == &#39;gene&#39;]</span>
+</span><span id="L-272"><a href="#L-272"><span class="linenos">272</span></a><span class="sd">    &gt;&gt;&gt; </span>
+</span><span id="L-273"><a href="#L-273"><span class="linenos">273</span></a><span class="sd">    &gt;&gt;&gt; # Capturing gene name from attributes column</span>
+</span><span id="L-274"><a href="#L-274"><span class="linenos">274</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations[&#39;gene_name&#39;] = [re.findall(r&#39;(?&lt;=gene_name &quot;)[A-z0-9]+&#39;, attr)[0] </span>
+</span><span id="L-275"><a href="#L-275"><span class="linenos">275</span></a><span class="sd">    ...                                  for attr in gene_annotations[&#39;attribute&#39;]]</span>
 </span><span id="L-276"><a href="#L-276"><span class="linenos">276</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="L-277"><a href="#L-277"><span class="linenos">277</span></a><span class="sd">    &gt;&gt;&gt; atac_grouping.keys()</span>
-</span><span id="L-278"><a href="#L-278"><span class="linenos">278</span></a><span class="sd">    dict_keys([&#39;HALLMARK_TNFA_SIGNALING_VIA_NFKB&#39;, &#39;HALLMARK_HYPOXIA&#39;, ...])</span>
-</span><span id="L-279"><a href="#L-279"><span class="linenos">279</span></a><span class="sd">    &#39;&#39;&#39;</span>
-</span><span id="L-280"><a href="#L-280"><span class="linenos">280</span></a>    <span class="c1"># Getting a unique set of gene names from gene_sets</span>
-</span><span id="L-281"><a href="#L-281"><span class="linenos">281</span></a>    <span class="n">all_genes</span> <span class="o">=</span> <span class="p">{</span><span class="n">gene</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">gene_sets</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-</span><span id="L-282"><a href="#L-282"><span class="linenos">282</span></a>                 <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">gene_sets</span><span class="p">[</span><span class="n">group</span><span class="p">]}</span>
-</span><span id="L-283"><a href="#L-283"><span class="linenos">283</span></a>    
-</span><span id="L-284"><a href="#L-284"><span class="linenos">284</span></a>    <span class="c1"># Filtering out NaN values</span>
-</span><span id="L-285"><a href="#L-285"><span class="linenos">285</span></a>    <span class="n">all_genes</span> <span class="o">=</span> <span class="p">[</span><span class="n">gene</span> <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">all_genes</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">gene</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">float</span><span class="p">]</span>
-</span><span id="L-286"><a href="#L-286"><span class="linenos">286</span></a>
-</span><span id="L-287"><a href="#L-287"><span class="linenos">287</span></a>    <span class="c1"># Filtering out annotations for genes not present in gene_sets</span>
-</span><span id="L-288"><a href="#L-288"><span class="linenos">288</span></a>    <span class="n">gene_anno</span> <span class="o">=</span> <span class="n">gene_anno</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">gene_anno</span><span class="p">[</span><span class="s1">&#39;gene_name&#39;</span><span class="p">],</span> <span class="n">all_genes</span><span class="p">)]</span>
-</span><span id="L-289"><a href="#L-289"><span class="linenos">289</span></a>
-</span><span id="L-290"><a href="#L-290"><span class="linenos">290</span></a>    <span class="c1"># Adjusting start and end columns to represent promotor regions</span>
-</span><span id="L-291"><a href="#L-291"><span class="linenos">291</span></a>    <span class="n">gene_anno</span> <span class="o">=</span> <span class="n">_adjust_regions</span><span class="p">(</span><span class="n">gene_anno</span> <span class="o">=</span> <span class="n">gene_anno</span><span class="p">,</span> 
-</span><span id="L-292"><a href="#L-292"><span class="linenos">292</span></a>                                <span class="n">len_up</span> <span class="o">=</span> <span class="n">len_up</span><span class="p">,</span> <span class="n">len_down</span> <span class="o">=</span> <span class="n">len_down</span><span class="p">)</span>
+</span><span id="L-277"><a href="#L-277"><span class="linenos">277</span></a><span class="sd">    &gt;&gt;&gt; atac_grouping = scmkl.get_atac_groupings(gene_anno = gene_annotations,</span>
+</span><span id="L-278"><a href="#L-278"><span class="linenos">278</span></a><span class="sd">    ...                                         gene_sets = gene_sets,</span>
+</span><span id="L-279"><a href="#L-279"><span class="linenos">279</span></a><span class="sd">    ...                                         feature_names = assay_peaks)</span>
+</span><span id="L-280"><a href="#L-280"><span class="linenos">280</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="L-281"><a href="#L-281"><span class="linenos">281</span></a><span class="sd">    &gt;&gt;&gt; atac_grouping.keys()</span>
+</span><span id="L-282"><a href="#L-282"><span class="linenos">282</span></a><span class="sd">    dict_keys([&#39;HALLMARK_TNFA_SIGNALING_VIA_NFKB&#39;, &#39;HALLMARK_HYPOXIA&#39;, ...])</span>
+</span><span id="L-283"><a href="#L-283"><span class="linenos">283</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-284"><a href="#L-284"><span class="linenos">284</span></a>    <span class="c1"># Getting a unique set of gene names from gene_sets</span>
+</span><span id="L-285"><a href="#L-285"><span class="linenos">285</span></a>    <span class="n">all_genes</span> <span class="o">=</span> <span class="p">{</span><span class="n">gene</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">gene_sets</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</span><span id="L-286"><a href="#L-286"><span class="linenos">286</span></a>                 <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">gene_sets</span><span class="p">[</span><span class="n">group</span><span class="p">]}</span>
+</span><span id="L-287"><a href="#L-287"><span class="linenos">287</span></a>    
+</span><span id="L-288"><a href="#L-288"><span class="linenos">288</span></a>    <span class="c1"># Filtering out NaN values</span>
+</span><span id="L-289"><a href="#L-289"><span class="linenos">289</span></a>    <span class="n">all_genes</span> <span class="o">=</span> <span class="p">[</span><span class="n">gene</span> <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">all_genes</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">gene</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">float</span><span class="p">]</span>
+</span><span id="L-290"><a href="#L-290"><span class="linenos">290</span></a>
+</span><span id="L-291"><a href="#L-291"><span class="linenos">291</span></a>    <span class="c1"># Filtering out annotations for genes not present in gene_sets</span>
+</span><span id="L-292"><a href="#L-292"><span class="linenos">292</span></a>    <span class="n">gene_anno</span> <span class="o">=</span> <span class="n">gene_anno</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">gene_anno</span><span class="p">[</span><span class="s1">&#39;gene_name&#39;</span><span class="p">],</span> <span class="n">all_genes</span><span class="p">)]</span>
 </span><span id="L-293"><a href="#L-293"><span class="linenos">293</span></a>
-</span><span id="L-294"><a href="#L-294"><span class="linenos">294</span></a>    <span class="c1"># Creating a dictionary from assay features where [chr] : (start, end)</span>
-</span><span id="L-295"><a href="#L-295"><span class="linenos">295</span></a>    <span class="n">feature_dict</span> <span class="o">=</span> <span class="n">_create_feature_dict</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
-</span><span id="L-296"><a href="#L-296"><span class="linenos">296</span></a>
-</span><span id="L-297"><a href="#L-297"><span class="linenos">297</span></a>    <span class="c1"># Creating data structures from gene_anno for comparing regions</span>
-</span><span id="L-298"><a href="#L-298"><span class="linenos">298</span></a>    <span class="n">peak_gene_dict</span><span class="p">,</span> <span class="n">ga_regions</span> <span class="o">=</span> <span class="n">_create_region_dicts</span><span class="p">(</span><span class="n">gene_anno</span><span class="p">)</span>
-</span><span id="L-299"><a href="#L-299"><span class="linenos">299</span></a>
-</span><span id="L-300"><a href="#L-300"><span class="linenos">300</span></a>    <span class="c1"># Capturing the separator type used in assay</span>
-</span><span id="L-301"><a href="#L-301"><span class="linenos">301</span></a>    <span class="n">chr_sep</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span> <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">feature_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;-&#39;</span>
-</span><span id="L-302"><a href="#L-302"><span class="linenos">302</span></a>
-</span><span id="L-303"><a href="#L-303"><span class="linenos">303</span></a>    <span class="n">atac_groupings</span> <span class="o">=</span> <span class="n">_compare_regions</span><span class="p">(</span><span class="n">feature_dict</span> <span class="o">=</span> <span class="n">feature_dict</span><span class="p">,</span>
-</span><span id="L-304"><a href="#L-304"><span class="linenos">304</span></a>                                     <span class="n">ga_regions</span> <span class="o">=</span> <span class="n">ga_regions</span><span class="p">,</span>
-</span><span id="L-305"><a href="#L-305"><span class="linenos">305</span></a>                                     <span class="n">peak_gene_dict</span> <span class="o">=</span> <span class="n">peak_gene_dict</span><span class="p">,</span>
-</span><span id="L-306"><a href="#L-306"><span class="linenos">306</span></a>                                     <span class="n">gene_sets</span> <span class="o">=</span> <span class="n">gene_sets</span><span class="p">,</span>
-</span><span id="L-307"><a href="#L-307"><span class="linenos">307</span></a>                                     <span class="n">chr_sep</span> <span class="o">=</span> <span class="n">chr_sep</span><span class="p">)</span>
-</span><span id="L-308"><a href="#L-308"><span class="linenos">308</span></a>    
-</span><span id="L-309"><a href="#L-309"><span class="linenos">309</span></a>    <span class="k">return</span> <span class="n">atac_groupings</span>
+</span><span id="L-294"><a href="#L-294"><span class="linenos">294</span></a>    <span class="c1"># Adjusting start and end columns to represent promotor regions</span>
+</span><span id="L-295"><a href="#L-295"><span class="linenos">295</span></a>    <span class="n">gene_anno</span> <span class="o">=</span> <span class="n">_adjust_regions</span><span class="p">(</span><span class="n">gene_anno</span> <span class="o">=</span> <span class="n">gene_anno</span><span class="p">,</span> 
+</span><span id="L-296"><a href="#L-296"><span class="linenos">296</span></a>                                <span class="n">len_up</span> <span class="o">=</span> <span class="n">len_up</span><span class="p">,</span> <span class="n">len_down</span> <span class="o">=</span> <span class="n">len_down</span><span class="p">)</span>
+</span><span id="L-297"><a href="#L-297"><span class="linenos">297</span></a>
+</span><span id="L-298"><a href="#L-298"><span class="linenos">298</span></a>    <span class="c1"># Creating a dictionary from assay features where [chr] : (start, end)</span>
+</span><span id="L-299"><a href="#L-299"><span class="linenos">299</span></a>    <span class="n">feature_dict</span> <span class="o">=</span> <span class="n">_create_feature_dict</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
+</span><span id="L-300"><a href="#L-300"><span class="linenos">300</span></a>
+</span><span id="L-301"><a href="#L-301"><span class="linenos">301</span></a>    <span class="c1"># Creating data structures from gene_anno for comparing regions</span>
+</span><span id="L-302"><a href="#L-302"><span class="linenos">302</span></a>    <span class="n">peak_gene_dict</span><span class="p">,</span> <span class="n">ga_regions</span> <span class="o">=</span> <span class="n">_create_region_dicts</span><span class="p">(</span><span class="n">gene_anno</span><span class="p">)</span>
+</span><span id="L-303"><a href="#L-303"><span class="linenos">303</span></a>
+</span><span id="L-304"><a href="#L-304"><span class="linenos">304</span></a>    <span class="c1"># Capturing the separator type used in assay</span>
+</span><span id="L-305"><a href="#L-305"><span class="linenos">305</span></a>    <span class="n">chr_sep</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span> <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">feature_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;-&#39;</span>
+</span><span id="L-306"><a href="#L-306"><span class="linenos">306</span></a>
+</span><span id="L-307"><a href="#L-307"><span class="linenos">307</span></a>    <span class="n">atac_groupings</span> <span class="o">=</span> <span class="n">_compare_regions</span><span class="p">(</span><span class="n">feature_dict</span> <span class="o">=</span> <span class="n">feature_dict</span><span class="p">,</span>
+</span><span id="L-308"><a href="#L-308"><span class="linenos">308</span></a>                                     <span class="n">ga_regions</span> <span class="o">=</span> <span class="n">ga_regions</span><span class="p">,</span>
+</span><span id="L-309"><a href="#L-309"><span class="linenos">309</span></a>                                     <span class="n">peak_gene_dict</span> <span class="o">=</span> <span class="n">peak_gene_dict</span><span class="p">,</span>
+</span><span id="L-310"><a href="#L-310"><span class="linenos">310</span></a>                                     <span class="n">gene_sets</span> <span class="o">=</span> <span class="n">gene_sets</span><span class="p">,</span>
+</span><span id="L-311"><a href="#L-311"><span class="linenos">311</span></a>                                     <span class="n">chr_sep</span> <span class="o">=</span> <span class="n">chr_sep</span><span class="p">)</span>
+</span><span id="L-312"><a href="#L-312"><span class="linenos">312</span></a>    
+</span><span id="L-313"><a href="#L-313"><span class="linenos">313</span></a>    <span class="k">return</span> <span class="n">atac_groupings</span>
 </span></pre></div>
 
 
@@ -383,104 +387,112 @@
 </span><span id="get_atac_groupings-222"><a href="#get_atac_groupings-222"><span class="linenos">222</span></a>                       <span class="n">feature_names</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">set</span><span class="p">,</span>
 </span><span id="get_atac_groupings-223"><a href="#get_atac_groupings-223"><span class="linenos">223</span></a>                       <span class="n">len_up</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span> <span class="n">len_down</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 </span><span id="get_atac_groupings-224"><a href="#get_atac_groupings-224"><span class="linenos">224</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-</span><span id="get_atac_groupings-225"><a href="#get_atac_groupings-225"><span class="linenos">225</span></a><span class="sd">    Creates a peak set from a gene set.</span>
-</span><span id="get_atac_groupings-226"><a href="#get_atac_groupings-226"><span class="linenos">226</span></a>
-</span><span id="get_atac_groupings-227"><a href="#get_atac_groupings-227"><span class="linenos">227</span></a><span class="sd">    Parameters</span>
-</span><span id="get_atac_groupings-228"><a href="#get_atac_groupings-228"><span class="linenos">228</span></a><span class="sd">    ----------</span>
-</span><span id="get_atac_groupings-229"><a href="#get_atac_groupings-229"><span class="linenos">229</span></a><span class="sd">    **gene_anno** : *pd.DataFrame*</span>
-</span><span id="get_atac_groupings-230"><a href="#get_atac_groupings-230"><span class="linenos">230</span></a><span class="sd">        &gt; Gene annotations in GTF format as a pd.DataFrame </span>
-</span><span id="get_atac_groupings-231"><a href="#get_atac_groupings-231"><span class="linenos">231</span></a><span class="sd">        with columns [&#39;chr&#39;, &#39;start&#39;, &#39;end&#39;, &#39;strand&#39;, &#39;gene_name&#39;]</span>
-</span><span id="get_atac_groupings-232"><a href="#get_atac_groupings-232"><span class="linenos">232</span></a>
-</span><span id="get_atac_groupings-233"><a href="#get_atac_groupings-233"><span class="linenos">233</span></a><span class="sd">    **gene_sets** : *dict*</span>
-</span><span id="get_atac_groupings-234"><a href="#get_atac_groupings-234"><span class="linenos">234</span></a><span class="sd">        &gt; Gene set names as keys and an iterable object of gene names</span>
-</span><span id="get_atac_groupings-235"><a href="#get_atac_groupings-235"><span class="linenos">235</span></a><span class="sd">        as values.</span>
+</span><span id="get_atac_groupings-225"><a href="#get_atac_groupings-225"><span class="linenos">225</span></a><span class="sd">    Creates a peak set where keys are gene set names from `gene_sets` and </span>
+</span><span id="get_atac_groupings-226"><a href="#get_atac_groupings-226"><span class="linenos">226</span></a><span class="sd">    values are arrays of features pulled from `feature_names`. Features</span>
+</span><span id="get_atac_groupings-227"><a href="#get_atac_groupings-227"><span class="linenos">227</span></a><span class="sd">    are added to each peak set given overlap between regions in </span>
+</span><span id="get_atac_groupings-228"><a href="#get_atac_groupings-228"><span class="linenos">228</span></a><span class="sd">    single-cell data matrix and inferred gene promoter regions in </span>
+</span><span id="get_atac_groupings-229"><a href="#get_atac_groupings-229"><span class="linenos">229</span></a><span class="sd">    `gene_anno`.</span>
+</span><span id="get_atac_groupings-230"><a href="#get_atac_groupings-230"><span class="linenos">230</span></a>
+</span><span id="get_atac_groupings-231"><a href="#get_atac_groupings-231"><span class="linenos">231</span></a><span class="sd">    Parameters</span>
+</span><span id="get_atac_groupings-232"><a href="#get_atac_groupings-232"><span class="linenos">232</span></a><span class="sd">    ----------</span>
+</span><span id="get_atac_groupings-233"><a href="#get_atac_groupings-233"><span class="linenos">233</span></a><span class="sd">    **gene_anno** : *pd.DataFrame*</span>
+</span><span id="get_atac_groupings-234"><a href="#get_atac_groupings-234"><span class="linenos">234</span></a><span class="sd">        &gt; Gene annotations in GTF format as a pd.DataFrame with columns</span>
+</span><span id="get_atac_groupings-235"><a href="#get_atac_groupings-235"><span class="linenos">235</span></a><span class="sd">        [&#39;chr&#39;, &#39;start&#39;, &#39;end&#39;, &#39;strand&#39;, &#39;gene_name&#39;].</span>
 </span><span id="get_atac_groupings-236"><a href="#get_atac_groupings-236"><span class="linenos">236</span></a>
-</span><span id="get_atac_groupings-237"><a href="#get_atac_groupings-237"><span class="linenos">237</span></a><span class="sd">    **feature_names** : *np.ndarray* | *pd.Series* | *list* | *set*</span>
-</span><span id="get_atac_groupings-238"><a href="#get_atac_groupings-238"><span class="linenos">238</span></a><span class="sd">        &gt; Feature names corresponding to a single_cell ATAC data </span>
-</span><span id="get_atac_groupings-239"><a href="#get_atac_groupings-239"><span class="linenos">239</span></a><span class="sd">        matrix.</span>
+</span><span id="get_atac_groupings-237"><a href="#get_atac_groupings-237"><span class="linenos">237</span></a><span class="sd">    **gene_sets** : *dict*</span>
+</span><span id="get_atac_groupings-238"><a href="#get_atac_groupings-238"><span class="linenos">238</span></a><span class="sd">        &gt; Gene set names as keys and an iterable object of gene names</span>
+</span><span id="get_atac_groupings-239"><a href="#get_atac_groupings-239"><span class="linenos">239</span></a><span class="sd">        as values.</span>
 </span><span id="get_atac_groupings-240"><a href="#get_atac_groupings-240"><span class="linenos">240</span></a>
-</span><span id="get_atac_groupings-241"><a href="#get_atac_groupings-241"><span class="linenos">241</span></a><span class="sd">    Returns</span>
-</span><span id="get_atac_groupings-242"><a href="#get_atac_groupings-242"><span class="linenos">242</span></a><span class="sd">    -------</span>
-</span><span id="get_atac_groupings-243"><a href="#get_atac_groupings-243"><span class="linenos">243</span></a><span class="sd">    **atac_grouping** : *dict*</span>
-</span><span id="get_atac_groupings-244"><a href="#get_atac_groupings-244"><span class="linenos">244</span></a><span class="sd">        &gt; Keys are the names from `gene_sets` and values</span>
-</span><span id="get_atac_groupings-245"><a href="#get_atac_groupings-245"><span class="linenos">245</span></a><span class="sd">        are a list of regions from `feature_names` that overlap with </span>
-</span><span id="get_atac_groupings-246"><a href="#get_atac_groupings-246"><span class="linenos">246</span></a><span class="sd">        promotor regions respective to genes in `gene_sets` (i.e., if </span>
-</span><span id="get_atac_groupings-247"><a href="#get_atac_groupings-247"><span class="linenos">247</span></a><span class="sd">        ATAC feature in `feature_names` overlaps with promotor region </span>
-</span><span id="get_atac_groupings-248"><a href="#get_atac_groupings-248"><span class="linenos">248</span></a><span class="sd">        from a gene in a gene set from `gene_sets`, that region will be</span>
-</span><span id="get_atac_groupings-249"><a href="#get_atac_groupings-249"><span class="linenos">249</span></a><span class="sd">        added to the new dictionary under the respective gene set </span>
-</span><span id="get_atac_groupings-250"><a href="#get_atac_groupings-250"><span class="linenos">250</span></a><span class="sd">        name).</span>
-</span><span id="get_atac_groupings-251"><a href="#get_atac_groupings-251"><span class="linenos">251</span></a>
-</span><span id="get_atac_groupings-252"><a href="#get_atac_groupings-252"><span class="linenos">252</span></a><span class="sd">    Examples</span>
-</span><span id="get_atac_groupings-253"><a href="#get_atac_groupings-253"><span class="linenos">253</span></a><span class="sd">    --------</span>
-</span><span id="get_atac_groupings-254"><a href="#get_atac_groupings-254"><span class="linenos">254</span></a><span class="sd">    &gt;&gt;&gt; # Reading in a gene set and the peak names from scATAC dataset</span>
-</span><span id="get_atac_groupings-255"><a href="#get_atac_groupings-255"><span class="linenos">255</span></a><span class="sd">    &gt;&gt;&gt; gene_sets = np.load(&quot;data/RNA_hallmark_groupings.pkl&quot;, allow_pickle = True)</span>
-</span><span id="get_atac_groupings-256"><a href="#get_atac_groupings-256"><span class="linenos">256</span></a><span class="sd">    &gt;&gt;&gt; assay_peaks = np.load(&quot;data/MCF7_ATAC_feature_names.npy&quot;, allow_pickle = True)</span>
-</span><span id="get_atac_groupings-257"><a href="#get_atac_groupings-257"><span class="linenos">257</span></a><span class="sd">    &gt;&gt;&gt; </span>
-</span><span id="get_atac_groupings-258"><a href="#get_atac_groupings-258"><span class="linenos">258</span></a><span class="sd">    &gt;&gt;&gt; # Reading in GTF file</span>
-</span><span id="get_atac_groupings-259"><a href="#get_atac_groupings-259"><span class="linenos">259</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations = pd.read_csv(&quot;data/hg38_subset_protein_coding.annotation.gtf&quot;, </span>
-</span><span id="get_atac_groupings-260"><a href="#get_atac_groupings-260"><span class="linenos">260</span></a><span class="sd">    ...                                 sep = &quot;\t&quot;, header = None, skip_blank_lines=True, </span>
-</span><span id="get_atac_groupings-261"><a href="#get_atac_groupings-261"><span class="linenos">261</span></a><span class="sd">    ...                                 comment = &quot;#&quot;)</span>
-</span><span id="get_atac_groupings-262"><a href="#get_atac_groupings-262"><span class="linenos">262</span></a><span class="sd">    &gt;&gt;&gt; # Naming columns</span>
-</span><span id="get_atac_groupings-263"><a href="#get_atac_groupings-263"><span class="linenos">263</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations.columns = [&#39;chr&#39;, &#39;source&#39;, &#39;feature&#39;, &#39;start&#39;, &#39;end&#39;, &#39;score&#39;, </span>
-</span><span id="get_atac_groupings-264"><a href="#get_atac_groupings-264"><span class="linenos">264</span></a><span class="sd">    ...                             &#39;strand&#39;, &#39;frame&#39;, &#39;attribute&#39;]</span>
-</span><span id="get_atac_groupings-265"><a href="#get_atac_groupings-265"><span class="linenos">265</span></a><span class="sd">    &gt;&gt;&gt; # Subsetting to only protein coding genes</span>
-</span><span id="get_atac_groupings-266"><a href="#get_atac_groupings-266"><span class="linenos">266</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations = gene_annotations[gene_annotations[&#39;attribute&#39;].str.contains(</span>
-</span><span id="get_atac_groupings-267"><a href="#get_atac_groupings-267"><span class="linenos">267</span></a><span class="sd">    ...                                                                     &#39;protein_coding&#39;)]</span>
-</span><span id="get_atac_groupings-268"><a href="#get_atac_groupings-268"><span class="linenos">268</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations = gene_annotations[gene_annotations[&#39;feature&#39;] == &#39;gene&#39;]</span>
-</span><span id="get_atac_groupings-269"><a href="#get_atac_groupings-269"><span class="linenos">269</span></a><span class="sd">    &gt;&gt;&gt; </span>
-</span><span id="get_atac_groupings-270"><a href="#get_atac_groupings-270"><span class="linenos">270</span></a><span class="sd">    &gt;&gt;&gt; # Capturing gene name from attributes column</span>
-</span><span id="get_atac_groupings-271"><a href="#get_atac_groupings-271"><span class="linenos">271</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations[&#39;gene_name&#39;] = [re.findall(r&#39;(?&lt;=gene_name &quot;)[A-z0-9]+&#39;, attr)[0] </span>
-</span><span id="get_atac_groupings-272"><a href="#get_atac_groupings-272"><span class="linenos">272</span></a><span class="sd">    ...                                  for attr in gene_annotations[&#39;attribute&#39;]]</span>
-</span><span id="get_atac_groupings-273"><a href="#get_atac_groupings-273"><span class="linenos">273</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="get_atac_groupings-274"><a href="#get_atac_groupings-274"><span class="linenos">274</span></a><span class="sd">    &gt;&gt;&gt; atac_grouping = scmkl.get_atac_groupings(gene_anno = gene_annotations,</span>
-</span><span id="get_atac_groupings-275"><a href="#get_atac_groupings-275"><span class="linenos">275</span></a><span class="sd">    ...                                         gene_sets = gene_sets,</span>
-</span><span id="get_atac_groupings-276"><a href="#get_atac_groupings-276"><span class="linenos">276</span></a><span class="sd">    ...                                         feature_names = assay_peaks)</span>
+</span><span id="get_atac_groupings-241"><a href="#get_atac_groupings-241"><span class="linenos">241</span></a><span class="sd">    **feature_names** : *np.ndarray* | *pd.Series* | *list* | *set*</span>
+</span><span id="get_atac_groupings-242"><a href="#get_atac_groupings-242"><span class="linenos">242</span></a><span class="sd">        &gt; Feature names corresponding to a single_cell ATAC data </span>
+</span><span id="get_atac_groupings-243"><a href="#get_atac_groupings-243"><span class="linenos">243</span></a><span class="sd">        matrix.</span>
+</span><span id="get_atac_groupings-244"><a href="#get_atac_groupings-244"><span class="linenos">244</span></a>
+</span><span id="get_atac_groupings-245"><a href="#get_atac_groupings-245"><span class="linenos">245</span></a><span class="sd">    Returns</span>
+</span><span id="get_atac_groupings-246"><a href="#get_atac_groupings-246"><span class="linenos">246</span></a><span class="sd">    -------</span>
+</span><span id="get_atac_groupings-247"><a href="#get_atac_groupings-247"><span class="linenos">247</span></a><span class="sd">    **atac_grouping** : *dict*</span>
+</span><span id="get_atac_groupings-248"><a href="#get_atac_groupings-248"><span class="linenos">248</span></a><span class="sd">        &gt; Keys are the names from `gene_sets` and values</span>
+</span><span id="get_atac_groupings-249"><a href="#get_atac_groupings-249"><span class="linenos">249</span></a><span class="sd">        are a list of regions from `feature_names` that overlap with </span>
+</span><span id="get_atac_groupings-250"><a href="#get_atac_groupings-250"><span class="linenos">250</span></a><span class="sd">        promotor regions respective to genes in `gene_sets` (i.e., if </span>
+</span><span id="get_atac_groupings-251"><a href="#get_atac_groupings-251"><span class="linenos">251</span></a><span class="sd">        ATAC feature in `feature_names` overlaps with promotor region </span>
+</span><span id="get_atac_groupings-252"><a href="#get_atac_groupings-252"><span class="linenos">252</span></a><span class="sd">        from a gene in a gene set from `gene_sets`, that region will be</span>
+</span><span id="get_atac_groupings-253"><a href="#get_atac_groupings-253"><span class="linenos">253</span></a><span class="sd">        added to the new dictionary under the respective gene set </span>
+</span><span id="get_atac_groupings-254"><a href="#get_atac_groupings-254"><span class="linenos">254</span></a><span class="sd">        name).</span>
+</span><span id="get_atac_groupings-255"><a href="#get_atac_groupings-255"><span class="linenos">255</span></a>
+</span><span id="get_atac_groupings-256"><a href="#get_atac_groupings-256"><span class="linenos">256</span></a><span class="sd">    Examples</span>
+</span><span id="get_atac_groupings-257"><a href="#get_atac_groupings-257"><span class="linenos">257</span></a><span class="sd">    --------</span>
+</span><span id="get_atac_groupings-258"><a href="#get_atac_groupings-258"><span class="linenos">258</span></a><span class="sd">    &gt;&gt;&gt; # Reading in a gene set and the peak names from scATAC dataset</span>
+</span><span id="get_atac_groupings-259"><a href="#get_atac_groupings-259"><span class="linenos">259</span></a><span class="sd">    &gt;&gt;&gt; gene_sets = np.load(&quot;data/RNA_hallmark_groupings.pkl&quot;, allow_pickle = True)</span>
+</span><span id="get_atac_groupings-260"><a href="#get_atac_groupings-260"><span class="linenos">260</span></a><span class="sd">    &gt;&gt;&gt; assay_peaks = np.load(&quot;data/MCF7_ATAC_feature_names.npy&quot;, allow_pickle = True)</span>
+</span><span id="get_atac_groupings-261"><a href="#get_atac_groupings-261"><span class="linenos">261</span></a><span class="sd">    &gt;&gt;&gt; </span>
+</span><span id="get_atac_groupings-262"><a href="#get_atac_groupings-262"><span class="linenos">262</span></a><span class="sd">    &gt;&gt;&gt; # Reading in GTF file</span>
+</span><span id="get_atac_groupings-263"><a href="#get_atac_groupings-263"><span class="linenos">263</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations = pd.read_csv(&quot;data/hg38_subset_protein_coding.annotation.gtf&quot;, </span>
+</span><span id="get_atac_groupings-264"><a href="#get_atac_groupings-264"><span class="linenos">264</span></a><span class="sd">    ...                                 sep = &quot;\t&quot;, header = None, skip_blank_lines=True, </span>
+</span><span id="get_atac_groupings-265"><a href="#get_atac_groupings-265"><span class="linenos">265</span></a><span class="sd">    ...                                 comment = &quot;#&quot;)</span>
+</span><span id="get_atac_groupings-266"><a href="#get_atac_groupings-266"><span class="linenos">266</span></a><span class="sd">    &gt;&gt;&gt; # Naming columns</span>
+</span><span id="get_atac_groupings-267"><a href="#get_atac_groupings-267"><span class="linenos">267</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations.columns = [&#39;chr&#39;, &#39;source&#39;, &#39;feature&#39;, &#39;start&#39;, &#39;end&#39;, &#39;score&#39;, </span>
+</span><span id="get_atac_groupings-268"><a href="#get_atac_groupings-268"><span class="linenos">268</span></a><span class="sd">    ...                             &#39;strand&#39;, &#39;frame&#39;, &#39;attribute&#39;]</span>
+</span><span id="get_atac_groupings-269"><a href="#get_atac_groupings-269"><span class="linenos">269</span></a><span class="sd">    &gt;&gt;&gt; # Subsetting to only protein coding genes</span>
+</span><span id="get_atac_groupings-270"><a href="#get_atac_groupings-270"><span class="linenos">270</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations = gene_annotations[gene_annotations[&#39;attribute&#39;].str.contains(</span>
+</span><span id="get_atac_groupings-271"><a href="#get_atac_groupings-271"><span class="linenos">271</span></a><span class="sd">    ...                                                                     &#39;protein_coding&#39;)]</span>
+</span><span id="get_atac_groupings-272"><a href="#get_atac_groupings-272"><span class="linenos">272</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations = gene_annotations[gene_annotations[&#39;feature&#39;] == &#39;gene&#39;]</span>
+</span><span id="get_atac_groupings-273"><a href="#get_atac_groupings-273"><span class="linenos">273</span></a><span class="sd">    &gt;&gt;&gt; </span>
+</span><span id="get_atac_groupings-274"><a href="#get_atac_groupings-274"><span class="linenos">274</span></a><span class="sd">    &gt;&gt;&gt; # Capturing gene name from attributes column</span>
+</span><span id="get_atac_groupings-275"><a href="#get_atac_groupings-275"><span class="linenos">275</span></a><span class="sd">    &gt;&gt;&gt; gene_annotations[&#39;gene_name&#39;] = [re.findall(r&#39;(?&lt;=gene_name &quot;)[A-z0-9]+&#39;, attr)[0] </span>
+</span><span id="get_atac_groupings-276"><a href="#get_atac_groupings-276"><span class="linenos">276</span></a><span class="sd">    ...                                  for attr in gene_annotations[&#39;attribute&#39;]]</span>
 </span><span id="get_atac_groupings-277"><a href="#get_atac_groupings-277"><span class="linenos">277</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="get_atac_groupings-278"><a href="#get_atac_groupings-278"><span class="linenos">278</span></a><span class="sd">    &gt;&gt;&gt; atac_grouping.keys()</span>
-</span><span id="get_atac_groupings-279"><a href="#get_atac_groupings-279"><span class="linenos">279</span></a><span class="sd">    dict_keys([&#39;HALLMARK_TNFA_SIGNALING_VIA_NFKB&#39;, &#39;HALLMARK_HYPOXIA&#39;, ...])</span>
-</span><span id="get_atac_groupings-280"><a href="#get_atac_groupings-280"><span class="linenos">280</span></a><span class="sd">    &#39;&#39;&#39;</span>
-</span><span id="get_atac_groupings-281"><a href="#get_atac_groupings-281"><span class="linenos">281</span></a>    <span class="c1"># Getting a unique set of gene names from gene_sets</span>
-</span><span id="get_atac_groupings-282"><a href="#get_atac_groupings-282"><span class="linenos">282</span></a>    <span class="n">all_genes</span> <span class="o">=</span> <span class="p">{</span><span class="n">gene</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">gene_sets</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-</span><span id="get_atac_groupings-283"><a href="#get_atac_groupings-283"><span class="linenos">283</span></a>                 <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">gene_sets</span><span class="p">[</span><span class="n">group</span><span class="p">]}</span>
-</span><span id="get_atac_groupings-284"><a href="#get_atac_groupings-284"><span class="linenos">284</span></a>    
-</span><span id="get_atac_groupings-285"><a href="#get_atac_groupings-285"><span class="linenos">285</span></a>    <span class="c1"># Filtering out NaN values</span>
-</span><span id="get_atac_groupings-286"><a href="#get_atac_groupings-286"><span class="linenos">286</span></a>    <span class="n">all_genes</span> <span class="o">=</span> <span class="p">[</span><span class="n">gene</span> <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">all_genes</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">gene</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">float</span><span class="p">]</span>
-</span><span id="get_atac_groupings-287"><a href="#get_atac_groupings-287"><span class="linenos">287</span></a>
-</span><span id="get_atac_groupings-288"><a href="#get_atac_groupings-288"><span class="linenos">288</span></a>    <span class="c1"># Filtering out annotations for genes not present in gene_sets</span>
-</span><span id="get_atac_groupings-289"><a href="#get_atac_groupings-289"><span class="linenos">289</span></a>    <span class="n">gene_anno</span> <span class="o">=</span> <span class="n">gene_anno</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">gene_anno</span><span class="p">[</span><span class="s1">&#39;gene_name&#39;</span><span class="p">],</span> <span class="n">all_genes</span><span class="p">)]</span>
-</span><span id="get_atac_groupings-290"><a href="#get_atac_groupings-290"><span class="linenos">290</span></a>
-</span><span id="get_atac_groupings-291"><a href="#get_atac_groupings-291"><span class="linenos">291</span></a>    <span class="c1"># Adjusting start and end columns to represent promotor regions</span>
-</span><span id="get_atac_groupings-292"><a href="#get_atac_groupings-292"><span class="linenos">292</span></a>    <span class="n">gene_anno</span> <span class="o">=</span> <span class="n">_adjust_regions</span><span class="p">(</span><span class="n">gene_anno</span> <span class="o">=</span> <span class="n">gene_anno</span><span class="p">,</span> 
-</span><span id="get_atac_groupings-293"><a href="#get_atac_groupings-293"><span class="linenos">293</span></a>                                <span class="n">len_up</span> <span class="o">=</span> <span class="n">len_up</span><span class="p">,</span> <span class="n">len_down</span> <span class="o">=</span> <span class="n">len_down</span><span class="p">)</span>
+</span><span id="get_atac_groupings-278"><a href="#get_atac_groupings-278"><span class="linenos">278</span></a><span class="sd">    &gt;&gt;&gt; atac_grouping = scmkl.get_atac_groupings(gene_anno = gene_annotations,</span>
+</span><span id="get_atac_groupings-279"><a href="#get_atac_groupings-279"><span class="linenos">279</span></a><span class="sd">    ...                                         gene_sets = gene_sets,</span>
+</span><span id="get_atac_groupings-280"><a href="#get_atac_groupings-280"><span class="linenos">280</span></a><span class="sd">    ...                                         feature_names = assay_peaks)</span>
+</span><span id="get_atac_groupings-281"><a href="#get_atac_groupings-281"><span class="linenos">281</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="get_atac_groupings-282"><a href="#get_atac_groupings-282"><span class="linenos">282</span></a><span class="sd">    &gt;&gt;&gt; atac_grouping.keys()</span>
+</span><span id="get_atac_groupings-283"><a href="#get_atac_groupings-283"><span class="linenos">283</span></a><span class="sd">    dict_keys([&#39;HALLMARK_TNFA_SIGNALING_VIA_NFKB&#39;, &#39;HALLMARK_HYPOXIA&#39;, ...])</span>
+</span><span id="get_atac_groupings-284"><a href="#get_atac_groupings-284"><span class="linenos">284</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="get_atac_groupings-285"><a href="#get_atac_groupings-285"><span class="linenos">285</span></a>    <span class="c1"># Getting a unique set of gene names from gene_sets</span>
+</span><span id="get_atac_groupings-286"><a href="#get_atac_groupings-286"><span class="linenos">286</span></a>    <span class="n">all_genes</span> <span class="o">=</span> <span class="p">{</span><span class="n">gene</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">gene_sets</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</span><span id="get_atac_groupings-287"><a href="#get_atac_groupings-287"><span class="linenos">287</span></a>                 <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">gene_sets</span><span class="p">[</span><span class="n">group</span><span class="p">]}</span>
+</span><span id="get_atac_groupings-288"><a href="#get_atac_groupings-288"><span class="linenos">288</span></a>    
+</span><span id="get_atac_groupings-289"><a href="#get_atac_groupings-289"><span class="linenos">289</span></a>    <span class="c1"># Filtering out NaN values</span>
+</span><span id="get_atac_groupings-290"><a href="#get_atac_groupings-290"><span class="linenos">290</span></a>    <span class="n">all_genes</span> <span class="o">=</span> <span class="p">[</span><span class="n">gene</span> <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">all_genes</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">gene</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">float</span><span class="p">]</span>
+</span><span id="get_atac_groupings-291"><a href="#get_atac_groupings-291"><span class="linenos">291</span></a>
+</span><span id="get_atac_groupings-292"><a href="#get_atac_groupings-292"><span class="linenos">292</span></a>    <span class="c1"># Filtering out annotations for genes not present in gene_sets</span>
+</span><span id="get_atac_groupings-293"><a href="#get_atac_groupings-293"><span class="linenos">293</span></a>    <span class="n">gene_anno</span> <span class="o">=</span> <span class="n">gene_anno</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">gene_anno</span><span class="p">[</span><span class="s1">&#39;gene_name&#39;</span><span class="p">],</span> <span class="n">all_genes</span><span class="p">)]</span>
 </span><span id="get_atac_groupings-294"><a href="#get_atac_groupings-294"><span class="linenos">294</span></a>
-</span><span id="get_atac_groupings-295"><a href="#get_atac_groupings-295"><span class="linenos">295</span></a>    <span class="c1"># Creating a dictionary from assay features where [chr] : (start, end)</span>
-</span><span id="get_atac_groupings-296"><a href="#get_atac_groupings-296"><span class="linenos">296</span></a>    <span class="n">feature_dict</span> <span class="o">=</span> <span class="n">_create_feature_dict</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
-</span><span id="get_atac_groupings-297"><a href="#get_atac_groupings-297"><span class="linenos">297</span></a>
-</span><span id="get_atac_groupings-298"><a href="#get_atac_groupings-298"><span class="linenos">298</span></a>    <span class="c1"># Creating data structures from gene_anno for comparing regions</span>
-</span><span id="get_atac_groupings-299"><a href="#get_atac_groupings-299"><span class="linenos">299</span></a>    <span class="n">peak_gene_dict</span><span class="p">,</span> <span class="n">ga_regions</span> <span class="o">=</span> <span class="n">_create_region_dicts</span><span class="p">(</span><span class="n">gene_anno</span><span class="p">)</span>
-</span><span id="get_atac_groupings-300"><a href="#get_atac_groupings-300"><span class="linenos">300</span></a>
-</span><span id="get_atac_groupings-301"><a href="#get_atac_groupings-301"><span class="linenos">301</span></a>    <span class="c1"># Capturing the separator type used in assay</span>
-</span><span id="get_atac_groupings-302"><a href="#get_atac_groupings-302"><span class="linenos">302</span></a>    <span class="n">chr_sep</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span> <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">feature_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;-&#39;</span>
-</span><span id="get_atac_groupings-303"><a href="#get_atac_groupings-303"><span class="linenos">303</span></a>
-</span><span id="get_atac_groupings-304"><a href="#get_atac_groupings-304"><span class="linenos">304</span></a>    <span class="n">atac_groupings</span> <span class="o">=</span> <span class="n">_compare_regions</span><span class="p">(</span><span class="n">feature_dict</span> <span class="o">=</span> <span class="n">feature_dict</span><span class="p">,</span>
-</span><span id="get_atac_groupings-305"><a href="#get_atac_groupings-305"><span class="linenos">305</span></a>                                     <span class="n">ga_regions</span> <span class="o">=</span> <span class="n">ga_regions</span><span class="p">,</span>
-</span><span id="get_atac_groupings-306"><a href="#get_atac_groupings-306"><span class="linenos">306</span></a>                                     <span class="n">peak_gene_dict</span> <span class="o">=</span> <span class="n">peak_gene_dict</span><span class="p">,</span>
-</span><span id="get_atac_groupings-307"><a href="#get_atac_groupings-307"><span class="linenos">307</span></a>                                     <span class="n">gene_sets</span> <span class="o">=</span> <span class="n">gene_sets</span><span class="p">,</span>
-</span><span id="get_atac_groupings-308"><a href="#get_atac_groupings-308"><span class="linenos">308</span></a>                                     <span class="n">chr_sep</span> <span class="o">=</span> <span class="n">chr_sep</span><span class="p">)</span>
-</span><span id="get_atac_groupings-309"><a href="#get_atac_groupings-309"><span class="linenos">309</span></a>    
-</span><span id="get_atac_groupings-310"><a href="#get_atac_groupings-310"><span class="linenos">310</span></a>    <span class="k">return</span> <span class="n">atac_groupings</span>
+</span><span id="get_atac_groupings-295"><a href="#get_atac_groupings-295"><span class="linenos">295</span></a>    <span class="c1"># Adjusting start and end columns to represent promotor regions</span>
+</span><span id="get_atac_groupings-296"><a href="#get_atac_groupings-296"><span class="linenos">296</span></a>    <span class="n">gene_anno</span> <span class="o">=</span> <span class="n">_adjust_regions</span><span class="p">(</span><span class="n">gene_anno</span> <span class="o">=</span> <span class="n">gene_anno</span><span class="p">,</span> 
+</span><span id="get_atac_groupings-297"><a href="#get_atac_groupings-297"><span class="linenos">297</span></a>                                <span class="n">len_up</span> <span class="o">=</span> <span class="n">len_up</span><span class="p">,</span> <span class="n">len_down</span> <span class="o">=</span> <span class="n">len_down</span><span class="p">)</span>
+</span><span id="get_atac_groupings-298"><a href="#get_atac_groupings-298"><span class="linenos">298</span></a>
+</span><span id="get_atac_groupings-299"><a href="#get_atac_groupings-299"><span class="linenos">299</span></a>    <span class="c1"># Creating a dictionary from assay features where [chr] : (start, end)</span>
+</span><span id="get_atac_groupings-300"><a href="#get_atac_groupings-300"><span class="linenos">300</span></a>    <span class="n">feature_dict</span> <span class="o">=</span> <span class="n">_create_feature_dict</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
+</span><span id="get_atac_groupings-301"><a href="#get_atac_groupings-301"><span class="linenos">301</span></a>
+</span><span id="get_atac_groupings-302"><a href="#get_atac_groupings-302"><span class="linenos">302</span></a>    <span class="c1"># Creating data structures from gene_anno for comparing regions</span>
+</span><span id="get_atac_groupings-303"><a href="#get_atac_groupings-303"><span class="linenos">303</span></a>    <span class="n">peak_gene_dict</span><span class="p">,</span> <span class="n">ga_regions</span> <span class="o">=</span> <span class="n">_create_region_dicts</span><span class="p">(</span><span class="n">gene_anno</span><span class="p">)</span>
+</span><span id="get_atac_groupings-304"><a href="#get_atac_groupings-304"><span class="linenos">304</span></a>
+</span><span id="get_atac_groupings-305"><a href="#get_atac_groupings-305"><span class="linenos">305</span></a>    <span class="c1"># Capturing the separator type used in assay</span>
+</span><span id="get_atac_groupings-306"><a href="#get_atac_groupings-306"><span class="linenos">306</span></a>    <span class="n">chr_sep</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span> <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">feature_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;-&#39;</span>
+</span><span id="get_atac_groupings-307"><a href="#get_atac_groupings-307"><span class="linenos">307</span></a>
+</span><span id="get_atac_groupings-308"><a href="#get_atac_groupings-308"><span class="linenos">308</span></a>    <span class="n">atac_groupings</span> <span class="o">=</span> <span class="n">_compare_regions</span><span class="p">(</span><span class="n">feature_dict</span> <span class="o">=</span> <span class="n">feature_dict</span><span class="p">,</span>
+</span><span id="get_atac_groupings-309"><a href="#get_atac_groupings-309"><span class="linenos">309</span></a>                                     <span class="n">ga_regions</span> <span class="o">=</span> <span class="n">ga_regions</span><span class="p">,</span>
+</span><span id="get_atac_groupings-310"><a href="#get_atac_groupings-310"><span class="linenos">310</span></a>                                     <span class="n">peak_gene_dict</span> <span class="o">=</span> <span class="n">peak_gene_dict</span><span class="p">,</span>
+</span><span id="get_atac_groupings-311"><a href="#get_atac_groupings-311"><span class="linenos">311</span></a>                                     <span class="n">gene_sets</span> <span class="o">=</span> <span class="n">gene_sets</span><span class="p">,</span>
+</span><span id="get_atac_groupings-312"><a href="#get_atac_groupings-312"><span class="linenos">312</span></a>                                     <span class="n">chr_sep</span> <span class="o">=</span> <span class="n">chr_sep</span><span class="p">)</span>
+</span><span id="get_atac_groupings-313"><a href="#get_atac_groupings-313"><span class="linenos">313</span></a>    
+</span><span id="get_atac_groupings-314"><a href="#get_atac_groupings-314"><span class="linenos">314</span></a>    <span class="k">return</span> <span class="n">atac_groupings</span>
 </span></pre></div>
 
 
-            <div class="docstring"><p>Creates a peak set from a gene set.</p>
+            <div class="docstring"><p>Creates a peak set where keys are gene set names from <code>gene_sets</code> and 
+values are arrays of features pulled from <code>feature_names</code>. Features
+are added to each peak set given overlap between regions in 
+single-cell data matrix and inferred gene promoter regions in 
+<code>gene_anno</code>.</p>
 
 <h2 id="parameters">Parameters</h2>
 
 <p><strong>gene_anno</strong> : <em>pd.DataFrame</em></p>
 
 <blockquote>
-  <p>Gene annotations in GTF format as a pd.DataFrame 
-      with columns ['chr', 'start', 'end', 'strand', 'gene_name']</p>
+  <p>Gene annotations in GTF format as a pd.DataFrame with columns
+      ['chr', 'start', 'end', 'strand', 'gene_name'].</p>
 </blockquote>
 
 <p><strong>gene_sets</strong> : <em>dict</em></p>

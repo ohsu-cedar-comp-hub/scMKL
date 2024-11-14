@@ -221,13 +221,17 @@ def get_atac_groupings(gene_anno : pd.DataFrame, gene_sets : dict,
                        feature_names : np.ndarray | pd.Series | list | set,
                        len_up : int = 5000, len_down : int = 5000) -> dict:
     '''
-    Creates a peak set from a gene set.
+    Creates a peak set where keys are gene set names from `gene_sets` and 
+    values are arrays of features pulled from `feature_names`. Features
+    are added to each peak set given overlap between regions in 
+    single-cell data matrix and inferred gene promoter regions in 
+    `gene_anno`.
 
     Parameters
     ----------
     **gene_anno** : *pd.DataFrame*
-        > Gene annotations in GTF format as a pd.DataFrame 
-        with columns ['chr', 'start', 'end', 'strand', 'gene_name']
+        > Gene annotations in GTF format as a pd.DataFrame with columns
+        ['chr', 'start', 'end', 'strand', 'gene_name'].
 
     **gene_sets** : *dict*
         > Gene set names as keys and an iterable object of gene names
