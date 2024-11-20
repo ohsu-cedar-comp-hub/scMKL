@@ -2,11 +2,28 @@
 <img src="https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/scMKL_logo.png?raw=true" width="500"/>
 </h1><br>
 
+
+![PyPI](https://img.shields.io/pypi/v/scmkl?label=pypi%20package)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/scmkl)
+[![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/version.svg)](https://anaconda.org/ivango17/scmkl)
+[![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/downloads.svg)](https://anaconda.org/ivango17/scmkl)
+[![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/latest_release_date.svg)](https://anaconda.org/ivango17/scmkl)
+
+
 Single-cell analysis using Multiple Kernel Learning, scMKL, is a binary classification algorithm utilizing prior information to group features to enhance classification and aid understanding of distinguishing features in multi-omic data sets.
 
 
-## Installation with pip
-First, create a virtual environment with a version of python >= 3.11.1 and <3.13.
+## Installation
+
+### Conda install
+Conda is the recommended method to install scMKL:
+
+```
+conda create -n scMKL python=3.12 ivango17::scmkl
+```
+
+### Pip install
+First, create a virtual environment with `python>=3.11.1,<3.13`.
 
 Then, install scMKL with:
 ```
@@ -14,9 +31,9 @@ Then, install scMKL with:
 pip install scmkl
 ```
 
-If wheels do not build correctly, ensure ```gcc``` and ```g++``` are installed. They can be installed with ```sudo apt install gcc``` and ```sudo apt-get install g++```.
+If wheels do not build correctly, ensure ```gcc``` and ```g++``` are installed. They can be installed with ```sudo apt install gcc``` and ```sudo apt install g++```.
 
-## Usage
+## Requirements
 scMKL takes advantage of AnnData objects and can be implemented with just four pieces of data:
 
 1) scRNA and/or scATAC matrices (can be `scipy.sparse` matrix)
@@ -33,11 +50,13 @@ For implementing scMKL, see our examples for your use case in [examples](https:/
 
 
 ## Links
-Repo: [GitHub Repository](https://github.com/ohsu-cedar-comp-hub/scMKL)
+Repo: [https://github.com/ohsu-cedar-comp-hub/scMKL](https://github.com/ohsu-cedar-comp-hub/scMKL)
 
-PyPI: [Python Package Repository](https://pypi.org/project/scmkl/)
+PyPI: [https://pypi.org/project/scmkl/](https://pypi.org/project/scmkl/)
 
-API: [scMKL Documentation](https://ohsu-cedar-comp-hub.github.io/scMKL/)
+Anaconda: [https://anaconda.org/ivango17/scmkl](https://anaconda.org/ivango17/scmkl)
+
+API: [https://ohsu-cedar-comp-hub.github.io/scMKL/](https://ohsu-cedar-comp-hub.github.io/scMKL/)
 
 
 ## Citation
