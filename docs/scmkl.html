@@ -17,15 +17,15 @@
         <label id="navtoggle" for="togglestate" class="pdoc-button"><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'><path stroke-linecap='round' stroke="currentColor" stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg></label>
         <input id="togglestate" type="checkbox" aria-hidden="true" tabindex="-1">
         <div>
-            <img src="scMKL/scMKL_logo.png" class="logo" alt="project logo"/>
+            <img src="https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/scMKL_logo.png?raw=true" class="logo" alt="project logo"/>
 
             <input type="search" placeholder="Search..." role="searchbox" aria-label="search"
                    pattern=".+" required>
 
             <h2>Contents</h2>
             <ul>
-  <li><a href="#installation-with-pip">Installation with pip</a></li>
-  <li><a href="#usage">Usage</a></li>
+  <li><a href="#installation">Installation</a></li>
+  <li><a href="#requirements">Requirements</a></li>
   <li><a href="#links">Links</a></li>
   <li><a href="#citation">Citation</a></li>
   <li><a href="#scmkl-documentation"><strong>scMKL Documentation</strong></a></li>
@@ -103,11 +103,26 @@ scmkl    </h1>
 <img src="https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/scMKL_logo.png?raw=true" width="500"/>
 </h1><br>
 
+<p><img src="https://img.shields.io/pypi/v/scmkl?label=pypi%20package" alt="PyPI" />
+<img src="https://img.shields.io/pypi/dm/scmkl" alt="PyPI - Downloads" />
+<a href="https://anaconda.org/ivango17/scmkl"><img src="https://anaconda.org/ivango17/scmkl/badges/version.svg" alt="Anaconda-Server Badge" /></a>
+<a href="https://anaconda.org/ivango17/scmkl"><img src="https://anaconda.org/ivango17/scmkl/badges/downloads.svg" alt="Anaconda-Server Badge" /></a>
+<a href="https://anaconda.org/ivango17/scmkl"><img src="https://anaconda.org/ivango17/scmkl/badges/latest_release_date.svg" alt="Anaconda-Server Badge" /></a></p>
+
 <p>Single-cell analysis using Multiple Kernel Learning, scMKL, is a binary classification algorithm utilizing prior information to group features to enhance classification and aid understanding of distinguishing features in multi-omic data sets.</p>
 
-<h2 id="installation-with-pip">Installation with pip</h2>
+<h2 id="installation">Installation</h2>
 
-<p>First, create a virtual environment with a version of python &gt;= 3.11.1 and &lt;3.13.</p>
+<h3 id="conda-install">Conda install</h3>
+
+<p>Conda is the recommended method to install scMKL:</p>
+
+<pre><code>conda create -n scMKL python=3.12 ivango17::scmkl
+</code></pre>
+
+<h3 id="pip-install">Pip install</h3>
+
+<p>First, create a virtual environment with <code>python&gt;=3.11.1,&lt;3.13</code>.</p>
 
 <p>Then, install scMKL with:</p>
 
@@ -115,9 +130,9 @@ scmkl    </h1>
 pip install scmkl
 </code></pre>
 
-<p>If wheels do not build correctly, ensure <code>gcc</code> and <code>g++</code> are installed. They can be installed with <code>sudo apt install gcc</code> and <code>sudo apt-get install g++</code>.</p>
+<p>If wheels do not build correctly, ensure <code>gcc</code> and <code>g++</code> are installed. They can be installed with <code>sudo apt install gcc</code> and <code>sudo apt install g++</code>.</p>
 
-<h2 id="usage">Usage</h2>
+<h2 id="requirements">Requirements</h2>
 
 <p>scMKL takes advantage of AnnData objects and can be implemented with just four pieces of data:</p>
 
@@ -135,11 +150,13 @@ pip install scmkl
 
 <h2 id="links">Links</h2>
 
-<p>Repo: <a href="https://github.com/ohsu-cedar-comp-hub/scMKL">GitHub Repository</a></p>
+<p>Repo: <a href="https://github.com/ohsu-cedar-comp-hub/scMKL">https://github.com/ohsu-cedar-comp-hub/scMKL</a></p>
 
-<p>PyPI: <a href="https://pypi.org/project/scmkl/">Python Package Repository</a></p>
+<p>PyPI: <a href="https://pypi.org/project/scmkl/">https://pypi.org/project/scmkl/</a></p>
 
-<p>API: <a href="https://ohsu-cedar-comp-hub.github.io/scMKL/">scMKL Documentation</a></p>
+<p>Anaconda: <a href="https://anaconda.org/ivango17/scmkl">https://anaconda.org/ivango17/scmkl</a></p>
+
+<p>API: <a href="https://ohsu-cedar-comp-hub.github.io/scMKL/">https://ohsu-cedar-comp-hub.github.io/scMKL/</a></p>
 
 <h2 id="citation">Citation</h2>
 
