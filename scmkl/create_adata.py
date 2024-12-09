@@ -38,7 +38,80 @@ def _filter_features(X, feature_names, group_dict):
     return X, feature_names, group_dict
 
 
-def _train_test_split(y, train_indices = None, seed_obj = np.random.default_rng(100), train_ratio = 0.8):
+def _multi_class_train_test_split(y, seed_obj = np.random.default_rng(100), train_ratio = 0.8, 
+                                  class_threshold = 'median'):
+    '''
+    Function for calculating the training and testing cell positions 
+    for multiclass data sets.
+
+    Parameters
+    ----------
+    **y** : *np.ndarray* | *pd.Series* | *list*
+        > Should be an iterable object cooresponding to samples in 
+        `ad.AnnData` object.
+
+    **seed_obj** : *numpy.random._generator.Generator*
+        > Seed used to randomly sample and split data.
+
+    **train_ratio** : *float*
+        > Ratio of number of training samples to entire data set. Note:
+        if a threshold is applied, the ratio training samples may 
+        decrease depending on class balance and `class_threshold`
+        parameter.
+
+    **class_threshold** : *str* | *int*
+        > If is type `int`, classes with more samples than 
+        class_threshold will be sampled. If `'median'`, 
+        samples will be sampled to the median number of samples per 
+        class.
+
+    Returns
+    -------
+    **train_indices** : *np.ndarray*
+        > Indices for training samples.
+
+    **test_indices** : *np.ndarray*
+        > Indices for testing samples.
+    '''
+    uniq_labels = np.unique(y)
+
+    # Finding indices for each cell class
+    class_positions = {class_ : np.where(y == class_)[0] 
+                       for class_ in uniq_labels}
+    
+    # Capturing training indices while maintaining original class proportions
+    train_samples = {class_ : seed_obj.choice(class_positions[class_], 
+                                              int(len(class_positions[class_]) * train_ratio), 
+                                              replace = False)
+                        for class_ in class_positions.keys()}
+    
+    # Capturing testing indices while maintaining original class proportions
+    test_samples = {class_ : np.setdiff1d(class_positions[class_], 
+                                          train_samples[class_])
+                    for class_ in class_positions.keys()}
+    
+    # Applying threshold for samples per class
+    if class_threshold == 'median':
+        all_train = [idx for class_ in train_samples.keys()
+                         for idx in train_samples[class_]]
+        _, class_threshold = np.unique(y[all_train], return_counts = True)
+        class_threshold = int(np.median(class_threshold))
+    
+    for class_ in train_samples.keys():
+        if len(train_samples[class_]) > class_threshold:
+            train_samples[class_] = seed_obj.choice(train_samples[class_], 
+                                                       class_threshold)
+            
+    train_indices = np.array([idx for class_ in train_samples.keys()
+                                  for idx in train_samples[class_]])
+    
+    test_indices = np.array([idx for class_ in test_samples.keys()
+                                 for idx in test_samples[class_]])
+    
+    return train_indices, test_indices
+
+
+def _binary_train_test_split(y, train_indices = None, seed_obj = np.random.default_rng(100), train_ratio = 0.8):
     '''
     Function to calculate training and testing indices for given dataset. If train indices are given, it will calculate the test indices.
         If train_indices == None, then it calculates both indices, preserving the ratio of each label in y
@@ -77,8 +150,12 @@ def _train_test_split(y, train_indices = None, seed_obj = np.random.default_rng(
     return train_indices, test_indices
 
 
-def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_dict: dict, scale_data: bool = True, split_data = None, D = 100, 
-                 remove_features = True, distance_metric = 'euclidean', kernel_type = 'Gaussian', random_state = 1):
+def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, 
+                 group_dict: dict, scale_data: bool = True, split_data = None,
+                 D = 100, remove_features = True, 
+                 distance_metric = 'euclidean', kernel_type = 'Gaussian', 
+                 random_state = 1, allow_multiclass = False, 
+                 class_threshold = 'median'):
     
     '''
     Function to create an AnnData object to carry all relevant 
@@ -135,6 +212,15 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
         > Integer random_state used to set the seed for 
         reproducibilty.
 
+    **allow_multiclass** : *bool*
+        > If `False`, will ensure that cell labels are binary.
+
+    **class_threshold** : *str* | *int*
+        > Number of samples allowed in the training data for each cell
+        class in the training data. If `'median'`, the median number of
+        cells per cell class will be the threshold for number of 
+        samples per class.
+
     Returns
     -------
     **adata** : *AnnData*
@@ -184,7 +270,8 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
 
     assert X.shape[0] == len(cell_labels), 'Different number of cells than labels'
     assert X.shape[1] == len(feature_names), 'Different number of features in X than feature names'
-    assert len(np.unique(cell_labels)) == 2, 'cell_labels must contain 2 classes'
+    if not allow_multiclass:
+        assert len(np.unique(cell_labels)) == 2, 'cell_labels must contain 2 classes'
     assert isinstance(D, int) and D > 0, 'D must be a positive integer'
     assert kernel_type.lower() in ['gaussian', 'laplacian', 'cauchy'], 'Given kernel type not implemented. Gaussian, Laplacian, and Cauchy are the acceptable types.'
 
@@ -204,8 +291,15 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
     adata.uns['kernel_type'] = kernel_type
     adata.uns['distance_metric'] = distance_metric
 
-    if split_data == None:
-        train_indices, test_indices = _train_test_split(cell_labels, seed_obj = adata.uns['seed_obj'])
+    if (split_data is None) and (allow_multiclass == False):
+        train_indices, test_indices = _binary_train_test_split(cell_labels, 
+                                                               seed_obj = adata.uns['seed_obj'])
+
+    elif (split_data is None) and (allow_multiclass == True):
+        train_indices, test_indices = _multi_class_train_test_split(cell_labels, 
+                                                                    seed_obj = adata.uns['seed_obj'], 
+                                                                    class_threshold = class_threshold)
+
     else:
         train_indices = np.where(split_data == 'train')[0]
         test_indices = np.where(split_data == 'test')[0]
@@ -215,7 +309,6 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, group_di
 
     if not scale_data:
         print('WARNING: Data will not be log transformed and scaled')
-        print('         Columns with zero summed columns will not be removed')
         print('         To change this behavior, set scale_data to True')
 
     return adata

@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import gc
 
 from scmkl.run import run
@@ -13,20 +14,28 @@ def _eval_labels(cell_labels : np.ndarray, train_indices : np.ndarray,
     '''
     Takes an array of multiclass cell labels and returns a unique array 
     of cell labels to test for.
-    Args:
-        cell_labels - a numpy array of cell labels that coorespond to 
-            an AnnData object.
-        train_indices - a numpy array of indices for the training 
-            samples in an AnnData object.
-        test_indices - a numpy array of indices for the testing samples 
-            in an AnnData object.
-        remove_labels - If True, models will only be created for cell 
-            labels in both the training and test data, if False, 
-            models will be generated for all cell labels in the 
-            training data.
-    Returns:
-        Returns a numpy array of unique cell labels to be iterated 
-        through during one versus all experimental setups.
+
+    Parameters
+    ----------
+    cell_labels : np.ndarray
+        > Cell labels that coorespond to an AnnData object.
+
+    train_indices : np.ndarray
+        > Indices for the training samples in an AnnData object.
+    
+    test_indices - np.ndarray
+        > Indices for the testing samples in an AnnData object.
+
+    remove_labels : bool
+        > If True, models will only be created for cell labels in both
+        the training and test data, if False, models will be generated
+        for all cell labels in the training data.
+
+    Returns
+    -------
+    uniq_labels : np.ndarray
+        > Returns a numpy array of unique cell labels to be iterated 
+        through during one versus all setups.
     '''
     train_uniq_labels = np.unique(cell_labels[train_indices])
     test_uniq_labels = np.unique(cell_labels[test_indices])
@@ -43,8 +52,60 @@ def _eval_labels(cell_labels : np.ndarray, train_indices : np.ndarray,
     return uniq_labels
 
 
+def _prob_table(results : dict, alpha):
+    '''
+    Takes a results dictionary with class and probabilities keys and 
+    returns a table of probabilities for each class and the most 
+    probable class for each cell.
+
+    Parameters
+    ----------
+    results : dict
+        > A nested dictionary that contains a dictionary for each class 
+        containing probabilities for each cell class.
+
+    alpha : float
+        > A float for which model probabilities should be evaluated 
+        for.
+
+    Returns
+    -------
+    prob_table : pd.DataFrame
+        > Each column is a cell class and the elements are the
+        class probability outputs from the model.
+
+    pred_class : list
+        > The most probable cell classes respective to the training set 
+        cells. 
+    '''
+    prob_table = {class_ : results[class_]['Probabilities'][alpha][class_]
+                  for class_ in results.keys()}
+    prob_table = pd.DataFrame(prob_table)
+
+    pred_class = []
+    maxes = []
+
+    for i, row in prob_table.iterrows():
+        row_max = np.max(row)
+        indices = np.where(row == row_max)
+        prediction = prob_table.columns[indices]
+
+        if len(prediction) > 1:
+            prediction = " and ".join(prediction)
+        else:
+            prediction = prediction[0]
+
+        pred_class.append(prediction)
+        maxes.append(row_max)
+
+    maxes = np.round(maxes, 0)
+    low_conf = np.invert(np.array(maxes, dtype = np.bool_))
+
+    return prob_table, pred_class, low_conf
+
+
 def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray, 
-              tfidf : list, D : int) -> dict:
+              tfidf : list) -> dict:
     '''
     For each cell class, creates model(s) comparing that class to all 
     others. Then, predicts on the training data using `scmkl.run()`.
@@ -62,7 +123,7 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
         > List of string variables that describe each modality
         respective to adatas for labeling.
         
-    **alpha_list** : *np.ndarray*
+    **alpha_list** : *np.ndarray* | *float*
         > An array of alpha values to create each model with.
 
     **tfidf** : *list[bool]* 
@@ -131,7 +192,15 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
         adata.obs['labels'] = cur_labels
 
         # Running scMKL
-        results[label] = run(adata, alpha_list)
+        results[label] = run(adata, alpha_list, return_probs = True)
 
+    # Getting final predictions
+    alpha = np.min(alpha_list)
+    prob_table, pred_class, low_conf = _prob_table(results, alpha)
+
+    results['Probability_table'] = prob_table
+    results['Predicted_class'] = pred_class
+    results['Truth_labels'] = cell_labels[adata.uns['test_indices']]
+    results['Low_confidence'] = low_conf
 
     return results
