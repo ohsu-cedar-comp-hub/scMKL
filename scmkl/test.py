@@ -2,7 +2,7 @@ import numpy as np
 import sklearn
 
 
-def predict(adata, metrics = None):
+def predict(adata, metrics = None, return_probs = False):
     '''
     Function to return predicted labels and calculate any of AUROC, 
     Accuracy, F1 Score, Precision, Recall for a classification. 
@@ -13,17 +13,27 @@ def predict(adata, metrics = None):
         > Has keys `'model'`, `'Z_train'`, and `'Z_test'` in 
         `adata.uns`.
 
-    **metrics** : *list[str]*
+    **metrics** : *list[str]* | *None*
         > Which metrics to calculate on the predicted values. Options
         are `'AUROC'`, `'Accuracy'`, `'F1-Score'`, `'Precision'`, and 
         `'Recall'`.
 
+    **return_probs** : *bool*
+        > If `True`, will return a dictionary with class probabilities.
+
     Returns
     -------
+    **y_pred** : *np.ndarray*
+        > Predicted cell classes.
+
     **metrics_dict** : *dict*
         > Contains `'AUROC'`, `'Accuracy'`, `'F1-Score'`, 
         `'Precision'`, and/or `'Recall'` keys depending on metrics 
         argument.
+
+    **probs** : *dict*
+        > If `return_probs` is `True`, will return a dictionary with 
+        probabilities for each class in `y_test`.
 
     Examples
     --------
@@ -42,20 +52,23 @@ def predict(adata, metrics = None):
     assert X_test.shape[0] == len(y_test), 'X and y must have the same number of samples'
     assert all([metric in ['AUROC', 'Accuracy', 'F1-Score', 'Precision', 'Recall'] for metric in metrics]), 'Unknown metric provided.  Must be one or more of AUROC, Accuracy, F1-Score, Precision, Recall'
 
+    # Capturing class labels
+    classes = np.unique(y_test)
+
     # Sigmoid function to force probabilities into [0,1]
     probabilities = 1 / (1 + np.exp(-adata.uns['model'].predict(X_test)))
 
     # Group Lasso requires 'continous' y values need to re-descritize it
     y = np.zeros((len(y_test)))
-    y[y_test == np.unique(y_test)[0]] = 1
+    y[y_test == classes[0]] = 1
 
     metric_dict = {}
 
     #Convert numerical probabilities into binary phenotype
-    y_pred = np.array(np.repeat(np.unique(y_test)[1], len(y_test)), dtype = 'object')
-    y_pred[np.round(probabilities,0).astype(int) == 1] = np.unique(y_test)[0]
+    y_pred = np.array(np.repeat(classes[1], len(y_test)), dtype = 'object')
+    y_pred[np.round(probabilities,0).astype(int) == 1] = classes[0]
 
-    if metrics == None:
+    if (metrics == None) and (return_probs == False):
         return y_pred
     
     # Calculate and save metrics given in metrics
@@ -65,13 +78,18 @@ def predict(adata, metrics = None):
     if 'Accuracy' in metrics:
         metric_dict['Accuracy'] = np.mean(y_test == y_pred)
     if 'F1-Score' in metrics:
-        metric_dict['F1-Score'] = sklearn.metrics.f1_score(y_test, y_pred, pos_label = np.unique(y_test)[0])
+        metric_dict['F1-Score'] = sklearn.metrics.f1_score(y_test, y_pred, pos_label = classes[0])
     if 'Precision' in metrics:
-        metric_dict['Precision'] = sklearn.metrics.precision_score(y_test, y_pred, pos_label = np.unique(y_test)[0])
+        metric_dict['Precision'] = sklearn.metrics.precision_score(y_test, y_pred, pos_label = classes[0])
     if 'Recall' in metrics:
-        metric_dict['Recall'] = sklearn.metrics.recall_score(y_test, y_pred, pos_label = np.unique(y_test)[0])
+        metric_dict['Recall'] = sklearn.metrics.recall_score(y_test, y_pred, pos_label = classes[0])
 
-    return y_pred, metric_dict
+    if return_probs:
+        probs = {classes[0] : probabilities,
+                 classes[1] : 1 - probabilities}
+        return y_pred, metric_dict, probs
+    else:
+        return y_pred, metric_dict
 
 
 def find_selected_groups(adata) -> np.ndarray:

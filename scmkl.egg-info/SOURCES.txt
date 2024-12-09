@@ -5,12 +5,14 @@ scmkl/__init__.py
 scmkl/_checks.py
 scmkl/calculate_z.py
 scmkl/create_adata.py
+scmkl/dataframes.py
 scmkl/estimate_sigma.py
 scmkl/get_atac_groupings.py
 scmkl/multimodal_processing.py
 scmkl/one_v_rest.py
 scmkl/optimize_alpha.py
 scmkl/optimize_sparsity.py
+scmkl/plotting.py
 scmkl/run.py
 scmkl/test.py
 scmkl/tfidf_normalize.py

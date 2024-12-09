@@ -8,7 +8,7 @@ from scmkl.test import predict, find_selected_groups
 
 
 def run(adata : ad.AnnData, alpha_list : np.ndarray, 
-        metrics : list | None = None) -> dict:
+        metrics : list | None = None, return_probs = False) -> dict:
     '''
     Wrapper function for training and test with multiple alpha values.
     Returns metrics, predictions, group weights, and resource usage.
@@ -90,6 +90,7 @@ def run(adata : ad.AnnData, alpha_list : np.ndarray,
     selected_groups = {}
     train_time = {}
     models = {}
+    probabilities = {}
 
     D = adata.uns['D']
 
@@ -101,8 +102,14 @@ def run(adata : ad.AnnData, alpha_list : np.ndarray,
         train_start = time.time()
 
         adata = train_model(adata, group_size= 2*D, alpha = alpha)
-        predicted[alpha], metric_dict[alpha] = predict(adata, 
-                                                            metrics = metrics)
+        if return_probs:
+            predicted[alpha], metric_dict[alpha], probabilities[alpha] = predict(adata, 
+                                                        metrics = metrics,
+                                                        return_probs = return_probs)
+        else:
+            predicted[alpha], metric_dict[alpha] = probabilities[alpha] = predict(adata, 
+                                                        metrics = metrics,
+                                                        return_probs = return_probs)
         selected_groups[alpha] = find_selected_groups(adata)
 
         kernel_weights = adata.uns['model'].coef_
@@ -128,5 +135,6 @@ def run(adata : ad.AnnData, alpha_list : np.ndarray,
     results['Models'] = models
     results['Train_time'] = train_time
     results['RAM_usage'] = f'{tracemalloc.get_traced_memory()[1] / 1e9} GB'
+    results['Probabilities'] = probabilities
 
     return results

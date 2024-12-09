@@ -9,12 +9,14 @@
 
 __all__ = ['calculate_z', 
            'create_adata', 
+           'dataframes'
            'estimate_sigma', 
            'get_atac_groupings',
            'multimodal_processing', 
            'one_v_rest', 
            'optimize_alpha', 
            'optimize_sparsity',
+           'plotting',
            'run',
            'test', 
            'tfidf_normalize',
@@ -24,12 +26,14 @@ __all__ = ['calculate_z',
 from scmkl._checks import *
 from scmkl.calculate_z import *
 from scmkl.create_adata import *
+from scmkl.dataframes import *
 from scmkl.estimate_sigma import *
 from scmkl.get_atac_groupings import *
 from scmkl.multimodal_processing import *
 from scmkl.one_v_rest import *
 from scmkl.optimize_alpha import *
 from scmkl.optimize_sparsity import *
+from scmkl.plotting import *
 from scmkl.run import *
 from scmkl.test import *
 from scmkl.tfidf_normalize import *
