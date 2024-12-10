@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="pdoc 15.0.0"/>
-    <title>scmkl.estimate_sigma API documentation</title>
+    <title>scmkl.dataframes API documentation</title>
 
     <style>/*! * Bootstrap Reboot v5.0.0 (https://getbootstrap.com/) * Copyright 2011-2021 The Bootstrap Authors * Copyright 2011-2021 Twitter, Inc. * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE) * Forked from Normalize.css, licensed MIT (https://github.com/necolas/normalize.css/blob/master/LICENSE.md) */*,::after,::before{box-sizing:border-box}@media (prefers-reduced-motion:no-preference){:root{scroll-behavior:smooth}}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-size:1rem;font-weight:400;line-height:1.5;color:#212529;background-color:#fff;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}hr{margin:1rem 0;color:inherit;background-color:currentColor;border:0;opacity:.25}hr:not([size]){height:1px}h1,h2,h3,h4,h5,h6{margin-top:0;margin-bottom:.5rem;font-weight:500;line-height:1.2}h1{font-size:calc(1.375rem + 1.5vw)}@media (min-width:1200px){h1{font-size:2.5rem}}h2{font-size:calc(1.325rem + .9vw)}@media (min-width:1200px){h2{font-size:2rem}}h3{font-size:calc(1.3rem + .6vw)}@media (min-width:1200px){h3{font-size:1.75rem}}h4{font-size:calc(1.275rem + .3vw)}@media (min-width:1200px){h4{font-size:1.5rem}}h5{font-size:1.25rem}h6{font-size:1rem}p{margin-top:0;margin-bottom:1rem}abbr[data-bs-original-title],abbr[title]{-webkit-text-decoration:underline dotted;text-decoration:underline dotted;cursor:help;-webkit-text-decoration-skip-ink:none;text-decoration-skip-ink:none}address{margin-bottom:1rem;font-style:normal;line-height:inherit}ol,ul{padding-left:2rem}dl,ol,ul{margin-top:0;margin-bottom:1rem}ol ol,ol ul,ul ol,ul ul{margin-bottom:0}dt{font-weight:700}dd{margin-bottom:.5rem;margin-left:0}blockquote{margin:0 0 1rem}b,strong{font-weight:bolder}small{font-size:.875em}mark{padding:.2em;background-color:#fcf8e3}sub,sup{position:relative;font-size:.75em;line-height:0;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}a{color:#0d6efd;text-decoration:underline}a:hover{color:#0a58ca}a:not([href]):not([class]),a:not([href]):not([class]):hover{color:inherit;text-decoration:none}code,kbd,pre,samp{font-family:SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:1em;direction:ltr;unicode-bidi:bidi-override}pre{display:block;margin-top:0;margin-bottom:1rem;overflow:auto;font-size:.875em}pre code{font-size:inherit;color:inherit;word-break:normal}code{font-size:.875em;color:#d63384;word-wrap:break-word}a>code{color:inherit}kbd{padding:.2rem .4rem;font-size:.875em;color:#fff;background-color:#212529;border-radius:.2rem}kbd kbd{padding:0;font-size:1em;font-weight:700}figure{margin:0 0 1rem}img,svg{vertical-align:middle}table{caption-side:bottom;border-collapse:collapse}caption{padding-top:.5rem;padding-bottom:.5rem;color:#6c757d;text-align:left}th{text-align:inherit;text-align:-webkit-match-parent}tbody,td,tfoot,th,thead,tr{border-color:inherit;border-style:solid;border-width:0}label{display:inline-block}button{border-radius:0}button:focus:not(:focus-visible){outline:0}button,input,optgroup,select,textarea{margin:0;font-family:inherit;font-size:inherit;line-height:inherit}button,select{text-transform:none}[role=button]{cursor:pointer}select{word-wrap:normal}select:disabled{opacity:1}[list]::-webkit-calendar-picker-indicator{display:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]:not(:disabled),[type=reset]:not(:disabled),[type=submit]:not(:disabled),button:not(:disabled){cursor:pointer}::-moz-focus-inner{padding:0;border-style:none}textarea{resize:vertical}fieldset{min-width:0;padding:0;margin:0;border:0}legend{float:left;width:100%;padding:0;margin-bottom:.5rem;font-size:calc(1.275rem + .3vw);line-height:inherit}@media (min-width:1200px){legend{font-size:1.5rem}}legend+*{clear:left}::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-fields-wrapper,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-text,::-webkit-datetime-edit-year-field{padding:0}::-webkit-inner-spin-button{height:auto}[type=search]{outline-offset:-2px;-webkit-appearance:textfield}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-color-swatch-wrapper{padding:0}::file-selector-button{font:inherit}::-webkit-file-upload-button{font:inherit;-webkit-appearance:button}output{display:inline-block}iframe{border:0}summary{display:list-item;cursor:pointer}progress{vertical-align:baseline}[hidden]{display:none!important}</style>
     <style>/*! syntax-highlighting.css */pre{line-height:125%;}span.linenos{color:inherit; background-color:transparent; padding-left:5px; padding-right:20px;}.pdoc-code .hll{background-color:#ffffcc}.pdoc-code{background:#f8f8f8;}.pdoc-code .c{color:#3D7B7B; font-style:italic}.pdoc-code .err{border:1px solid #FF0000}.pdoc-code .k{color:#008000; font-weight:bold}.pdoc-code .o{color:#666666}.pdoc-code .ch{color:#3D7B7B; font-style:italic}.pdoc-code .cm{color:#3D7B7B; font-style:italic}.pdoc-code .cp{color:#9C6500}.pdoc-code .cpf{color:#3D7B7B; font-style:italic}.pdoc-code .c1{color:#3D7B7B; font-style:italic}.pdoc-code .cs{color:#3D7B7B; font-style:italic}.pdoc-code .gd{color:#A00000}.pdoc-code .ge{font-style:italic}.pdoc-code .gr{color:#E40000}.pdoc-code .gh{color:#000080; font-weight:bold}.pdoc-code .gi{color:#008400}.pdoc-code .go{color:#717171}.pdoc-code .gp{color:#000080; font-weight:bold}.pdoc-code .gs{font-weight:bold}.pdoc-code .gu{color:#800080; font-weight:bold}.pdoc-code .gt{color:#0044DD}.pdoc-code .kc{color:#008000; font-weight:bold}.pdoc-code .kd{color:#008000; font-weight:bold}.pdoc-code .kn{color:#008000; font-weight:bold}.pdoc-code .kp{color:#008000}.pdoc-code .kr{color:#008000; font-weight:bold}.pdoc-code .kt{color:#B00040}.pdoc-code .m{color:#666666}.pdoc-code .s{color:#BA2121}.pdoc-code .na{color:#687822}.pdoc-code .nb{color:#008000}.pdoc-code .nc{color:#0000FF; font-weight:bold}.pdoc-code .no{color:#880000}.pdoc-code .nd{color:#AA22FF}.pdoc-code .ni{color:#717171; font-weight:bold}.pdoc-code .ne{color:#CB3F38; font-weight:bold}.pdoc-code .nf{color:#0000FF}.pdoc-code .nl{color:#767600}.pdoc-code .nn{color:#0000FF; font-weight:bold}.pdoc-code .nt{color:#008000; font-weight:bold}.pdoc-code .nv{color:#19177C}.pdoc-code .ow{color:#AA22FF; font-weight:bold}.pdoc-code .w{color:#bbbbbb}.pdoc-code .mb{color:#666666}.pdoc-code .mf{color:#666666}.pdoc-code .mh{color:#666666}.pdoc-code .mi{color:#666666}.pdoc-code .mo{color:#666666}.pdoc-code .sa{color:#BA2121}.pdoc-code .sb{color:#BA2121}.pdoc-code .sc{color:#BA2121}.pdoc-code .dl{color:#BA2121}.pdoc-code .sd{color:#BA2121; font-style:italic}.pdoc-code .s2{color:#BA2121}.pdoc-code .se{color:#AA5D1F; font-weight:bold}.pdoc-code .sh{color:#BA2121}.pdoc-code .si{color:#A45A77; font-weight:bold}.pdoc-code .sx{color:#008000}.pdoc-code .sr{color:#A45A77}.pdoc-code .s1{color:#BA2121}.pdoc-code .ss{color:#19177C}.pdoc-code .bp{color:#008000}.pdoc-code .fm{color:#0000FF}.pdoc-code .vc{color:#19177C}.pdoc-code .vg{color:#19177C}.pdoc-code .vi{color:#19177C}.pdoc-code .vm{color:#19177C}.pdoc-code .il{color:#666666}</style>
@@ -32,7 +32,7 @@
             <h2>API Documentation</h2>
                 <ul class="memberlist">
             <li>
-                    <a class="function" href="#estimate_sigma">estimate_sigma</a>
+                    <a class="function" href="#get_summary">get_summary</a>
             </li>
     </ul>
 
@@ -48,188 +48,189 @@
     <main class="pdoc">
             <section class="module-info">
                     <h1 class="modulename">
-<a href="./../scmkl.html">scmkl</a><wbr>.estimate_sigma    </h1>
+<a href="./../scmkl.html">scmkl</a><wbr>.dataframes    </h1>
 
                 
-                        <input id="mod-estimate_sigma-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+                        <input id="mod-dataframes-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 
-                        <label class="view-source-button" for="mod-estimate_sigma-view-source"><span>View Source</span></label>
+                        <label class="view-source-button" for="mod-dataframes-view-source"><span>View Source</span></label>
 
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-</span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a><span class="kn">import</span> <span class="nn">scipy</span>
+</span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 </span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a>
-</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="kn">from</span> <span class="nn">scmkl.calculate_z</span> <span class="kn">import</span> <span class="n">_process_data</span>
-</span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a>
-</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a>
-</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="k">def</span> <span class="nf">estimate_sigma</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">):</span>
-</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="sd">    Calculate kernel widths to inform distribution for projection of </span>
-</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd">    Fourier Features. Calculates one sigma per group of features.</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a>
+</span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="k">def</span> <span class="nf">get_summary</span><span class="p">(</span><span class="n">results</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;AUROC&#39;</span><span class="p">):</span>
+</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="sd">    Takes the results from either `scmkl.run()` and generates a </span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="sd">    dataframe for each model containing columns for alpha, area under </span>
+</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="sd">    the ROC, number of groups with nonzero weights, and highest </span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd">    weighted group.</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>
 </span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="sd">    Parameters</span>
 </span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="sd">    ----------</span>
-</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="sd">    **adata** : *AnnData* </span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="sd">        &gt; Created by `create_adata`.</span>
-</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a><span class="sd">    </span>
-</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a><span class="sd">    **n_features** : *int*  </span>
-</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a><span class="sd">        &gt; Number of random features to include when estimating sigma. </span>
-</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a><span class="sd">        Will be scaled for the whole pathway set according to a </span>
-</span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a><span class="sd">        heuristic. Used for scalability.</span>
-</span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a><span class="sd">    </span>
-</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a><span class="sd">    Returns</span>
-</span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a><span class="sd">    -------</span>
-</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a><span class="sd">    **adata** : *AnnData*</span>
-</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a><span class="sd">        &gt; Key added `adata.uns[&#39;sigma&#39;]`.</span>
-</span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a>
-</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a><span class="sd">    Examples</span>
-</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a><span class="sd">    --------</span>
-</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a><span class="sd">    &gt;&gt;&gt; adata = scmkl.estimate_sigma(adata)</span>
-</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a><span class="sd">    &gt;&gt;&gt; adata.uns[&#39;sigma&#39;]</span>
-</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a><span class="sd">    array([10.4640895 , 10.82011454,  6.16769438,  9.86156855, ...])</span>
-</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a><span class="sd">    &#39;&#39;&#39;</span>
-</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a> 
-</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a>    <span class="n">sigma_list</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a>
-</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a>    <span class="c1"># Loop over every group in group_dict</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>    <span class="k">for</span> <span class="n">group_features</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;group_dict&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a>
-</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>        <span class="c1"># Select only features within that group and downsample for scalability</span>
-</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>        <span class="n">num_group_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">group_features</span><span class="p">)</span>
-</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>        <span class="n">group_features</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;seed_obj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">group_features</span><span class="p">)),</span> <span class="nb">min</span><span class="p">([</span><span class="n">n_features</span><span class="p">,</span> <span class="n">num_group_features</span><span class="p">]),</span> <span class="n">replace</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> 
-</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>
-</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a>        <span class="c1"># Use on the train data to estimate sigma</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a>        <span class="n">X_train</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">],</span> <span class="n">group_features</span><span class="p">]</span><span class="o">.</span><span class="n">X</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a>        <span class="n">X_train</span> <span class="o">=</span> <span class="n">_process_data</span><span class="p">(</span><span class="n">X_train</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">scale_data</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;scale_data&#39;</span><span class="p">],</span> <span class="n">return_dense</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a>        
-</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a>        <span class="c1"># Sample cells because distance calculation are costly and can be approximated</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a>        <span class="n">distance_indices</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;seed_obj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">((</span><span class="mi">2000</span><span class="p">,</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
-</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a>
-</span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a>        <span class="c1"># Calculate Distance Matrix with specified metric</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a>        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">spatial</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="n">distance_indices</span><span class="p">,:],</span> <span class="n">X_train</span><span class="p">[</span><span class="n">distance_indices</span><span class="p">,:],</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;distance_metric&#39;</span><span class="p">]))</span>
-</span><span id="L-52"><a href="#L-52"><span class="linenos">52</span></a>
-</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a>        <span class="c1"># sigma = 0 is numerically unusable in later steps</span>
-</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a>        <span class="c1"># Using such a small sigma will result in wide distribution, and typically a non-predictive Z</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a>        <span class="k">if</span> <span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a>            <span class="n">sigma</span> <span class="o">+=</span> <span class="mf">1e-5</span>
-</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a>
-</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a>        <span class="k">if</span> <span class="n">n_features</span> <span class="o">&lt;</span> <span class="n">num_group_features</span><span class="p">:</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a>            <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">num_group_features</span> <span class="o">/</span> <span class="n">n_features</span> <span class="c1"># Heuristic we calculated to account for fewer features used in distance calculation</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a>
-</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a>        <span class="n">sigma_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a>    
-</span><span id="L-63"><a href="#L-63"><span class="linenos">63</span></a>    <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigma_list</span><span class="p">)</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos">64</span></a>        
-</span><span id="L-65"><a href="#L-65"><span class="linenos">65</span></a>    <span class="k">return</span> <span class="n">adata</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="sd">    **results** : *dict*</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="sd">        &gt; A dictionary of results from scMKL generated from either </span>
+</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a><span class="sd">        `scmkl.run()`.</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>
+</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a><span class="sd">    **metric** : *str*</span>
+</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a><span class="sd">        &gt; Which metric to include in the summary. Default is AUROC. </span>
+</span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a><span class="sd">        Options include `&#39;AUROC&#39;`, `&#39;Recall&#39;`, `&#39;Precision&#39;`, </span>
+</span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a><span class="sd">        `&#39;Accuracy&#39;`, and `&#39;F1-Score&#39;`.</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a>
+</span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a><span class="sd">    Returns</span>
+</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a><span class="sd">    -------</span>
+</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a><span class="sd">    **summary_df** : *pd.DataFrame*</span>
+</span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a><span class="sd">        &gt; A table with columns:</span>
+</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a><span class="sd">        `[&#39;Alpha&#39;, &#39;AUROC&#39;, &#39;Number of Selected Groups&#39;, &#39;Top Group&#39;]`.</span>
+</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a><span class="sd">    </span>
+</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a><span class="sd">    Examples</span>
+</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a><span class="sd">    --------</span>
+</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a><span class="sd">    &gt;&gt;&gt; results = scmkl.run(adata, alpha_list)</span>
+</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a><span class="sd">    &gt;&gt;&gt; summary_df = scmkl.get_summary(results)</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a><span class="sd">    ...</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a><span class="sd">    &gt;&gt;&gt; summary_df.head()</span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a><span class="sd">        Alpha   AUROC  Number of Selected Groups  Top Group</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a><span class="sd">    0   2.20  0.8600                          3   RNA-HALLMARK_E2F_TARGETS</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a><span class="sd">    1   1.96  0.9123                          4   RNA-HALLMARK_ESTROGEN_RESPONSE_EARLY</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a><span class="sd">    2   1.72  0.9357                          5   RNA-HALLMARK_ESTROGEN_RESPONSE_EARLY</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a><span class="sd">    3   1.48  0.9524                          7   RNA-HALLMARK_ESTROGEN_RESPONSE_EARLY</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a><span class="sd">    4   1.24  0.9666                          9   RNA-HALLMARK_ESTROGEN_RESPONSE_EARLY</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>    <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Alpha&#39;</span> <span class="p">:</span> <span class="p">[],</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a>           <span class="s1">&#39;AUROC&#39;</span> <span class="p">:</span> <span class="p">[],</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a>           <span class="s1">&#39;Number of Selected Groups&#39;</span> <span class="p">:</span> <span class="p">[],</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a>           <span class="s1">&#39;Top Group&#39;</span> <span class="p">:</span> <span class="p">[]}</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a>    
+</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a>    <span class="n">alpha_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;Metrics&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a>
+</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a>    <span class="c1"># Creating summary DataFrame for each model</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a>    <span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="n">alpha_list</span><span class="p">:</span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a>        <span class="n">top_group_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;Norms&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">]</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;Norms&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">]))</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos">52</span></a>        <span class="n">summary</span><span class="p">[</span><span class="s1">&#39;Alpha&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a>        <span class="n">summary</span><span class="p">[</span><span class="s1">&#39;AUROC&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;Metrics&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a>        <span class="n">summary</span><span class="p">[</span><span class="s1">&#39;Number of Selected Groups&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;Selected_groups&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">]))</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a>        <span class="n">summary</span><span class="p">[</span><span class="s1">&#39;Top Group&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;Group_names&#39;</span><span class="p">])[</span><span class="n">top_group_index</span><span class="p">])</span>
+</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a>    
+</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a>    <span class="n">summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a>
+</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a>    <span class="k">return</span> <span class="n">summary</span>
 </span></pre></div>
 
 
             </section>
-                <section id="estimate_sigma">
-                            <input id="estimate_sigma-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+                <section id="get_summary">
+                            <input id="get_summary-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">estimate_sigma</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">adata</span>, </span><span class="param"><span class="n">n_features</span><span class="o">=</span><span class="mi">5000</span></span><span class="return-annotation">):</span></span>
+        <span class="name">get_summary</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">results</span><span class="p">:</span> <span class="nb">dict</span>, </span><span class="param"><span class="n">metric</span><span class="o">=</span><span class="s1">&#39;AUROC&#39;</span></span><span class="return-annotation">):</span></span>
 
-                <label class="view-source-button" for="estimate_sigma-view-source"><span>View Source</span></label>
+                <label class="view-source-button" for="get_summary-view-source"><span>View Source</span></label>
 
     </div>
-    <a class="headerlink" href="#estimate_sigma"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="estimate_sigma-8"><a href="#estimate_sigma-8"><span class="linenos"> 8</span></a><span class="k">def</span> <span class="nf">estimate_sigma</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">):</span>
-</span><span id="estimate_sigma-9"><a href="#estimate_sigma-9"><span class="linenos"> 9</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-</span><span id="estimate_sigma-10"><a href="#estimate_sigma-10"><span class="linenos">10</span></a><span class="sd">    Calculate kernel widths to inform distribution for projection of </span>
-</span><span id="estimate_sigma-11"><a href="#estimate_sigma-11"><span class="linenos">11</span></a><span class="sd">    Fourier Features. Calculates one sigma per group of features.</span>
-</span><span id="estimate_sigma-12"><a href="#estimate_sigma-12"><span class="linenos">12</span></a>
-</span><span id="estimate_sigma-13"><a href="#estimate_sigma-13"><span class="linenos">13</span></a><span class="sd">    Parameters</span>
-</span><span id="estimate_sigma-14"><a href="#estimate_sigma-14"><span class="linenos">14</span></a><span class="sd">    ----------</span>
-</span><span id="estimate_sigma-15"><a href="#estimate_sigma-15"><span class="linenos">15</span></a><span class="sd">    **adata** : *AnnData* </span>
-</span><span id="estimate_sigma-16"><a href="#estimate_sigma-16"><span class="linenos">16</span></a><span class="sd">        &gt; Created by `create_adata`.</span>
-</span><span id="estimate_sigma-17"><a href="#estimate_sigma-17"><span class="linenos">17</span></a><span class="sd">    </span>
-</span><span id="estimate_sigma-18"><a href="#estimate_sigma-18"><span class="linenos">18</span></a><span class="sd">    **n_features** : *int*  </span>
-</span><span id="estimate_sigma-19"><a href="#estimate_sigma-19"><span class="linenos">19</span></a><span class="sd">        &gt; Number of random features to include when estimating sigma. </span>
-</span><span id="estimate_sigma-20"><a href="#estimate_sigma-20"><span class="linenos">20</span></a><span class="sd">        Will be scaled for the whole pathway set according to a </span>
-</span><span id="estimate_sigma-21"><a href="#estimate_sigma-21"><span class="linenos">21</span></a><span class="sd">        heuristic. Used for scalability.</span>
-</span><span id="estimate_sigma-22"><a href="#estimate_sigma-22"><span class="linenos">22</span></a><span class="sd">    </span>
-</span><span id="estimate_sigma-23"><a href="#estimate_sigma-23"><span class="linenos">23</span></a><span class="sd">    Returns</span>
-</span><span id="estimate_sigma-24"><a href="#estimate_sigma-24"><span class="linenos">24</span></a><span class="sd">    -------</span>
-</span><span id="estimate_sigma-25"><a href="#estimate_sigma-25"><span class="linenos">25</span></a><span class="sd">    **adata** : *AnnData*</span>
-</span><span id="estimate_sigma-26"><a href="#estimate_sigma-26"><span class="linenos">26</span></a><span class="sd">        &gt; Key added `adata.uns[&#39;sigma&#39;]`.</span>
-</span><span id="estimate_sigma-27"><a href="#estimate_sigma-27"><span class="linenos">27</span></a>
-</span><span id="estimate_sigma-28"><a href="#estimate_sigma-28"><span class="linenos">28</span></a><span class="sd">    Examples</span>
-</span><span id="estimate_sigma-29"><a href="#estimate_sigma-29"><span class="linenos">29</span></a><span class="sd">    --------</span>
-</span><span id="estimate_sigma-30"><a href="#estimate_sigma-30"><span class="linenos">30</span></a><span class="sd">    &gt;&gt;&gt; adata = scmkl.estimate_sigma(adata)</span>
-</span><span id="estimate_sigma-31"><a href="#estimate_sigma-31"><span class="linenos">31</span></a><span class="sd">    &gt;&gt;&gt; adata.uns[&#39;sigma&#39;]</span>
-</span><span id="estimate_sigma-32"><a href="#estimate_sigma-32"><span class="linenos">32</span></a><span class="sd">    array([10.4640895 , 10.82011454,  6.16769438,  9.86156855, ...])</span>
-</span><span id="estimate_sigma-33"><a href="#estimate_sigma-33"><span class="linenos">33</span></a><span class="sd">    &#39;&#39;&#39;</span>
-</span><span id="estimate_sigma-34"><a href="#estimate_sigma-34"><span class="linenos">34</span></a> 
-</span><span id="estimate_sigma-35"><a href="#estimate_sigma-35"><span class="linenos">35</span></a>    <span class="n">sigma_list</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="estimate_sigma-36"><a href="#estimate_sigma-36"><span class="linenos">36</span></a>
-</span><span id="estimate_sigma-37"><a href="#estimate_sigma-37"><span class="linenos">37</span></a>    <span class="c1"># Loop over every group in group_dict</span>
-</span><span id="estimate_sigma-38"><a href="#estimate_sigma-38"><span class="linenos">38</span></a>    <span class="k">for</span> <span class="n">group_features</span> <span class="ow">in</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;group_dict&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-</span><span id="estimate_sigma-39"><a href="#estimate_sigma-39"><span class="linenos">39</span></a>
-</span><span id="estimate_sigma-40"><a href="#estimate_sigma-40"><span class="linenos">40</span></a>        <span class="c1"># Select only features within that group and downsample for scalability</span>
-</span><span id="estimate_sigma-41"><a href="#estimate_sigma-41"><span class="linenos">41</span></a>        <span class="n">num_group_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">group_features</span><span class="p">)</span>
-</span><span id="estimate_sigma-42"><a href="#estimate_sigma-42"><span class="linenos">42</span></a>        <span class="n">group_features</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;seed_obj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">group_features</span><span class="p">)),</span> <span class="nb">min</span><span class="p">([</span><span class="n">n_features</span><span class="p">,</span> <span class="n">num_group_features</span><span class="p">]),</span> <span class="n">replace</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> 
-</span><span id="estimate_sigma-43"><a href="#estimate_sigma-43"><span class="linenos">43</span></a>
-</span><span id="estimate_sigma-44"><a href="#estimate_sigma-44"><span class="linenos">44</span></a>        <span class="c1"># Use on the train data to estimate sigma</span>
-</span><span id="estimate_sigma-45"><a href="#estimate_sigma-45"><span class="linenos">45</span></a>        <span class="n">X_train</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">],</span> <span class="n">group_features</span><span class="p">]</span><span class="o">.</span><span class="n">X</span>
-</span><span id="estimate_sigma-46"><a href="#estimate_sigma-46"><span class="linenos">46</span></a>        <span class="n">X_train</span> <span class="o">=</span> <span class="n">_process_data</span><span class="p">(</span><span class="n">X_train</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">scale_data</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;scale_data&#39;</span><span class="p">],</span> <span class="n">return_dense</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-</span><span id="estimate_sigma-47"><a href="#estimate_sigma-47"><span class="linenos">47</span></a>        
-</span><span id="estimate_sigma-48"><a href="#estimate_sigma-48"><span class="linenos">48</span></a>        <span class="c1"># Sample cells because distance calculation are costly and can be approximated</span>
-</span><span id="estimate_sigma-49"><a href="#estimate_sigma-49"><span class="linenos">49</span></a>        <span class="n">distance_indices</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;seed_obj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">((</span><span class="mi">2000</span><span class="p">,</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
-</span><span id="estimate_sigma-50"><a href="#estimate_sigma-50"><span class="linenos">50</span></a>
-</span><span id="estimate_sigma-51"><a href="#estimate_sigma-51"><span class="linenos">51</span></a>        <span class="c1"># Calculate Distance Matrix with specified metric</span>
-</span><span id="estimate_sigma-52"><a href="#estimate_sigma-52"><span class="linenos">52</span></a>        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">spatial</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="n">distance_indices</span><span class="p">,:],</span> <span class="n">X_train</span><span class="p">[</span><span class="n">distance_indices</span><span class="p">,:],</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;distance_metric&#39;</span><span class="p">]))</span>
-</span><span id="estimate_sigma-53"><a href="#estimate_sigma-53"><span class="linenos">53</span></a>
-</span><span id="estimate_sigma-54"><a href="#estimate_sigma-54"><span class="linenos">54</span></a>        <span class="c1"># sigma = 0 is numerically unusable in later steps</span>
-</span><span id="estimate_sigma-55"><a href="#estimate_sigma-55"><span class="linenos">55</span></a>        <span class="c1"># Using such a small sigma will result in wide distribution, and typically a non-predictive Z</span>
-</span><span id="estimate_sigma-56"><a href="#estimate_sigma-56"><span class="linenos">56</span></a>        <span class="k">if</span> <span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="estimate_sigma-57"><a href="#estimate_sigma-57"><span class="linenos">57</span></a>            <span class="n">sigma</span> <span class="o">+=</span> <span class="mf">1e-5</span>
-</span><span id="estimate_sigma-58"><a href="#estimate_sigma-58"><span class="linenos">58</span></a>
-</span><span id="estimate_sigma-59"><a href="#estimate_sigma-59"><span class="linenos">59</span></a>        <span class="k">if</span> <span class="n">n_features</span> <span class="o">&lt;</span> <span class="n">num_group_features</span><span class="p">:</span>
-</span><span id="estimate_sigma-60"><a href="#estimate_sigma-60"><span class="linenos">60</span></a>            <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">num_group_features</span> <span class="o">/</span> <span class="n">n_features</span> <span class="c1"># Heuristic we calculated to account for fewer features used in distance calculation</span>
-</span><span id="estimate_sigma-61"><a href="#estimate_sigma-61"><span class="linenos">61</span></a>
-</span><span id="estimate_sigma-62"><a href="#estimate_sigma-62"><span class="linenos">62</span></a>        <span class="n">sigma_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
-</span><span id="estimate_sigma-63"><a href="#estimate_sigma-63"><span class="linenos">63</span></a>    
-</span><span id="estimate_sigma-64"><a href="#estimate_sigma-64"><span class="linenos">64</span></a>    <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigma_list</span><span class="p">)</span>
-</span><span id="estimate_sigma-65"><a href="#estimate_sigma-65"><span class="linenos">65</span></a>        
-</span><span id="estimate_sigma-66"><a href="#estimate_sigma-66"><span class="linenos">66</span></a>    <span class="k">return</span> <span class="n">adata</span>
+    <a class="headerlink" href="#get_summary"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="get_summary-6"><a href="#get_summary-6"><span class="linenos"> 6</span></a><span class="k">def</span> <span class="nf">get_summary</span><span class="p">(</span><span class="n">results</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;AUROC&#39;</span><span class="p">):</span>
+</span><span id="get_summary-7"><a href="#get_summary-7"><span class="linenos"> 7</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="get_summary-8"><a href="#get_summary-8"><span class="linenos"> 8</span></a><span class="sd">    Takes the results from either `scmkl.run()` and generates a </span>
+</span><span id="get_summary-9"><a href="#get_summary-9"><span class="linenos"> 9</span></a><span class="sd">    dataframe for each model containing columns for alpha, area under </span>
+</span><span id="get_summary-10"><a href="#get_summary-10"><span class="linenos">10</span></a><span class="sd">    the ROC, number of groups with nonzero weights, and highest </span>
+</span><span id="get_summary-11"><a href="#get_summary-11"><span class="linenos">11</span></a><span class="sd">    weighted group.</span>
+</span><span id="get_summary-12"><a href="#get_summary-12"><span class="linenos">12</span></a>
+</span><span id="get_summary-13"><a href="#get_summary-13"><span class="linenos">13</span></a><span class="sd">    Parameters</span>
+</span><span id="get_summary-14"><a href="#get_summary-14"><span class="linenos">14</span></a><span class="sd">    ----------</span>
+</span><span id="get_summary-15"><a href="#get_summary-15"><span class="linenos">15</span></a><span class="sd">    **results** : *dict*</span>
+</span><span id="get_summary-16"><a href="#get_summary-16"><span class="linenos">16</span></a><span class="sd">        &gt; A dictionary of results from scMKL generated from either </span>
+</span><span id="get_summary-17"><a href="#get_summary-17"><span class="linenos">17</span></a><span class="sd">        `scmkl.run()`.</span>
+</span><span id="get_summary-18"><a href="#get_summary-18"><span class="linenos">18</span></a>
+</span><span id="get_summary-19"><a href="#get_summary-19"><span class="linenos">19</span></a><span class="sd">    **metric** : *str*</span>
+</span><span id="get_summary-20"><a href="#get_summary-20"><span class="linenos">20</span></a><span class="sd">        &gt; Which metric to include in the summary. Default is AUROC. </span>
+</span><span id="get_summary-21"><a href="#get_summary-21"><span class="linenos">21</span></a><span class="sd">        Options include `&#39;AUROC&#39;`, `&#39;Recall&#39;`, `&#39;Precision&#39;`, </span>
+</span><span id="get_summary-22"><a href="#get_summary-22"><span class="linenos">22</span></a><span class="sd">        `&#39;Accuracy&#39;`, and `&#39;F1-Score&#39;`.</span>
+</span><span id="get_summary-23"><a href="#get_summary-23"><span class="linenos">23</span></a>
+</span><span id="get_summary-24"><a href="#get_summary-24"><span class="linenos">24</span></a><span class="sd">    Returns</span>
+</span><span id="get_summary-25"><a href="#get_summary-25"><span class="linenos">25</span></a><span class="sd">    -------</span>
+</span><span id="get_summary-26"><a href="#get_summary-26"><span class="linenos">26</span></a><span class="sd">    **summary_df** : *pd.DataFrame*</span>
+</span><span id="get_summary-27"><a href="#get_summary-27"><span class="linenos">27</span></a><span class="sd">        &gt; A table with columns:</span>
+</span><span id="get_summary-28"><a href="#get_summary-28"><span class="linenos">28</span></a><span class="sd">        `[&#39;Alpha&#39;, &#39;AUROC&#39;, &#39;Number of Selected Groups&#39;, &#39;Top Group&#39;]`.</span>
+</span><span id="get_summary-29"><a href="#get_summary-29"><span class="linenos">29</span></a><span class="sd">    </span>
+</span><span id="get_summary-30"><a href="#get_summary-30"><span class="linenos">30</span></a><span class="sd">    Examples</span>
+</span><span id="get_summary-31"><a href="#get_summary-31"><span class="linenos">31</span></a><span class="sd">    --------</span>
+</span><span id="get_summary-32"><a href="#get_summary-32"><span class="linenos">32</span></a><span class="sd">    &gt;&gt;&gt; results = scmkl.run(adata, alpha_list)</span>
+</span><span id="get_summary-33"><a href="#get_summary-33"><span class="linenos">33</span></a><span class="sd">    &gt;&gt;&gt; summary_df = scmkl.get_summary(results)</span>
+</span><span id="get_summary-34"><a href="#get_summary-34"><span class="linenos">34</span></a><span class="sd">    ...</span>
+</span><span id="get_summary-35"><a href="#get_summary-35"><span class="linenos">35</span></a><span class="sd">    &gt;&gt;&gt; summary_df.head()</span>
+</span><span id="get_summary-36"><a href="#get_summary-36"><span class="linenos">36</span></a><span class="sd">        Alpha   AUROC  Number of Selected Groups  Top Group</span>
+</span><span id="get_summary-37"><a href="#get_summary-37"><span class="linenos">37</span></a><span class="sd">    0   2.20  0.8600                          3   RNA-HALLMARK_E2F_TARGETS</span>
+</span><span id="get_summary-38"><a href="#get_summary-38"><span class="linenos">38</span></a><span class="sd">    1   1.96  0.9123                          4   RNA-HALLMARK_ESTROGEN_RESPONSE_EARLY</span>
+</span><span id="get_summary-39"><a href="#get_summary-39"><span class="linenos">39</span></a><span class="sd">    2   1.72  0.9357                          5   RNA-HALLMARK_ESTROGEN_RESPONSE_EARLY</span>
+</span><span id="get_summary-40"><a href="#get_summary-40"><span class="linenos">40</span></a><span class="sd">    3   1.48  0.9524                          7   RNA-HALLMARK_ESTROGEN_RESPONSE_EARLY</span>
+</span><span id="get_summary-41"><a href="#get_summary-41"><span class="linenos">41</span></a><span class="sd">    4   1.24  0.9666                          9   RNA-HALLMARK_ESTROGEN_RESPONSE_EARLY</span>
+</span><span id="get_summary-42"><a href="#get_summary-42"><span class="linenos">42</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="get_summary-43"><a href="#get_summary-43"><span class="linenos">43</span></a>    <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Alpha&#39;</span> <span class="p">:</span> <span class="p">[],</span>
+</span><span id="get_summary-44"><a href="#get_summary-44"><span class="linenos">44</span></a>           <span class="s1">&#39;AUROC&#39;</span> <span class="p">:</span> <span class="p">[],</span>
+</span><span id="get_summary-45"><a href="#get_summary-45"><span class="linenos">45</span></a>           <span class="s1">&#39;Number of Selected Groups&#39;</span> <span class="p">:</span> <span class="p">[],</span>
+</span><span id="get_summary-46"><a href="#get_summary-46"><span class="linenos">46</span></a>           <span class="s1">&#39;Top Group&#39;</span> <span class="p">:</span> <span class="p">[]}</span>
+</span><span id="get_summary-47"><a href="#get_summary-47"><span class="linenos">47</span></a>    
+</span><span id="get_summary-48"><a href="#get_summary-48"><span class="linenos">48</span></a>    <span class="n">alpha_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;Metrics&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</span><span id="get_summary-49"><a href="#get_summary-49"><span class="linenos">49</span></a>
+</span><span id="get_summary-50"><a href="#get_summary-50"><span class="linenos">50</span></a>    <span class="c1"># Creating summary DataFrame for each model</span>
+</span><span id="get_summary-51"><a href="#get_summary-51"><span class="linenos">51</span></a>    <span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="n">alpha_list</span><span class="p">:</span>
+</span><span id="get_summary-52"><a href="#get_summary-52"><span class="linenos">52</span></a>        <span class="n">top_group_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;Norms&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">]</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;Norms&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">]))</span>
+</span><span id="get_summary-53"><a href="#get_summary-53"><span class="linenos">53</span></a>        <span class="n">summary</span><span class="p">[</span><span class="s1">&#39;Alpha&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+</span><span id="get_summary-54"><a href="#get_summary-54"><span class="linenos">54</span></a>        <span class="n">summary</span><span class="p">[</span><span class="s1">&#39;AUROC&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;Metrics&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span>
+</span><span id="get_summary-55"><a href="#get_summary-55"><span class="linenos">55</span></a>        <span class="n">summary</span><span class="p">[</span><span class="s1">&#39;Number of Selected Groups&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;Selected_groups&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">]))</span>
+</span><span id="get_summary-56"><a href="#get_summary-56"><span class="linenos">56</span></a>        <span class="n">summary</span><span class="p">[</span><span class="s1">&#39;Top Group&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;Group_names&#39;</span><span class="p">])[</span><span class="n">top_group_index</span><span class="p">])</span>
+</span><span id="get_summary-57"><a href="#get_summary-57"><span class="linenos">57</span></a>    
+</span><span id="get_summary-58"><a href="#get_summary-58"><span class="linenos">58</span></a>    <span class="n">summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+</span><span id="get_summary-59"><a href="#get_summary-59"><span class="linenos">59</span></a>
+</span><span id="get_summary-60"><a href="#get_summary-60"><span class="linenos">60</span></a>    <span class="k">return</span> <span class="n">summary</span>
 </span></pre></div>
 
 
-            <div class="docstring"><p>Calculate kernel widths to inform distribution for projection of 
-Fourier Features. Calculates one sigma per group of features.</p>
+            <div class="docstring"><p>Takes the results from either <code><a href="run.html">scmkl.run</a></code> and generates a 
+dataframe for each model containing columns for alpha, area under 
+the ROC, number of groups with nonzero weights, and highest 
+weighted group.</p>
 
 <h2 id="parameters">Parameters</h2>
 
-<p><strong>adata</strong> : <em>AnnData</em> </p>
+<p><strong>results</strong> : <em>dict</em></p>
 
 <blockquote>
-  <p>Created by <code>create_adata</code>.</p>
+  <p>A dictionary of results from scMKL generated from either 
+      <code><a href="run.html">scmkl.run</a></code>.</p>
 </blockquote>
 
-<p><strong>n_features</strong> : <em>int</em>  </p>
+<p><strong>metric</strong> : <em>str</em></p>
 
 <blockquote>
-  <p>Number of random features to include when estimating sigma. 
-      Will be scaled for the whole pathway set according to a 
-      heuristic. Used for scalability.</p>
+  <p>Which metric to include in the summary. Default is AUROC. 
+      Options include <code>'AUROC'</code>, <code>'Recall'</code>, <code>'Precision'</code>, 
+      <code>'Accuracy'</code>, and <code>'F1-Score'</code>.</p>
 </blockquote>
 
 <h2 id="returns">Returns</h2>
 
-<p><strong>adata</strong> : <em>AnnData</em></p>
+<p><strong>summary_df</strong> : <em>pd.DataFrame</em></p>
 
 <blockquote>
-  <p>Key added <code>adata.uns['sigma']</code>.</p>
+  <p>A table with columns:
+      <code>['Alpha', 'AUROC', 'Number of Selected Groups', 'Top Group']</code>.</p>
 </blockquote>
 
 <h2 id="examples">Examples</h2>
 
 <div class="pdoc-code codehilite">
-<pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">adata</span> <span class="o">=</span> <span class="n"><a href="">scmkl.estimate_sigma</a></span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">]</span>
-<span class="go">array([10.4640895 , 10.82011454,  6.16769438,  9.86156855, ...])</span>
+<pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">results</span> <span class="o">=</span> <span class="n"><a href="run.html">scmkl.run</a></span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">alpha_list</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">summary_df</span> <span class="o">=</span> <span class="n"><a href="#get_summary">scmkl.get_summary</a></span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">summary_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="go">    Alpha   AUROC  Number of Selected Groups  Top Group</span>
+<span class="go">0   2.20  0.8600                          3   RNA-HALLMARK_E2F_TARGETS</span>
+<span class="go">1   1.96  0.9123                          4   RNA-HALLMARK_ESTROGEN_RESPONSE_EARLY</span>
+<span class="go">2   1.72  0.9357                          5   RNA-HALLMARK_ESTROGEN_RESPONSE_EARLY</span>
+<span class="go">3   1.48  0.9524                          7   RNA-HALLMARK_ESTROGEN_RESPONSE_EARLY</span>
+<span class="go">4   1.24  0.9666                          9   RNA-HALLMARK_ESTROGEN_RESPONSE_EARLY</span>
 </code></pre>
 </div>
 </div>

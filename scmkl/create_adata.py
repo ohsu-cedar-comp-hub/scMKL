@@ -2,9 +2,9 @@ import numpy as np
 import anndata as ad
 
 
-def _filter_features(X, feature_names, group_dict):
+def _filter_features(X, feature_names, group_dict, remove_features):
     '''
-    Function to remove unused features from X matrix.  Any features not included in group_dict will be removed from the matrix.
+    Function to remove unused features from X matrix. Any features not included in group_dict will be removed from the matrix.
     Also puts the features in the same relative order (of included features)
     Input:
             X- Data array. Can be Numpy array or Scipy Sparse Array
@@ -28,12 +28,17 @@ def _filter_features(X, feature_names, group_dict):
         # Converts to numpy array and sorts to preserve order of feature names
         group_dict[group] = np.sort(np.array(list(feature_set.intersection(set(group_dict[group])))))
 
-    # Find location of desired features in whole feature set
-    group_feature_indices = np.where(np.in1d(feature_names, np.array(list(group_features)), assume_unique = True))[0]
+    # Only keeping groupings that have at least two features
+    group_dict = {group : group_dict[group] for group in group_dict.keys()
+                  if len(group_dict[group]) > 1}
 
-    # Subset only the desired features and their data
-    X = X[:,group_feature_indices]
-    feature_names = np.array(list(feature_names))[group_feature_indices]
+    if remove_features:
+        # Find location of desired features in whole feature set
+        group_feature_indices = np.where(np.in1d(feature_names, np.array(list(group_features)), assume_unique = True))[0]
+
+        # Subset only the desired features and data
+        X = X[:,group_feature_indices]
+        feature_names = np.array(list(feature_names))[group_feature_indices]
 
     return X, feature_names, group_dict
 
@@ -152,11 +157,10 @@ def _binary_train_test_split(y, train_indices = None, seed_obj = np.random.defau
 
 def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, 
                  group_dict: dict, scale_data: bool = True, split_data = None,
-                 D = 100, remove_features = True, 
+                 D = 100, remove_features = True, train_ratio = 0.8,
                  distance_metric = 'euclidean', kernel_type = 'Gaussian', 
                  random_state = 1, allow_multiclass = False, 
                  class_threshold = 'median'):
-    
     '''
     Function to create an AnnData object to carry all relevant 
     information going forward.
@@ -199,6 +203,12 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
         > If `True`, will remove features from X and feature_names
         not in group_dict and remove features from groupings not in
         feature_names.
+
+    **train_ratio** : *float*
+        > Ratio of number of training samples to entire data set. Note:
+        if a threshold is applied, the ratio training samples may 
+        decrease depending on class balance and `class_threshold`
+        parameter if `allow_multiclass = True`.
 
     **distance_metric** : *str* 
         > The pairwise distance metric used to estimate sigma. Must
@@ -245,8 +255,8 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
 
     > `with adata.uns['D']` : Number of dimensions to scMKL with.
 
-    > `adata.uns['scale_data']` : *bool* for wether or not data
-    is log transformed and scaled.
+    > `adata.uns['scale_data']` : *bool* for whether or not data is log
+    transformed and scaled.
 
     > `adata.uns['distance_metric']` : Distance metric as given.
     
@@ -275,8 +285,7 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     assert isinstance(D, int) and D > 0, 'D must be a positive integer'
     assert kernel_type.lower() in ['gaussian', 'laplacian', 'cauchy'], 'Given kernel type not implemented. Gaussian, Laplacian, and Cauchy are the acceptable types.'
 
-    if remove_features:
-        X, feature_names, group_dict = _filter_features(X, feature_names, group_dict)
+    X, feature_names, group_dict = _filter_features(X, feature_names, group_dict, remove_features)
 
     # Create adata object and add column names
     adata = ad.AnnData(X)
@@ -293,12 +302,14 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
 
     if (split_data is None) and (allow_multiclass == False):
         train_indices, test_indices = _binary_train_test_split(cell_labels, 
-                                                               seed_obj = adata.uns['seed_obj'])
+                                                               seed_obj = adata.uns['seed_obj'],
+                                                               train_ratio = train_ratio)
 
     elif (split_data is None) and (allow_multiclass == True):
         train_indices, test_indices = _multi_class_train_test_split(cell_labels, 
                                                                     seed_obj = adata.uns['seed_obj'], 
-                                                                    class_threshold = class_threshold)
+                                                                    class_threshold = class_threshold,
+                                                                    train_ratio = train_ratio)
 
     else:
         train_indices = np.where(split_data == 'train')[0]
