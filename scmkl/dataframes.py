@@ -4,16 +4,16 @@ import pandas as pd
 
 def get_summary(results : dict, metric = 'AUROC'):
     '''
-    Takes the results from either `scmkl.run()` or `scmkl.one_v_all()` 
-    and generates a dataframe for each model containing columns for 
-    alpha, area under the ROC, number of groups with nonzero weights, 
-    and highest weighted group.
+    Takes the results from either `scmkl.run()` and generates a 
+    dataframe for each model containing columns for alpha, area under 
+    the ROC, number of groups with nonzero weights, and highest 
+    weighted group.
 
     Parameters
     ----------
     **results** : *dict*
         > A dictionary of results from scMKL generated from either 
-        `scmkl.run()` or `scmkl.one_v_all()`.
+        `scmkl.run()`.
 
     **metric** : *str*
         > Which metric to include in the summary. Default is AUROC. 

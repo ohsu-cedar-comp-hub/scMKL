@@ -8,7 +8,7 @@ from sklearn.metrics import confusion_matrix
 
 
 def plot_conf_mat(results, title = '', cmap = None, normalize = True,
-                          alpha = None, save = None):
+                          alpha = None, save = None) -> None:
     '''
     Creates a confusion matrix from the output of scMKL.
 
@@ -44,8 +44,12 @@ def plot_conf_mat(results, title = '', cmap = None, normalize = True,
     
     Examples
     --------
-    >>>
-    >>>
+    >>> # Running scmkl and capturing results
+    >>> results = scmkl.run(adata = adata, alpha_list = alpha_list)
+    >>> 
+    >>> from matplotlib.pyplot import get_cmap
+    >>> 
+    >>> scmkl.plot_conf_mat(results, title = '', cmap = get_cmap('Blues'))
 
     Citiation
     ---------
@@ -150,18 +154,18 @@ def plot_metric(summary_df : pd.DataFrame, alpha_star = None, color = 'red'):
 
     # Calculating alpha_star y_pos if present
     if alpha_star != None:
-        alpha_star_auroc = float(summary_df[summary_df['Alpha'] == alpha_star]['AUROC'])
+        alpha_star_metric = float(summary_df[summary_df['Alpha'] == alpha_star][metric])
 
-        metric_plot = (ggplot(summary_df, aes(x = 'Alpha', y = 'AUROC')) 
+        metric_plot = (ggplot(summary_df, aes(x = 'Alpha', y = metric)) 
                         + geom_point(fill = color, color = color) 
                         + theme_classic() 
                         + ylim(0.6, 1)
                         + scale_x_reverse(breaks = alpha_list)
-                        + annotate('text', x = alpha_star, y = alpha_star_auroc - 0.04, label='|\nAlpha\nStar')
+                        + annotate('text', x = alpha_star, y = alpha_star_metric - 0.04, label='|\nAlpha\nStar')
                         )
         
     else:
-        metric_plot = (ggplot(summary_df, aes(x = 'Alpha', y = 'AUROC')) 
+        metric_plot = (ggplot(summary_df, aes(x = 'Alpha', y = metric)) 
                 + geom_point(fill = color, color = color) 
                 + theme_classic() 
                 + ylim(0.6, 1)

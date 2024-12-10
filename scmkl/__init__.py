@@ -9,7 +9,7 @@
 
 __all__ = ['calculate_z', 
            'create_adata', 
-           'dataframes'
+           'dataframes',
            'estimate_sigma', 
            'get_atac_groupings',
            'multimodal_processing', 

@@ -125,11 +125,12 @@ def _multimodal_optimize_alpha(adatas : list, group_size = 1, tfidf = [False, Fa
     return alpha_star
 
 
-def optimize_alpha(adata, group_size, tfidf = False, 
+def optimize_alpha(adata, group_size = None, tfidf = False, 
                    alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4):
     '''
     Iteratively train a grouplasso model and update alpha to find the 
-    parameter yielding best performing sparsity.
+    parameter yielding best performing sparsity. This function 
+    currently only works for binary experiments.
 
     Parameters
     ----------
@@ -137,9 +138,9 @@ def optimize_alpha(adata, group_size, tfidf = False,
         > `AnnData`(s) with `'Z_train'` and `'Z_test'` in 
         `adata.uns.keys()`.
 
-    **group_size** : *int* 
-        > Argument describing how the features are grouped. Should be
-        `2 * D`. 
+    **group_size** : *None* | *int*
+        > Argument describing how the features are grouped. If *None*, 
+        `2 * adata.uns['D'] will be used. 
         For more information see 
         [celer documentation](https://mathurinm.github.io/celer/generated/celer.GroupLasso.html).
 
@@ -160,7 +161,7 @@ def optimize_alpha(adata, group_size, tfidf = False,
 
     Examples
     --------
-    >>> alpha_star = scmkl.optimize_alpha(adata, group_size = (2 * D))
+    >>> alpha_star = scmkl.optimize_alpha(adata)
     >>> alpha_star
     0.1
     '''
@@ -169,6 +170,9 @@ def optimize_alpha(adata, group_size, tfidf = False,
 
     import warnings 
     warnings.filterwarnings('ignore')
+
+    if group_size == None:
+        group_size = adata.uns['D'] * 2
 
     if type(adata) == list:
         alpha_star = _multimodal_optimize_alpha(adatas = adata, group_size = group_size, tfidf = tfidf, alpha_array = alpha_array)
@@ -192,8 +196,10 @@ def optimize_alpha(adata, group_size, tfidf = False,
         cv_adata = adata[adata.uns['train_indices'],:]
 
         # Create CV train/test indices
-        fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], negative_indices[np.where(negative_annotations != fold)[0]]))
-        fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], negative_indices[np.where(negative_annotations == fold)[0]]))
+        fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], 
+                                     negative_indices[np.where(negative_annotations != fold)[0]]))
+        fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], 
+                                    negative_indices[np.where(negative_annotations == fold)[0]]))
 
         cv_adata.uns['train_indices'] = fold_train
         cv_adata.uns['test_indices'] = fold_test
