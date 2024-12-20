@@ -143,7 +143,7 @@ def plot_metric(summary_df : pd.DataFrame, alpha_star = None, color = 'red'):
     >>> results = scmkl.run(adata, alpha_list)
     >>> summary_df = scmkl.get_summary(results)
     >>> metric_plot = plot_metric(results)
-    ...
+    >>>
     >>> metric_plot.save('scMKL_performance.png')
     '''
     # Capturing metric from summary_df
