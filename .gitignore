@@ -1,2 +1,3 @@
 *.pyc
 multiclass_analysis.ipynb
+*.h5ad
