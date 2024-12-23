@@ -47,49 +47,64 @@ def predict(adata, metrics = None, return_probs = False):
     >>> metrics_dict.keys()
     dict_keys(['AUROC', 'Accuracy', 'F1-Score', 'Precision', 'Recall'])
     '''
-    y_test = adata.obs['labels'].iloc[adata.uns['test_indices']].to_numpy()
     X_test = adata.uns['Z_test']
-    assert X_test.shape[0] == len(y_test), 'X and y must have the same number of samples'
-    assert all([metric in ['AUROC', 'Accuracy', 'F1-Score', 'Precision', 'Recall'] for metric in metrics]), 'Unknown metric provided.  Must be one or more of AUROC, Accuracy, F1-Score, Precision, Recall'
+
+    if metrics is not None:
+        assert all([metric in ['AUROC', 'Accuracy', 'F1-Score', 'Precision', 'Recall'] for metric in metrics]), \
+            'Unknown metric provided.  Must be None, or one or more of AUROC, Accuracy, F1-Score, Precision, Recall'
 
     # Capturing class labels
-    classes = np.unique(y_test)
+    classes = np.unique(adata.obs['labels'].iloc[adata.uns['train_indices']].to_numpy())
 
     # Sigmoid function to force probabilities into [0,1]
     probabilities = 1 / (1 + np.exp(-adata.uns['model'].predict(X_test)))
 
-    # Group Lasso requires 'continous' y values need to re-descritize it
-    y = np.zeros((len(y_test)))
-    y[y_test == classes[0]] = 1
-
-    metric_dict = {}
-
     #Convert numerical probabilities into binary phenotype
-    y_pred = np.array(np.repeat(classes[1], len(y_test)), dtype = 'object')
+    y_pred = np.array(np.repeat(classes[1], X_test.shape[0]), dtype = 'object')
     y_pred[np.round(probabilities,0).astype(int) == 1] = classes[0]
 
-    if (metrics == None) and (return_probs == False):
-        return y_pred
-    
-    # Calculate and save metrics given in metrics
-    if 'AUROC' in metrics:
-        fpr, tpr, _ = sklearn.metrics.roc_curve(y, probabilities)
-        metric_dict['AUROC'] = sklearn.metrics.auc(fpr, tpr)
-    if 'Accuracy' in metrics:
-        metric_dict['Accuracy'] = np.mean(y_test == y_pred)
-    if 'F1-Score' in metrics:
-        metric_dict['F1-Score'] = sklearn.metrics.f1_score(y_test, y_pred, pos_label = classes[0])
-    if 'Precision' in metrics:
-        metric_dict['Precision'] = sklearn.metrics.precision_score(y_test, y_pred, pos_label = classes[0])
-    if 'Recall' in metrics:
-        metric_dict['Recall'] = sklearn.metrics.recall_score(y_test, y_pred, pos_label = classes[0])
+    if not adata.uns['labeled_test']:
+        if not metrics is None:
+            print('WARNING: Cannot calculate classification metrics for unlabeled test data')
+    else:
+        y_test = adata.obs['labels'].iloc[adata.uns['test_indices']].to_numpy()
+        X_test = adata.uns['Z_test']
+        assert X_test.shape[0] == len(y_test), 'X and y must have the same number of samples'
+
+        # Group Lasso requires 'continous' y values need to re-descritize it
+        y = np.zeros((len(y_test)))
+        y[y_test == classes[0]] = 1
+
+        metric_dict = {}
+
+        if (metrics is None) and (return_probs == False):
+            return y_pred
+        
+        # Calculate and save metrics given in metrics
+        if 'AUROC' in metrics:
+            fpr, tpr, _ = sklearn.metrics.roc_curve(y, probabilities)
+            metric_dict['AUROC'] = sklearn.metrics.auc(fpr, tpr)
+        if 'Accuracy' in metrics:
+            metric_dict['Accuracy'] = np.mean(y_test == y_pred)
+        if 'F1-Score' in metrics:
+            metric_dict['F1-Score'] = sklearn.metrics.f1_score(y_test, y_pred, pos_label = classes[0])
+        if 'Precision' in metrics:
+            metric_dict['Precision'] = sklearn.metrics.precision_score(y_test, y_pred, pos_label = classes[0])
+        if 'Recall' in metrics:
+            metric_dict['Recall'] = sklearn.metrics.recall_score(y_test, y_pred, pos_label = classes[0])
 
     if return_probs:
         probs = {classes[0] : probabilities,
                  classes[1] : 1 - probabilities}
-        return y_pred, metric_dict, probs
+        if adata.uns['labeled_test'] and metrics is not None:
+            return y_pred, metric_dict, probs
+        else:
+            return y_pred, probs
     else:
-        return y_pred, metric_dict
+        if adata.uns['labeled_test'] and metrics is not None:
+            return y_pred, metric_dict
+        else:
+            return y_pred
 
 
 def find_selected_groups(adata) -> np.ndarray:
