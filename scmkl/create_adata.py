@@ -182,7 +182,7 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
 
     **group_dict** : *dict* 
         > Dictionary containing feature grouping information.
-            - Example: {geneset: np.array(gene_1, gene_2, ..., gene_n)}
+            - Example: {geneset: np.array([gene_1, gene_2, ..., gene_n])}
 
     **scale_data** : *bool*  
         > If `True`, data matrix is log transformed and standard 
@@ -191,7 +191,10 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     **split_data** : *None* | *np.ndarray*
         > If *None*, data will be split stratified by cell labels. 
         Else, is an array of precalculated train/test split 
-        corresponding to samples.
+        corresponding to samples. Can include labels for entire
+        dataset to benchmark performance or for only training
+        data to classify unknown cell types.
+            - Example: np.array(['train', 'test', ..., 'train'])
 
     **D** : *int* 
         > Number of Random Fourier Features used to calculate Z. 

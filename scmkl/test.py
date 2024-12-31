@@ -6,6 +6,8 @@ def predict(adata, metrics = None, return_probs = False):
     '''
     Function to return predicted labels and calculate any of AUROC, 
     Accuracy, F1 Score, Precision, Recall for a classification. 
+
+    ** If labeled_test flag is set to False, metrics cannot be computed.**
     
     Parameters
     ----------  
@@ -66,6 +68,7 @@ def predict(adata, metrics = None, return_probs = False):
     if not adata.uns['labeled_test']:
         if not metrics is None:
             print('WARNING: Cannot calculate classification metrics for unlabeled test data')
+            metrics = None
     else:
         y_test = adata.obs['labels'].iloc[adata.uns['test_indices']].to_numpy()
         X_test = adata.uns['Z_test']
@@ -96,12 +99,12 @@ def predict(adata, metrics = None, return_probs = False):
     if return_probs:
         probs = {classes[0] : probabilities,
                  classes[1] : 1 - probabilities}
-        if adata.uns['labeled_test'] and metrics is not None:
+        if metrics is not None:
             return y_pred, metric_dict, probs
         else:
             return y_pred, probs
     else:
-        if adata.uns['labeled_test'] and metrics is not None:
+        if metrics is not None:
             return y_pred, metric_dict
         else:
             return y_pred
