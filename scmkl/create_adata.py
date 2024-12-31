@@ -182,7 +182,7 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
 
     **group_dict** : *dict* 
         > Dictionary containing feature grouping information.
-            - Example: {geneset: np.array(gene_1, gene_2, ..., gene_n)}
+            - Example: {geneset: np.array([gene_1, gene_2, ..., gene_n])}
 
     **scale_data** : *bool*  
         > If `True`, data matrix is log transformed and standard 
@@ -191,7 +191,10 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     **split_data** : *None* | *np.ndarray*
         > If *None*, data will be split stratified by cell labels. 
         Else, is an array of precalculated train/test split 
-        corresponding to samples.
+        corresponding to samples. Can include labels for entire
+        dataset to benchmark performance or for only training
+        data to classify unknown cell types.
+            - Example: np.array(['train', 'test', ..., 'train'])
 
     **D** : *int* 
         > Number of Random Fourier Features used to calculate Z. 
@@ -278,7 +281,6 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     'distance_metric', 'train_indices', 'test_indices'
     '''
 
-    assert X.shape[0] == len(cell_labels), 'Different number of cells than labels'
     assert X.shape[1] == len(feature_names), 'Different number of features in X than feature names'
     if not allow_multiclass:
         assert len(np.unique(cell_labels)) == 2, 'cell_labels must contain 2 classes'
@@ -292,7 +294,6 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     adata.var_names = feature_names
 
     # Add metadata to adata object
-    adata.obs['labels'] = cell_labels
     adata.uns['group_dict'] = group_dict
     adata.uns['seed_obj'] = np.random.default_rng(100 * random_state)
     adata.uns['scale_data'] = scale_data
@@ -300,20 +301,42 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     adata.uns['kernel_type'] = kernel_type
     adata.uns['distance_metric'] = distance_metric
 
-    if (split_data is None) and (allow_multiclass == False):
-        train_indices, test_indices = _binary_train_test_split(cell_labels, 
-                                                               seed_obj = adata.uns['seed_obj'],
-                                                               train_ratio = train_ratio)
+    if (split_data is None):
+        assert X.shape[0] == len(cell_labels), 'Different number of cells than labels'
+        adata.obs['labels'] = cell_labels
 
-    elif (split_data is None) and (allow_multiclass == True):
-        train_indices, test_indices = _multi_class_train_test_split(cell_labels, 
-                                                                    seed_obj = adata.uns['seed_obj'], 
-                                                                    class_threshold = class_threshold,
-                                                                    train_ratio = train_ratio)
+        if (allow_multiclass == False):
+            train_indices, test_indices = _binary_train_test_split(cell_labels, 
+                                                                   seed_obj = adata.uns['seed_obj'],
+                                                                   train_ratio = train_ratio)
 
+        elif (allow_multiclass == True):
+            train_indices, test_indices = _multi_class_train_test_split(cell_labels, 
+                                                                        seed_obj = adata.uns['seed_obj'], 
+                                                                        class_threshold = class_threshold,
+                                                                        train_ratio = train_ratio)
+
+        adata.uns['labeled_test'] = True
     else:
+        assert X.shape[0] == len(cell_labels) or \
+            len(cell_labels) == np.sum(split_data == 'train'),\
+            'Must give labels for all cells or only for training cells'
+        
         train_indices = np.where(split_data == 'train')[0]
         test_indices = np.where(split_data == 'test')[0]
+
+        if len(cell_labels) == len(train_indices):
+
+            padded_cell_labels = np.zeros((X.shape[0])).astype('object')
+            padded_cell_labels[train_indices] = cell_labels
+            padded_cell_labels[test_indices] = 'padded_test_label'
+
+            adata.obs['labels'] = padded_cell_labels
+            adata.uns['labeled_test'] = False
+
+        elif len(cell_labels) == len(split_data):
+            adata.obs['labels'] = cell_labels
+            adata.uns['labeled_test'] = True
 
     adata.uns['train_indices'] = train_indices
     adata.uns['test_indices'] = test_indices
