@@ -31,7 +31,7 @@ Then, install scMKL with:
 pip install scmkl
 ```
 
-If wheels do not build correctly, ensure ```gcc``` and ```g++``` are installed. They can be installed with ```sudo apt install gcc``` and ```sudo apt install g++```.
+If wheels do not build correctly, ensure ```gcc``` and ```g++``` are installed and up to date. They can be installed with ```sudo apt install gcc``` and ```sudo apt install g++```.
 
 ## Requirements
 scMKL takes advantage of AnnData objects and can be implemented with just four pieces of data:

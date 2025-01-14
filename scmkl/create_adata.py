@@ -155,12 +155,42 @@ def _binary_train_test_split(y, train_indices = None, seed_obj = np.random.defau
     return train_indices, test_indices
 
 
+def calculate_d(num_samples : int):
+    '''
+    This function calculates the optimal number of dimensions for 
+    performance. See https://doi.org/10.48550/arXiv.1806.09178 for more
+    information.
+
+    Parameters
+    ----------
+    **num_samples** : *int*
+        > The number of samples in the data set including both training
+        and testing sets.
+
+    Returns
+    -------
+    **d** : *int*
+        > The optimal number of dimensions to run scMKL with the given 
+        data set.
+
+    Examples
+    --------
+    >>> raw_counts = scipy.sparse.load_npz('MCF7_counts.npz')
+    >>> d = scmkl.calculate_d(raw_counts.shape[0])
+    >>> d
+    161
+    '''
+    d = int(np.sqrt(num_samples) * np.log(np.log(num_samples)))
+    return d
+
+
 def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, 
-                 group_dict: dict, scale_data: bool = True, split_data = None,
-                 D = 100, remove_features = True, train_ratio = 0.8,
+                 group_dict: dict, scale_data: bool = True, 
+                 split_data : np.ndarray | None = None, D : int | None = None, 
+                 remove_features = True, train_ratio = 0.8,
                  distance_metric = 'euclidean', kernel_type = 'Gaussian', 
-                 random_state = 1, allow_multiclass = False, 
-                 class_threshold = 'median'):
+                 random_state : int = 1, allow_multiclass : bool = False, 
+                 class_threshold : str | int = 'median'):
     '''
     Function to create an AnnData object to carry all relevant 
     information going forward.
@@ -200,7 +230,8 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
         > Number of Random Fourier Features used to calculate Z. 
         Should be a positive integer. Higher values of D will 
         increase classification accuracy at the cost of computation 
-        time.
+        time. If set to `None`, will be calculated given number of 
+        samples. 
     
     **remove_features** : *bool* 
         > If `True`, will remove features from X and feature_names
@@ -297,7 +328,7 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     adata.uns['group_dict'] = group_dict
     adata.uns['seed_obj'] = np.random.default_rng(100 * random_state)
     adata.uns['scale_data'] = scale_data
-    adata.uns['D'] = D
+    adata.uns['D'] = D if D is not None else calculate_d(adata.shape[0])
     adata.uns['kernel_type'] = kernel_type
     adata.uns['distance_metric'] = distance_metric
 

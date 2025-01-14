@@ -1,6 +1,6 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.2
 Name: scmkl
-Version: 0.1.5
+Version: 0.1.6
 Summary: Single-cell analysis using Multiple Kernel Learning
 Home-page: https://github.com/ohsu-cedar-comp-hub/scMKL/tree/main
 Author: Sam Kupp, Ian VanGordon, Cigdem Ak
@@ -19,6 +19,16 @@ Requires-Dist: pandas==2.2.2
 Requires-Dist: scikit-learn==1.5.1
 Requires-Dist: scipy==1.14.1
 Requires-Dist: plotnine==0.14.3
+Requires-Dist: matplotlib==3.9.3
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
 
 <h1 align="center">
 <img src="https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/scMKL_logo.png?raw=true" width="500"/>
@@ -53,7 +63,7 @@ Then, install scMKL with:
 pip install scmkl
 ```
 
-If wheels do not build correctly, ensure ```gcc``` and ```g++``` are installed. They can be installed with ```sudo apt install gcc``` and ```sudo apt install g++```.
+If wheels do not build correctly, ensure ```gcc``` and ```g++``` are installed and up to date. They can be installed with ```sudo apt install gcc``` and ```sudo apt install g++```.
 
 ## Requirements
 scMKL takes advantage of AnnData objects and can be implemented with just four pieces of data:
