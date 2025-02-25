@@ -45,9 +45,9 @@ def _eval_labels(cell_labels : np.ndarray, train_indices : np.ndarray,
 
     # Ensuring that at least one cell type label between the two data
     #   are the same
-    assert len(np.intersect1d(train_uniq_labels, test_uniq_labels)) > 0, \
-        "There are no common labels between cells in the training and \
-            testing samples"
+    cl_intersect = np.intersect1d(train_uniq_labels, test_uniq_labels)
+    assert len(cl_intersect) > 0, ("There are no common labels between cells "
+                                   "in the training and testing samples")
 
     return uniq_labels
 

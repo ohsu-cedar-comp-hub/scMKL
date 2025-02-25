@@ -63,10 +63,12 @@ def run(adata : ad.AnnData, alpha_list : np.ndarray,
 
     Examples
     --------
-    >>> results = scmkl.run(adata = adata, alpha_list = np.array([0.05, 0.1, 0.5]))
+    >>> results = scmkl.run(adata = adata, 
+    ...                     alpha_list = np.array([0.05, 0.1, 0.5]))
     >>> results
-    dict_keys(['Metrics', 'Selected_groups', 'Norms', 'Predictions', 'Observed', 
-    'Test_indices', 'Group_names', 'Models', 'Train_time', 'RAM_usage'])
+    dict_keys(['Metrics', 'Selected_groups', 'Norms', 'Predictions', 
+    ...        'Observed', 'Test_indices', 'Group_names', 'Models', 
+    ...        'Train_time', 'RAM_usage'])
     >>>
     >>> # List of alpha values
     >>> results['Metrics'].keys()
@@ -84,13 +86,13 @@ def run(adata : ad.AnnData, alpha_list : np.ndarray,
 
     # Initializing variables to capture metrics
     group_names = list(adata.uns['group_dict'].keys())
-    predicted = {}
+    preds = {}
     group_norms = {}
-    metric_dict = {}
+    mets_dict = {}
     selected_groups = {}
     train_time = {}
     models = {}
-    probabilities = {}
+    probs = {}
 
     D = adata.uns['D']
 
@@ -102,14 +104,19 @@ def run(adata : ad.AnnData, alpha_list : np.ndarray,
         train_start = time.time()
 
         adata = train_model(adata, group_size= 2*D, alpha = alpha)
+
         if return_probs:
-            predicted[alpha], metric_dict[alpha], probabilities[alpha] = predict(adata, 
-                                                        metrics = metrics,
-                                                        return_probs = return_probs)
+            alpha_res = predict(adata, 
+                                metrics = metrics,
+                                return_probs = return_probs)
+            preds[alpha], mets_dict[alpha], probs[alpha] = alpha_res
+
         else:
-            predicted[alpha], metric_dict[alpha] = probabilities[alpha] = predict(adata, 
-                                                        metrics = metrics,
-                                                        return_probs = return_probs)
+            alpha_res = predict(adata, 
+                                metrics = metrics,
+                                return_probs = return_probs)
+            preds[alpha], mets_dict[alpha] = alpha_res
+
         selected_groups[alpha] = find_selected_groups(adata)
 
         kernel_weights = adata.uns['model'].coef_
@@ -125,16 +132,16 @@ def run(adata : ad.AnnData, alpha_list : np.ndarray,
 
     # Combining results into one object
     results = {}
-    results['Metrics'] = metric_dict
+    results['Metrics'] = mets_dict
     results['Selected_groups'] = selected_groups
     results['Norms'] = group_norms
-    results['Predictions'] = predicted
+    results['Predictions'] = preds
     results['Observed'] = adata.obs['labels'].iloc[adata.uns['test_indices']]
     results['Test_indices'] = adata.uns['test_indices']
     results['Group_names']= group_names
     results['Models'] = models
     results['Train_time'] = train_time
     results['RAM_usage'] = f'{tracemalloc.get_traced_memory()[1] / 1e9} GB'
-    results['Probabilities'] = probabilities
+    results['Probabilities'] = probs
 
     return results

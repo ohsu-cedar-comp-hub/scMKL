@@ -1,5 +1,5 @@
 import numpy as np
-import sklearn
+import sklearn.metrics as skm
 
 
 def predict(adata, metrics = None, return_probs = False):
@@ -7,7 +7,8 @@ def predict(adata, metrics = None, return_probs = False):
     Function to return predicted labels and calculate any of AUROC, 
     Accuracy, F1 Score, Precision, Recall for a classification. 
 
-    ** If labeled_test flag is set to False, metrics cannot be computed.**
+    ** If labeled_test flag is set to False, metrics cannot be 
+    computed.**
     
     Parameters
     ----------  
@@ -41,9 +42,9 @@ def predict(adata, metrics = None, return_probs = False):
     --------
     >>> adata = scmkl.estimate_sigma(adata)
     >>> adata = scmkl.calculate_z(adata)
-    >>> adata = scmkl.train_model(adata, metrics = ['AUROC', 'F1-Score', 
-    ...                                             'Accuracy', 'Precision', 
-    ...                                             'Recall'])
+    >>> metrics = ['AUROC', 'F1-Score', 'Accuracy', 'Precision', 
+    ...            'Recall']
+    >>> adata = scmkl.train_model(adata, metrics = metrics)
     >>>
     >>> metrics_dict = scmkl.predict(adata)
     >>> metrics_dict.keys()
@@ -51,28 +52,37 @@ def predict(adata, metrics = None, return_probs = False):
     '''
     X_test = adata.uns['Z_test']
 
+    allowed_mets = ['AUROC', 'Accuracy', 'F1-Score', 'Precision', 'Recall']
+
+    # Asserting all input metrics are valid
     if metrics is not None:
-        assert all([metric in ['AUROC', 'Accuracy', 'F1-Score', 'Precision', 'Recall'] for metric in metrics]), \
-            'Unknown metric provided.  Must be None, or one or more of AUROC, Accuracy, F1-Score, Precision, Recall'
+        mets_allowed = [metric in allowed_mets for metric in metrics]
+        assert all(mets_allowed), ("Unknown metric provided. Must be None, "
+                                   f"or one or more of {allowed_mets}")
 
     # Capturing class labels
-    classes = np.unique(adata.obs['labels'].iloc[adata.uns['train_indices']].to_numpy())
+    train_idx = adata.uns['train_indices']
+    classes = np.unique(adata.obs['labels'].iloc[train_idx].to_numpy())
 
     # Sigmoid function to force probabilities into [0,1]
     probabilities = 1 / (1 + np.exp(-adata.uns['model'].predict(X_test)))
 
     #Convert numerical probabilities into binary phenotype
-    y_pred = np.array(np.repeat(classes[1], X_test.shape[0]), dtype = 'object')
-    y_pred[np.round(probabilities,0).astype(int) == 1] = classes[0]
+    y_pred = np.array(np.repeat(classes[1], X_test.shape[0]), 
+                      dtype = 'object')
+    y_pred[np.round(probabilities, 0).astype(int) == 1] = classes[0]
 
     if not adata.uns['labeled_test']:
         if not metrics is None:
-            print('WARNING: Cannot calculate classification metrics for unlabeled test data')
+            print("WARNING: Cannot calculate classification metrics "
+                  "for unlabeled test data")
             metrics = None
     else:
-        y_test = adata.obs['labels'].iloc[adata.uns['test_indices']].to_numpy()
+        y_test = adata.obs['labels'].iloc[adata.uns['test_indices']]
+        y_test = y_test.to_numpy()
         X_test = adata.uns['Z_test']
-        assert X_test.shape[0] == len(y_test), 'X and y must have the same number of samples'
+        assert X_test.shape[0] == len(y_test), ("X rows and length of y must "
+                                                "be equal")
 
         # Group Lasso requires 'continous' y values need to re-descritize it
         y = np.zeros((len(y_test)))
@@ -84,17 +94,21 @@ def predict(adata, metrics = None, return_probs = False):
             return y_pred
         
         # Calculate and save metrics given in metrics
+        p_cl = classes[0]
         if 'AUROC' in metrics:
-            fpr, tpr, _ = sklearn.metrics.roc_curve(y, probabilities)
-            metric_dict['AUROC'] = sklearn.metrics.auc(fpr, tpr)
+            fpr, tpr, _ = skm.roc_curve(y, probabilities)
+            metric_dict['AUROC'] = skm.auc(fpr, tpr)
         if 'Accuracy' in metrics:
             metric_dict['Accuracy'] = np.mean(y_test == y_pred)
         if 'F1-Score' in metrics:
-            metric_dict['F1-Score'] = sklearn.metrics.f1_score(y_test, y_pred, pos_label = classes[0])
+            metric_dict['F1-Score'] = skm.f1_score(y_test, y_pred, 
+                                                   pos_label = p_cl)
         if 'Precision' in metrics:
-            metric_dict['Precision'] = sklearn.metrics.precision_score(y_test, y_pred, pos_label = classes[0])
+            metric_dict['Precision'] = skm.precision_score(y_test, y_pred, 
+                                                           pos_label = p_cl)
         if 'Recall' in metrics:
-            metric_dict['Recall'] = sklearn.metrics.recall_score(y_test, y_pred, pos_label = classes[0])
+            metric_dict['Recall'] = skm.recall_score(y_test, y_pred, 
+                                                     pos_label = p_cl)
 
     if return_probs:
         probs = {classes[0] : probabilities,
@@ -135,7 +149,8 @@ def find_selected_groups(adata) -> np.ndarray:
     >>>
     >>> selected_groups = scmkl.find_selected_groups(adata)
     >>> selected_groups
-    np.ndarray(['HALLMARK_ESTROGEN_RESPONSE_EARLY', 'HALLMARK_HYPOXIA'])
+    np.ndarray(['HALLMARK_ESTROGEN_RESPONSE_EARLY', 
+                'HALLMARK_HYPOXIA'])
     '''
 
     selected_groups = []
@@ -143,10 +158,14 @@ def find_selected_groups(adata) -> np.ndarray:
     group_size = adata.uns['model'].get_params()['groups']
     group_names = np.array(list(adata.uns['group_dict'].keys()))
 
-    # Loop over the model weights associated with each group and calculate the L2 norm.
+    # Loop over the model weights associated with each group and calculate 
+    # the L2 norm
     for i, group in enumerate(group_names):
         if not isinstance(group_size, (list, set, np.ndarray, tuple)):
-            group_norm = np.linalg.norm(coefficients[np.arange(i * group_size, (i+1) * group_size - 1)])
+            group_start = i * group_size
+            group_end = (i+1) * group_size - 1
+            group_cols = np.arange(group_start, group_end)
+            group_norm = np.linalg.norm(coefficients[group_cols])
         else: 
             group_norm = np.linalg.norm(coefficients[group_size[i]])
 

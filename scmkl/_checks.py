@@ -27,28 +27,30 @@ def _check_adatas(adatas : list, check_uns : bool = False,
     for i, adata in enumerate(adatas):
         # Ensuring all elements are type AnnData
         if type(adata) != ad.AnnData: 
-            raise TypeError(f'List object in position {i} is {type(adata)}, \
-                            all elements in adatas must of type \
-                            anndata.AnnData')
+            raise TypeError("All elements in adatas should be of type "
+                            "anndata.AnnData")
         
         # Ensuring all train/test indices are the same
         if check_uns:
             assert np.array_equal(adatas[0].uns['train_indices'],
-                                    adata.uns['train_indices']), \
-                "Train indices across AnnData objects in adatas do not \
-                    match, ensure adata.uns['train_indices'] are the same \
-                    for all elements"
+                                  adata.uns['train_indices']), ("Train "
+                                    "indices across AnnData objects in "
+                                    "adatas do not match, ensure "
+                                    "adata.uns['train_indices'] are the same "
+                                    "for all elements")
                 
             assert np.array_equal(adatas[0].uns['test_indices'], 
-                                    adata.uns['test_indices']), \
-                "Test indices across AnnData objects in adatas do not match, \
-                    ensure adata.uns['test_indices'] are the same for all \
-                    elements"
+                                    adata.uns['test_indices']), ("Test "
+                                    "indices across AnnData objects in "
+                                    "adatas do not match, ensure "
+                                    "adata.uns['test_indices'] are the same "
+                                    "for all elements")
 
         # Ensuring all cell labels are the same 
         if check_obs:
             assert np.array_equal(adatas[0].obs['labels'], 
-                                    adata.obs['labels']), \
-                f"adata.obs['labels'] are different between AnnData objects"
+                                    adata.obs['labels']), (
+                                    "adata.obs['labels'] are different "
+                                    "between AnnData objects")
     
     return None

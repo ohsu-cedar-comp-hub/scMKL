@@ -4,18 +4,25 @@ import anndata as ad
 
 def _filter_features(X, feature_names, group_dict, remove_features):
     '''
-    Function to remove unused features from X matrix. Any features not included in group_dict will be removed from the matrix.
-    Also puts the features in the same relative order (of included features)
-    Input:
-            X- Data array. Can be Numpy array or Scipy Sparse Array
-            feature_names- Numpy array of corresponding feature names
-            group_dict- Dictionary containing feature grouping information.
-                        Example: {geneset: np.array(gene_1, gene_2, ..., gene_n)}
-    Output:
-            X- Data array containing data only for features in the group_dict
-            feature_names- Numpy array of corresponding feature names from group_dict
+    Function to remove unused features from X matrix. Any features not 
+    included in group_dict will be removed from the matrix. Also puts 
+    the features in the same relative order (of included features)
+    
+    Parameters
+    ----------
+    X : Data array. Can be Numpy array or Scipy Sparse Array
+    feature_names : Numpy array of corresponding feature names
+    group_dict : Dictionary containing feature grouping information.
+                 Example: {geneset: np.array(gene_1, gene_2, ..., 
+                 gene_n)}
+    Returns
+    -------
+    X : Data array containing data only for features in the group_dict
+    feature_names : Numpy array of corresponding feature names from 
+                    group_dict
     '''
-    assert X.shape[1] == len(feature_names), 'Given features do not correspond with features in X'    
+    assert X.shape[1] == len(feature_names), ("Given features do not "
+                                              "correspond with features in X")  
 
     group_features = set()
     feature_set = set(feature_names)
@@ -25,8 +32,9 @@ def _filter_features(X, feature_names, group_dict, remove_features):
         group_features.update(set(group_dict[group]))
 
         # Finds intersection between group features and features in data
-        # Converts to numpy array and sorts to preserve order of feature names
-        group_dict[group] = np.sort(np.array(list(feature_set.intersection(set(group_dict[group])))))
+        # Converts to nd.array and sorts to preserve order of feature names
+        group_feats = list(feature_set.intersection(set(group_dict[group])))
+        group_dict[group] = np.sort(np.array(group_feats))
 
     # Only keeping groupings that have at least two features
     group_dict = {group : group_dict[group] for group in group_dict.keys()
@@ -34,7 +42,10 @@ def _filter_features(X, feature_names, group_dict, remove_features):
 
     if remove_features:
         # Find location of desired features in whole feature set
-        group_feature_indices = np.where(np.in1d(feature_names, np.array(list(group_features)), assume_unique = True))[0]
+        g_features = np.array(list(group_features))
+        group_feature_indices = np.where(np.in1d(feature_names, 
+                                                 g_features, 
+                                                 assume_unique = True))[0]
 
         # Subset only the desired features and data
         X = X[:,group_feature_indices]
@@ -43,8 +54,8 @@ def _filter_features(X, feature_names, group_dict, remove_features):
     return X, feature_names, group_dict
 
 
-def _multi_class_train_test_split(y, seed_obj = np.random.default_rng(100), train_ratio = 0.8, 
-                                  class_threshold = 'median'):
+def _multi_class_split(y, train_ratio = 0.8, class_threshold = 'median', 
+                       seed_obj = np.random.default_rng(100)):
     '''
     Function for calculating the training and testing cell positions 
     for multiclass data sets.
@@ -59,9 +70,9 @@ def _multi_class_train_test_split(y, seed_obj = np.random.default_rng(100), trai
         > Seed used to randomly sample and split data.
 
     **train_ratio** : *float*
-        > Ratio of number of training samples to entire data set. Note:
-        if a threshold is applied, the ratio training samples may 
-        decrease depending on class balance and `class_threshold`
+        > Ratio of number of training samples to entire data set. 
+        Note: if a threshold is applied, the ratio training samples 
+        may decrease depending on class balance and `class_threshold`
         parameter.
 
     **class_threshold** : *str* | *int*
@@ -86,7 +97,8 @@ def _multi_class_train_test_split(y, seed_obj = np.random.default_rng(100), trai
     
     # Capturing training indices while maintaining original class proportions
     train_samples = {class_ : seed_obj.choice(class_positions[class_], 
-                                              int(len(class_positions[class_]) * train_ratio), 
+                                              int(len(class_positions[class_])
+                                                  * train_ratio), 
                                               replace = False)
                         for class_ in class_positions.keys()}
     
@@ -116,18 +128,28 @@ def _multi_class_train_test_split(y, seed_obj = np.random.default_rng(100), trai
     return train_indices, test_indices
 
 
-def _binary_train_test_split(y, train_indices = None, seed_obj = np.random.default_rng(100), train_ratio = 0.8):
+def _binary_split(y, train_indices = None, train_ratio = 0.8,
+                  seed_obj = np.random.default_rng(100)):
     '''
-    Function to calculate training and testing indices for given dataset. If train indices are given, it will calculate the test indices.
-        If train_indices == None, then it calculates both indices, preserving the ratio of each label in y
-    Input:
-            y- Numpy array of cell labels. Can have any number of classes for this function.
-            train_indices- Optional array of pre-determined training indices
-            seed_obj- Numpy random state used for random processes. Can be specified for reproducubility or set by default.
-            train_ratio- decimal value ratio of features in training:testing sets
-    Output:
-            train_indices- Array of indices of training cells
-            test_indices- Array of indices of testing cells
+    Function to calculate training and testing indices for given 
+    dataset. If train indices are given, it will calculate the test 
+    indices. If train_indices == None, then it calculates both indices, 
+    preserving the ratio of each label in y
+
+    Parameters
+    ----------
+    y : Numpy array of cell labels. Can have any number of classes for 
+        this function.
+    train_indices : Optional array of pre-determined training indices
+    seed_obj : Numpy random state used for random processes. Can be 
+    specified for reproducubility or set by default.
+    train_ratio : decimal value ratio of features in training/testing 
+                  sets
+    
+    Returns
+    -------
+    train_indices : Array of indices of training cells
+    test_indices : Array of indices of testing cells
     '''
 
     # If train indices aren't provided
@@ -142,15 +164,19 @@ def _binary_train_test_split(y, train_indices = None, seed_obj = np.random.defau
             label_indices = np.where(y == label)[0]
 
             # Sample these indices according to train ratio
-            train_label_indices = seed_obj.choice(label_indices, int(len(label_indices) * train_ratio), replace = False)
+            n = int(len(label_indices) * train_ratio)
+            train_label_indices = seed_obj.choice(label_indices, n, 
+                                                  replace = False)
             train_indices.extend(train_label_indices)
     else:
-        assert len(train_indices) <= len(y), 'More train indices than there are samples'
+        assert len(train_indices) <= len(y), ("More train indices than there "
+                                              "are samples")
 
     train_indices = np.array(train_indices)
 
     # Test indices are the indices not in the train_indices
-    test_indices = np.setdiff1d(np.arange(len(y)), train_indices, assume_unique = True)
+    test_indices = np.setdiff1d(np.arange(len(y)), train_indices, 
+                                assume_unique = True)
 
     return train_indices, test_indices
 
@@ -212,7 +238,8 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
 
     **group_dict** : *dict* 
         > Dictionary containing feature grouping information.
-            - Example: {geneset: np.array([gene_1, gene_2, ..., gene_n])}
+            - Example: {geneset: np.array([gene_1, gene_2, ..., 
+                        gene_n])}
 
     **scale_data** : *bool*  
         > If `True`, data matrix is log transformed and standard 
@@ -300,7 +327,8 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     --------
     >>> data_mat = scipy.sparse.load_npz('MCF7_RNA_matrix.npz')
     >>> gene_names = np.load('MCF7_gene_names.pkl', allow_pickle = True)
-    >>> group_dict = np.load('hallmark_genesets.pkl', allow_pickle = True)
+    >>> group_dict = np.load('hallmark_genesets.pkl', 
+    >>>                      allow_pickle = True)
     >>> 
     >>> adata = scmkl.create_adata(X = data_mat, 
     ...                            feature_names = gene_names, 
@@ -312,13 +340,26 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     'distance_metric', 'train_indices', 'test_indices'
     '''
 
-    assert X.shape[1] == len(feature_names), 'Different number of features in X than feature names'
+    assert X.shape[1] == len(feature_names), ("Different number of features "
+                                              "in X than feature names")
+    
     if not allow_multiclass:
-        assert len(np.unique(cell_labels)) == 2, 'cell_labels must contain 2 classes'
-    assert isinstance(D, int) and D > 0, 'D must be a positive integer'
-    assert kernel_type.lower() in ['gaussian', 'laplacian', 'cauchy'], 'Given kernel type not implemented. Gaussian, Laplacian, and Cauchy are the acceptable types.'
+        assert len(np.unique(cell_labels)) == 2, ("cell_labels must contain "
+                                                  "2 classes")
+    if D is not None:    
+        assert isinstance(D, int) and D > 0, 'D must be a positive integer'
 
-    X, feature_names, group_dict = _filter_features(X, feature_names, group_dict, remove_features)
+    kernel_options = ['gaussian', 'laplacian', 'cauchy']
+    assert kernel_type.lower() in kernel_options, ("Given kernel type not "
+                                                   "implemented. Gaussian, "
+                                                   "Laplacian, and Cauchy "
+                                                   "are the acceptable "
+                                                   "types.")
+
+    X, feature_names, group_dict = _filter_features(X, 
+                                                    feature_names, 
+                                                    group_dict, 
+                                                    remove_features)
 
     # Create adata object and add column names
     adata = ad.AnnData(X)
@@ -333,25 +374,30 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     adata.uns['distance_metric'] = distance_metric
 
     if (split_data is None):
-        assert X.shape[0] == len(cell_labels), 'Different number of cells than labels'
+        assert X.shape[0] == len(cell_labels), ("Different number of cells "
+                                                "than labels")
         adata.obs['labels'] = cell_labels
 
         if (allow_multiclass == False):
-            train_indices, test_indices = _binary_train_test_split(cell_labels, 
-                                                                   seed_obj = adata.uns['seed_obj'],
-                                                                   train_ratio = train_ratio)
+            split = _binary_split(cell_labels, 
+                                  seed_obj = adata.uns['seed_obj'],
+                                  train_ratio = train_ratio)
+            train_indices, test_indices = split
 
         elif (allow_multiclass == True):
-            train_indices, test_indices = _multi_class_train_test_split(cell_labels, 
-                                                                        seed_obj = adata.uns['seed_obj'], 
-                                                                        class_threshold = class_threshold,
-                                                                        train_ratio = train_ratio)
+            split = _multi_class_split(cell_labels, 
+                                       seed_obj = adata.uns['seed_obj'], 
+                                       class_threshold = class_threshold,
+                                       train_ratio = train_ratio)
+            train_indices, test_indices = split
 
         adata.uns['labeled_test'] = True
+
     else:
-        assert X.shape[0] == len(cell_labels) or \
-            len(cell_labels) == np.sum(split_data == 'train'),\
-            'Must give labels for all cells or only for training cells'
+        x_eq_labs = X.shape[0] == len(cell_labels)
+        train_eq_labs = X.shape[0] == len(cell_labels)
+        assert x_eq_labs or train_eq_labs, ("Must give labels for all cells "
+                                            "or only for training cells")
         
         train_indices = np.where(split_data == 'train')[0]
         test_indices = np.where(split_data == 'test')[0]
@@ -373,10 +419,7 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     adata.uns['test_indices'] = test_indices
 
     if not scale_data:
-        print('WARNING: Data will not be log transformed and scaled')
-        print('         To change this behavior, set scale_data to True')
+        print("WARNING: Data will not be log transformed and scaled "
+              "To change this behavior, set scale_data to True")
 
     return adata
-
-
-
