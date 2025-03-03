@@ -55,6 +55,32 @@ def _parse_metrics(results, key : str | None = None,
     return df            
 
 
+def _parse_weights(results : dict, include_as : bool = False, 
+                   key : None | str = None) -> pd.DataFrame:
+    '''
+    '''
+    alpha_vals = []
+    group_names = []
+    kernel_weights = []
+
+    for alpha in results['Norms'].keys():
+        alpha_vals.extend([alpha] * len(results['Norms'][alpha]))
+        group_names.extend(results['Group_names'])
+        kernel_weights.extend(results['Norms'][alpha])
+
+    df = pd.DataFrame({'Alpha' : alpha_vals, 
+                       'Group' : group_names, 
+                       'Kernel Weight' : kernel_weights})
+    
+    if include_as:
+        df['Alpha Star'] = df['Alpha'] == results['Alpha_star'] 
+
+    if key is not None:
+        df['Key'] = [key] * df.shape[0]
+
+    return df
+
+
 def get_summary(results : dict, metric = 'AUROC'):
     '''
     Takes the results from either `scmkl.run()` and generates a 
@@ -235,3 +261,68 @@ def get_metrics(results : dict | None = None, rfiles : dict | None = None,
 
     return df
 
+
+def get_weights(results : dict | None = None, rfiles : dict | None = None, 
+                include_as : bool = False) -> pd.DataFrame:
+    '''
+    Takes either a single scMKL result or dictionary of results and 
+    returns a pd.DataFrame with cols ['Alpha', 'Group', 
+    'Kernel Weight']. If include_as == True, a fourth col will be 
+    added to indicate whether or not the run respective to that alpha 
+    was chosen as optimal via CV.
+
+    Parameters
+    ----------
+    **results** : *None* | *dict*
+        > A dictionary with the results of a single run from 
+        `scmkl.run()`. Must be `None` if `rfiles is not None`.
+
+    **rfiles** : *None* | *dict*
+        > A dictionary of results dictionaries containing multiple 
+        results from `scmkl.run()`. If `include_keys == True`, a col 
+        will be added to the output pd.DataFrame with the keys as 
+        values cooresponding to each row.
+
+    **include_as** : *bool*
+        > When `True`, will add a bool col to output pd.DataFrame 
+        where rows with alphas cooresponding to alpha_star will be 
+        `True`.
+
+    Returns
+    -------
+    **df** : *pd.DataFrame*
+        > A pd.DataFrame containing all of the groups from each alpha 
+        and their cooresponding kernel weights.
+
+    Examples
+    --------
+    >>> # For a single file
+    >>> results = scmkl.run(adata)
+    >>> metrics = scmkl.get_weights(results = results)
+
+    >>> # For multiple runs saved in a dict
+    >>> output_dir = 'scMKL_outputs/'
+    >>> rfiles = scmkl.read_files(output_dir)
+    >>> metrics = scmkl.get_weights(rfiles)
+    '''
+    # Checking which data is being worked with 
+    multi_results = _parse_result_type(results = results, rfiles = rfiles)
+
+    # Initiating col list with minimal columns
+    cols = ['Alpha', 'Group', 'Kernel Weight']
+
+    if include_as:
+        cols.append('Alpha Star')
+
+    if multi_results:
+        cols.append('Key')
+        df = pd.DataFrame(columns = cols)
+        for key, result in rfiles.items():
+            cur_df = _parse_weights(results = result, key = key, 
+                                     include_as = include_as)
+            df = pd.concat([df, cur_df.copy()])
+            
+    else:
+        df = _parse_metrics(results = results, include_as = include_as)
+
+    return df
