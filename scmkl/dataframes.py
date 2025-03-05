@@ -35,19 +35,24 @@ def _parse_metrics(results, key : str | None = None,
     met_names = []
     met_vals = []
 
-    for alpha in results['Metrics'].keys():
-        for metric, value in results['Metrics'][alpha].items():
-            alpha_vals.append(alpha)
-            met_names.append(metric)
-            met_vals.append(value)
+    # If statement ensuring results is a scMKL results with metrics
+    if 'Metrics' in results.keys():
+        for alpha in results['Metrics'].keys():
+            for metric, value in results['Metrics'][alpha].items():
+                alpha_vals.append(alpha)
+                met_names.append(metric)
+                met_vals.append(value)
+
+        if include_as:
+            assert 'Alpha_star' in results.keys(), "'Alpha_star' not in results"
+            df['Alpha Star'] = df['Alpha'] == results['Alpha_star']
+
+    else:
+        print(f"{key} is not a scMKL result and will be ignored.")
             
     df = pd.DataFrame({'Alpha' : alpha_vals,
                        'Metric' : met_names,
                        'Value' : met_vals})
-    
-    if include_as:
-        assert 'Alpha_star' in results.keys(), "'Alpha_star' not in results"
-        df['Alpha Star'] = df['Alpha'] == results['Alpha_star']
 
     if key is not None:
         df['Key'] = [key] * df.shape[0]
@@ -298,12 +303,12 @@ def get_weights(results : dict | None = None, rfiles : dict | None = None,
     --------
     >>> # For a single file
     >>> results = scmkl.run(adata)
-    >>> metrics = scmkl.get_weights(results = results)
-
+    >>> weights = scmkl.get_weights(results = results)
+    >>>
     >>> # For multiple runs saved in a dict
     >>> output_dir = 'scMKL_outputs/'
     >>> rfiles = scmkl.read_files(output_dir)
-    >>> metrics = scmkl.get_weights(rfiles)
+    >>> weights = scmkl.get_weights(rfiles)
     '''
     # Checking which data is being worked with 
     multi_results = _parse_result_type(results = results, rfiles = rfiles)
@@ -324,5 +329,64 @@ def get_weights(results : dict | None = None, rfiles : dict | None = None,
             
     else:
         df = _parse_metrics(results = results, include_as = include_as)
+
+    return df
+
+
+def get_selection(weights_df, order_groups : bool):
+    '''
+    This function takes a pd.DataFrame created by 
+    `scmkl.get_metrics()` and returns a selection table. Selection 
+    refers to how many times a group had a nonzero group weight. To 
+    calculate this, a col is added indicating whether the group was 
+    selected. Then, the dataframe is grouped by alpha and group. 
+    Selection can then be summed returning a dataframe with cols 
+    `['Alpha', 'Group', Selection]`.
+
+    Parameters
+    ----------
+    **weights_df** : *pd.DataFrame*
+        > A dataframe output by `scmkl.get_weights()` with cols
+        `['Alpha', 'Group', 'Kernel Weight']`.
+
+    **order_groups** : *bool*
+        > If `True`, the `'Group'` col of the output dataframe will be 
+        made into a `pd.Categorical` col ordered by number of times 
+        each group was selected in decending order.
+
+    Returns
+    -------
+    **df** : *pd.DataFrame*
+        > A dataframe with cols `['Alpha', 'Group', Selection]`.
+
+    Example
+    -------
+    >>> # For a single file
+    >>> results = scmkl.run(adata)
+    >>> weights = scmkl.get_weights(results = results)
+    >>> selection = scmkl.get_selection(weights)
+    >>>
+    >>> # For multiple runs saved in a dict
+    >>> output_dir = 'scMKL_outputs/'
+    >>> rfiles = scmkl.read_files(output_dir)
+    >>> weights = scmkl.get_weights(rfiles)
+    >>> selection = scmkl.get_selection(weights)
+    '''
+    # Adding col indicating whether or not groups have nonzero weight
+    selection = weights_df['Kernel Weight'].apply(lambda x: x > 0)
+    weights_df['Selection'] = selection
+
+    # Summing selection across replications to get selection
+    df = weights_df.groupby(['Alpha', 'Group'])['Selection'].sum()
+    df = df.reset_index()
+
+    # Getting group order
+    if order_groups:
+        order = df.groupby('Group')['Selection'].sum()
+        order = order.reset_index().sort_values(by = 'Selection', 
+                                                ascending = False)
+        order = order['Group']
+        df['Group'] = pd.Categorical(df['Group'], categories = order)
+
 
     return df
