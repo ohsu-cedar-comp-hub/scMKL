@@ -333,10 +333,10 @@ def get_weights(results : dict | None = None, rfiles : dict | None = None,
     return df
 
 
-def get_selection(weights_df, order_groups : bool):
+def get_selection(weights_df, order_groups : bool) -> pd.DataFrame:
     '''
     This function takes a pd.DataFrame created by 
-    `scmkl.get_metrics()` and returns a selection table. Selection 
+    `scmkl.get_weights()` and returns a selection table. Selection 
     refers to how many times a group had a nonzero group weight. To 
     calculate this, a col is added indicating whether the group was 
     selected. Then, the dataframe is grouped by alpha and group. 
@@ -390,3 +390,46 @@ def get_selection(weights_df, order_groups : bool):
 
 
     return df
+
+
+def mean_groups_per_alpha(selection_df) -> dict:
+    '''
+    This function takes a pd.DataFrame from `scmkl.get_selection()` 
+    generated from multiple scMKL results and returns a dictionary 
+    with keys being alphas from the input dataframe and values being 
+    the mean number of selected groups for a given alpha across 
+    results. 
+
+    Parameters
+    ----------
+    **selection_df** : *pd.DataFrame*
+        > A dataframe output by `scmkl.get_selection()` with cols 
+        `['Alpha', 'Group', Selection].
+    
+    Returns
+    -------
+    **mean_groups** : *dict*
+        > A dictionary with alphas as keys and the mean number of 
+        selected groups for that alpha as keys.
+
+    Examples
+    --------
+    >>> weights = scmkl.get_weights(rfiles)
+    >>> selection = scmkl.get_selection(weights)
+    >>> mean_groups = scmkl.mean_groups_per_alpha(selection)
+    >>> mean_groups = {alpha : np.round(num_selected, 1)
+    ...                for alpha, num_selected in mean_groups.items()}
+    >>>
+    >>> print(mean_groups)
+    {0.05 : 50.0, 0.2 : 24.7, 1.1 : 5.3}
+    '''
+    mean_groups = {}
+    for alpha in np.unique(selection_df['Alpha']):
+
+        # Capturing rows for given alpha
+        rows = selection_df['Alpha'] == alpha
+
+        # Adding mean number of groups for alpha
+        mean_groups[alpha] = np.mean(selection_df[rows]['Selection'])
+
+    return mean_groups

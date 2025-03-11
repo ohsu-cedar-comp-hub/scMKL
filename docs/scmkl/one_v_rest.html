@@ -102,9 +102,9 @@
 </span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a>
 </span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a>    <span class="c1"># Ensuring that at least one cell type label between the two data</span>
 </span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a>    <span class="c1">#   are the same</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a>    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">train_uniq_labels</span><span class="p">,</span> <span class="n">test_uniq_labels</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> \
-</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a>        <span class="s2">&quot;There are no common labels between cells in the training and </span><span class="se">\</span>
-</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a><span class="s2">            testing samples&quot;</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a>    <span class="n">cl_intersect</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">train_uniq_labels</span><span class="p">,</span> <span class="n">test_uniq_labels</span><span class="p">)</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a>    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">cl_intersect</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;There are no common labels between cells &quot;</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a>                                   <span class="s2">&quot;in the training and testing samples&quot;</span><span class="p">)</span>
 </span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a>
 </span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a>    <span class="k">return</span> <span class="n">uniq_labels</span>
 </span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a>

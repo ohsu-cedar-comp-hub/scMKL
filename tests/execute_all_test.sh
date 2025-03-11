@@ -24,7 +24,9 @@ for TEST in $(ls -1 *.py); \
     echo; \
     echo $TEST; \
     echo; \
-    python $TEST; \
+    python -W ignore $TEST; \
+    echo; \
+    echo; \
     done
 
 # Deactivating env
@@ -32,6 +34,7 @@ conda init
 conda deactivate
 
 # Deleting env
+conda init
 conda remove -n scmkl_test_env --all --yes
 
 echo
