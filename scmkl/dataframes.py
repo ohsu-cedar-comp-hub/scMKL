@@ -43,21 +43,21 @@ def _parse_metrics(results, key : str | None = None,
                 met_names.append(metric)
                 met_vals.append(value)
 
-        if include_as:
-            assert 'Alpha_star' in results.keys(), "'Alpha_star' not in results"
-            df['Alpha Star'] = df['Alpha'] == results['Alpha_star']
-
     else:
         print(f"{key} is not a scMKL result and will be ignored.")
             
     df = pd.DataFrame({'Alpha' : alpha_vals,
                        'Metric' : met_names,
                        'Value' : met_vals})
+    
+    if include_as:
+        assert 'Alpha_star' in results.keys(), "'Alpha_star' not in results"
+        df['Alpha Star'] = df['Alpha'] == results['Alpha_star']
 
     if key is not None:
         df['Key'] = [key] * df.shape[0]
 
-    return df            
+    return df        
 
 
 def _parse_weights(results : dict, include_as : bool = False, 
