@@ -35,6 +35,27 @@ def _tfidf(X, mode = 'filter'):
         significant_features = np.where(np.sum(tfidf, axis=0) > 0)[0]
         return significant_features
         
+def _tfidf_train_test(X_train, X_test):
+    if scipy.sparse.issparse(X_train):
+        tf_train = scipy.sparse.csc_array(X_train)
+        tf_test = scipy.sparse.csc_array(X_test)
+        doc_freq = np.array(np.sum(X_train > 0, axis=0)).flatten()
+    else:
+        tf_train = X_train
+        tf_test = X_test
+        doc_freq = np.sum(X_train > 0, axis=0)
+
+    idf = np.log1p((1 + X_train.shape[0]) / (1 + doc_freq))
+
+    tfidf_train = tf_train * idf
+    tfidf_test = tf_test * idf
+
+    if scipy.sparse.issparse(tfidf_train):
+        tfidf_train = scipy.sparse.csc_matrix(tfidf_train)
+        tfidf_test = scipy.sparse.csc_matrix(tfidf_test)
+        
+    return tfidf_train, tfidf_test
+
 
 def tfidf_normalize(adata, binarize = False):
     '''

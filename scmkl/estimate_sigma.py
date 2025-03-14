@@ -1,8 +1,9 @@
 import numpy as np
 import scipy
+from sklearn.decomposition import TruncatedSVD, PCA
 
 from scmkl.calculate_z import _process_data
-
+from scmkl.tfidf_normalize import _tfidf
 
 def estimate_sigma(adata, n_features = 5000):
     '''
@@ -42,13 +43,35 @@ def estimate_sigma(adata, n_features = 5000):
 
         # Use on the train data to estimate sigma
         X_train = adata[adata.uns['train_indices'], group_features].X
-        X_train = _process_data(X_train = X_train, scale_data = adata.uns['scale_data'], return_dense = True)
+        X_train = _process_data(X_train = X_train, scale_data = adata.uns['scale_data'], return_dense = False)
         
         # Sample cells because distance calculation are costly and can be approximated
         distance_indices = adata.uns['seed_obj'].choice(np.arange(X_train.shape[0]), np.min((2000, X_train.shape[0])))
 
+        if adata.uns['tfidf']:
+            X_train = _tfidf(X_train, mode = 'normalize')
+
+        if adata.uns['reduction'] == 'svd':
+
+            SVD_func = TruncatedSVD(n_components = np.min([50, X_train.shape[1]]), random_state = 1)
+            X_train = SVD_func.fit_transform(csr_array(X_train[distance_indices,:]))[:,1:]
+
+        elif adata.uns['pca'] == 'pca':
+            PCA_func = PCA(n_components = np.min([50, X_train.shape[1]]), random_state = 1)
+            X_train = PCA_func.fit_transform(np.asarray(X_train[distance_indices,:]))
+
+        elif adata.uns['reduction'] == 'linear':
+
+            X_train = X_train[distance_indices] @ adata.uns['seed_obj'].choice([0,1], [0.02, 0.98]).reshape((len(distance_indices), 50))
+
+        else:
+            X_train = X_train[distance_indices, :]
+
+        if scipy.sparse.issparse(X_train):
+            X_train = X_train.toarray()
+
         # Calculate Distance Matrix with specified metric
-        sigma = np.mean(scipy.spatial.distance.cdist(X_train[distance_indices,:], X_train[distance_indices,:], adata.uns['distance_metric']))
+        sigma = np.mean(scipy.spatial.distance.cdist(X_train, X_train, adata.uns['distance_metric']))
 
         # sigma = 0 is numerically unusable in later steps
         # Using such a small sigma will result in wide distribution, and typically a non-predictive Z

@@ -190,7 +190,8 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
                  remove_features = True, train_ratio = 0.8,
                  distance_metric = 'euclidean', kernel_type = 'Gaussian', 
                  random_state : int = 1, allow_multiclass : bool = False, 
-                 class_threshold : str | int = 'median'):
+                 class_threshold : str | int = 'median',
+                 reduction: str | None = None, tfidf: bool = False):
     '''
     Function to create an AnnData object to carry all relevant 
     information going forward.
@@ -265,6 +266,15 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
         cells per cell class will be the threshold for number of 
         samples per class.
 
+    **reduction**: *str* | *None*
+        > Choose which dimension reduction technique to perform on features
+        within a group.  'svd' will run sklearn.decomposition.TruncatedSVD,
+        'linear' will multiply by an array of 1s down to 50 dimensions.
+        
+    **tfidf**: *bool*
+        > Whether to calculate TFIDF transformation on peaks within 
+        groupings.
+        
     Returns
     -------
     **adata** : *AnnData*
@@ -296,6 +306,10 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     
     > `adata.uns['kernel_type']` : Kernel function as given.
 
+    > `adata.uns['svd'] : *bool* for whether to calculate svd reduction.
+
+    > `adata.uns['tfidf'] : *bool* for whether to calculate tfidf per grouping.
+
     Examples
     --------
     >>> data_mat = scipy.sparse.load_npz('MCF7_RNA_matrix.npz')
@@ -315,7 +329,7 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     assert X.shape[1] == len(feature_names), 'Different number of features in X than feature names'
     if not allow_multiclass:
         assert len(np.unique(cell_labels)) == 2, 'cell_labels must contain 2 classes'
-    assert isinstance(D, int) and D > 0, 'D must be a positive integer'
+    assert isinstance(D, int) and D > 0 or D is None, 'D must be a positive integer'
     assert kernel_type.lower() in ['gaussian', 'laplacian', 'cauchy'], 'Given kernel type not implemented. Gaussian, Laplacian, and Cauchy are the acceptable types.'
 
     X, feature_names, group_dict = _filter_features(X, feature_names, group_dict, remove_features)
@@ -331,6 +345,8 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     adata.uns['D'] = D if D is not None else calculate_d(adata.shape[0])
     adata.uns['kernel_type'] = kernel_type
     adata.uns['distance_metric'] = distance_metric
+    adata.uns['reduction'] = reduction
+    adata.uns['tfidf'] = tfidf
 
     if (split_data is None):
         assert X.shape[0] == len(cell_labels), 'Different number of cells than labels'
