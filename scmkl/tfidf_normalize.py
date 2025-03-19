@@ -16,12 +16,12 @@ def _tfidf(X, mode = 'filter'):
     '''
 
     assert mode in ['filter', 'normalize'], 'mode must be "filter" or "normalize".'
-    
+
     if scipy.sparse.issparse(X):
         tf = scipy.sparse.csc_array(X)
-        doc_freq = np.array(np.sum(X > 0, axis=0)).flatten()
+        doc_freq = np.array(np.sum(tf > 0, axis=0)).reshape(-1)
     else:
-        tf = X
+        tf = np.asarray(X)
         doc_freq = np.sum(X > 0, axis=0)
 
     idf = np.log1p((1 + X.shape[0]) / (1 + doc_freq))
@@ -39,7 +39,7 @@ def _tfidf_train_test(X_train, X_test):
     if scipy.sparse.issparse(X_train):
         tf_train = scipy.sparse.csc_array(X_train)
         tf_test = scipy.sparse.csc_array(X_test)
-        doc_freq = np.array(np.sum(X_train > 0, axis=0)).flatten()
+        doc_freq = np.array(np.sum(X_train > 0, axis=0)).reshape(-1)
     else:
         tf_train = X_train
         tf_test = X_test

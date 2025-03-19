@@ -331,6 +331,7 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
         assert len(np.unique(cell_labels)) == 2, 'cell_labels must contain 2 classes'
     assert isinstance(D, int) and D > 0 or D is None, 'D must be a positive integer'
     assert kernel_type.lower() in ['gaussian', 'laplacian', 'cauchy'], 'Given kernel type not implemented. Gaussian, Laplacian, and Cauchy are the acceptable types.'
+    assert reduction in [None, 'SVD', 'svd', 'PCA', 'pca'], 'Given reduction technique not implemented. PCA and SVA are the supported methods.'
 
     X, feature_names, group_dict = _filter_features(X, feature_names, group_dict, remove_features)
 
@@ -345,7 +346,7 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     adata.uns['D'] = D if D is not None else calculate_d(adata.shape[0])
     adata.uns['kernel_type'] = kernel_type
     adata.uns['distance_metric'] = distance_metric
-    adata.uns['reduction'] = reduction
+    adata.uns['reduction'] = reduction if isinstance(reduction, str) else 'None'
     adata.uns['tfidf'] = tfidf
 
     if (split_data is None):

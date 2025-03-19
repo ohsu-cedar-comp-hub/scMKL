@@ -42,6 +42,8 @@ def _process_data(X_train, X_test = None, scale_data = True, return_dense = True
         X_train, X_test- Numpy arrays with the process train/test data respectively.
     '''
 
+    if scipy.sparse.issparse(X_train):
+        X_train = scipy.sparse.csc_array(X_train)
 
     if X_test is None:
             X_test = X_train[:1,:] # Creates dummy matrix to for the sake of calculation without increasing computational time
@@ -74,11 +76,13 @@ def _process_data(X_train, X_test = None, scale_data = True, return_dense = True
         X_train = (X_train - train_means) / train_sds
         X_test = (X_test - train_means) / train_sds
 
+
     if return_dense and scipy.sparse.issparse(X_train):
         X_train = X_train.toarray()
         X_test = X_test.toarray()
 
-    if orig_test == None:
+
+    if orig_test is None:
         return X_train
     else:
         return X_train, X_test
@@ -118,8 +122,8 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
     D = adata.uns['D']
 
     # Create Arrays to store concatenated group Z.  Each group of features will have a corresponding entry in each array
-    Z_train = np.zeros((len(adata.uns['train_indices']), 2 * adata.uns['D'] * N_pathway))
-    Z_test = np.zeros((len(adata.uns['test_indices']), 2 * adata.uns['D'] * N_pathway))
+    Z_train = np.zeros((len(adata.uns['train_indices']), 2 * adata.uns['D'] * N_pathway)).astype(np.float16)
+    Z_test = np.zeros((len(adata.uns['test_indices']), 2 * adata.uns['D'] * N_pathway)).astype(np.float16)
 
     # Loop over each of the groups and creating Z for each
     for m, group_features in enumerate(adata.uns['group_dict'].values()):
@@ -143,15 +147,15 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
         # If given data_type is 'counts' (like RNA) will log scale and z-score the data
         X_train, X_test = _process_data(X_train = X_train, X_test = X_test, scale_data = adata.uns['scale_data'], return_dense = False)            
 
-        if adata.uns['reduction'] == 'svd':
+        if adata.uns['reduction'].lower() == 'svd':
 
             SVD_func = TruncatedSVD(n_components = np.min([50, X_train.shape[1]]), random_state = 1)
             
             # Remove first component as it corresponds with sequencing depth
-            X_train = SVD_func.fit_transform(csr_array(X_train))[:, 1:]
-            X_test = SVD_func.transform(csr_array(X_test))[:, 1:]
+            X_train = SVD_func.fit_transform(scipy.sparse.csr_array(X_train))[:, 1:]
+            X_test = SVD_func.transform(scipy.sparse.csr_array(X_test))[:, 1:]
 
-        elif adata.uns['reduction'] == 'pca':
+        elif adata.uns['reduction'].lower() == 'pca':
             PCA_func = PCA(n_components = np.min([50, X_train.shape[1]]), random_state = 1)
 
             X_train = PCA_func.fit_transform(np.asarray(X_train))
@@ -163,8 +167,8 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
             X_test = X_test @ adata.uns['seed_obj'].choice([0,1], p = [0.02, 0.98], size = X_test.shape[1] * 50).reshape((X_train.shape[1], 50))
 
         if scipy.sparse.issparse(X_train):
-            X_train = X_train.toarray()
-            X_test = X_test.toarray()
+            X_train = X_train.toarray().astype(np.float16)
+            X_test = X_test.toarray().astype(np.float16)
 
         #Extract pre-calculated sigma used for approximating kernel
         adjusted_sigma = adata.uns['sigma'][m]
