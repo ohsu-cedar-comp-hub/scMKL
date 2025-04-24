@@ -54,7 +54,6 @@ def plot_conf_mat(results, title = '', cmap = None, normalize = True,
     Citiation
     ---------
     http://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
-
     '''
     # Determining type of results
     if ('Observed' in results.keys()) and ('Metrics' in results.keys()):
@@ -69,7 +68,8 @@ def plot_conf_mat(results, title = '', cmap = None, normalize = True,
                               y_pred = results['Predicted_class'], 
                               labels = names)
     else:
-        alpha = alpha if alpha != None else np.min(list(results['Metrics'].keys()))
+        min_alpha = np.min(list(results['Metrics'].keys()))
+        alpha = alpha if alpha != None else min_alpha
         cm = confusion_matrix(y_true = results['Observed'],
                               y_pred = results['Predictions'][alpha],
                               labels = names)
@@ -104,10 +104,12 @@ def plot_conf_mat(results, title = '', cmap = None, normalize = True,
                      horizontalalignment="center",
                      color="white" if cm[i, j] > thresh else "black")
 
+    acc_label = 'Predicted label\naccuracy={:0.4f}; misclass={:0.4f}'
+    acc_label = acc_label.format(accuracy, misclass)
 
     plt.tight_layout()
     plt.ylabel('True label')
-    plt.xlabel('Predicted label\naccuracy={:0.4f}; misclass={:0.4f}'.format(accuracy, misclass))
+    plt.xlabel(acc_label)
     plt.show()
 
     if save != None:
@@ -154,14 +156,17 @@ def plot_metric(summary_df : pd.DataFrame, alpha_star = None, color = 'red'):
 
     # Calculating alpha_star y_pos if present
     if alpha_star != None:
-        alpha_star_metric = float(summary_df[summary_df['Alpha'] == alpha_star][metric])
+        best_rows = summary_df['Alpha'] == alpha_star
+        alpha_star_metric = float(summary_df[best_rows][metric])
 
         metric_plot = (ggplot(summary_df, aes(x = 'Alpha', y = metric)) 
                         + geom_point(fill = color, color = color) 
                         + theme_classic() 
                         + ylim(0.6, 1)
                         + scale_x_reverse(breaks = alpha_list)
-                        + annotate('text', x = alpha_star, y = alpha_star_metric - 0.04, label='|\nAlpha\nStar')
+                        + annotate('text', x = alpha_star, 
+                                   y = alpha_star_metric - 0.04, 
+                                   label='|\nAlpha\nStar')
                         )
         
     else:

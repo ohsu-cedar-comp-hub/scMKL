@@ -37,17 +37,23 @@ def estimate_sigma(adata, n_features = 5000):
     # Loop over every group in group_dict
     for m, group_features in enumerate(adata.uns['group_dict'].values()):
 
-        # Select only features within that group and downsample for scalability
+        # Select only features in that group and downsample for scalability
         num_group_features = len(group_features)
-        group_features = adata.uns['seed_obj'].choice(np.array(list(group_features)), min([n_features, num_group_features]), replace = False) 
+        group_array = np.array(list(group_features))
+        n_feats = min([n_features, num_group_features])
+        group_features = adata.uns['seed_obj'].choice(group_array, n_feats, 
+                                                      replace = False) 
 
         # Use on the train data to estimate sigma
         X_train = adata[adata.uns['train_indices'], group_features].X
-
-        X_train = _process_data(X_train = X_train, scale_data = adata.uns['scale_data'], return_dense = False)
-
-        # Sample cells because distance calculation are costly and can be approximated
-        distance_indices = adata.uns['seed_obj'].choice(np.arange(X_train.shape[0]), np.min((2000, X_train.shape[0])))
+        X_train = _process_data(X_train = X_train, 
+                                scale_data = adata.uns['scale_data'], 
+                                return_dense = True)
+        
+        # Sample cells for scalability
+        sample_idx = np.arange(X_train.shape[0])
+        n_samples = np.min((2000, X_train.shape[0]))
+        distance_indices = adata.uns['seed_obj'].choice(sample_idx, n_samples)
 
         if adata.uns['tfidf']:
             X_train = _tfidf(X_train, mode = 'normalize')
@@ -72,15 +78,21 @@ def estimate_sigma(adata, n_features = 5000):
             X_train = X_train.toarray()
 
         # Calculate Distance Matrix with specified metric
-        sigma = np.mean(scipy.spatial.distance.cdist(X_train, X_train, adata.uns['distance_metric']))
+        sigma = scipy.spatial.distance.cdist(X_train[distance_indices,:], 
+                                             X_train[distance_indices,:], 
+                                             adata.uns['distance_metric'])
+        sigma = np.mean(sigma)
 
         # sigma = 0 is numerically unusable in later steps
-        # Using such a small sigma will result in wide distribution, and typically a non-predictive Z
+        # Using such a small sigma will result in wide distribution, and 
+        # typically a non-predictive Z
         if sigma == 0:
             sigma += 1e-5
 
         if n_features < num_group_features:
-            sigma = sigma * num_group_features / n_features # Heuristic we calculated to account for fewer features used in distance calculation
+            # Heuristic we calculated to account for fewer features used in 
+            # distance calculation
+            sigma = sigma * num_group_features / n_features 
 
         sigma_list.append(sigma)
     

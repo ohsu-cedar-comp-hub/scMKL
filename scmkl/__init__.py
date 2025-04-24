@@ -19,6 +19,7 @@ __all__ = ['calculate_z',
            'plotting',
            'run',
            'test', 
+           'test_import',
            'tfidf_normalize',
            'train_model'
            ]
