@@ -43,6 +43,7 @@ def _parse_metrics(results, key : str | None = None,
                 met_names.append(metric)
                 met_vals.append(value)
 
+    # Fix this for include_as parameter
     else:
         print(f"{key} is not a scMKL result and will be ignored.")
             
@@ -145,7 +146,7 @@ def get_summary(results : dict, metric = 'AUROC'):
         top_group_names = np.array(results['Group_names'])[top_group_index]
 
         summary['Alpha'].append(alpha)
-        summary['AUROC'].append(results['Metrics'][alpha][metric])
+        summary[metric].append(results['Metrics'][alpha][metric])
         summary['Number of Selected Groups'].append(num_selected)
         summary['Top Group'].append(*top_group_names)
     
