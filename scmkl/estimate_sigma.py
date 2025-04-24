@@ -1,8 +1,9 @@
 import numpy as np
 import scipy
+from sklearn.decomposition import TruncatedSVD, PCA
 
 from scmkl.calculate_z import _process_data
-
+from scmkl.tfidf_normalize import _tfidf
 
 def estimate_sigma(adata, n_features = 5000):
     '''
@@ -34,7 +35,7 @@ def estimate_sigma(adata, n_features = 5000):
     sigma_list = []
 
     # Loop over every group in group_dict
-    for group_features in adata.uns['group_dict'].values():
+    for m, group_features in enumerate(adata.uns['group_dict'].values()):
 
         # Select only features in that group and downsample for scalability
         num_group_features = len(group_features)
@@ -53,6 +54,28 @@ def estimate_sigma(adata, n_features = 5000):
         sample_idx = np.arange(X_train.shape[0])
         n_samples = np.min((2000, X_train.shape[0]))
         distance_indices = adata.uns['seed_obj'].choice(sample_idx, n_samples)
+
+        if adata.uns['tfidf']:
+            X_train = _tfidf(X_train, mode = 'normalize')
+
+        if adata.uns['reduction'].lower() == 'svd':
+
+            SVD_func = TruncatedSVD(n_components = np.min([50, X_train.shape[1]]), random_state = 1)
+            X_train = SVD_func.fit_transform(scipy.sparse.csr_array(X_train[distance_indices,:]))[:,1:]
+
+        elif adata.uns['reduction'].lower() == 'pca':
+            PCA_func = PCA(n_components = np.min([50, X_train.shape[1]]), random_state = 1)
+            X_train = PCA_func.fit_transform(np.asarray(X_train[distance_indices,:]))
+
+        elif adata.uns['reduction'].lower() == 'linear':
+
+            X_train = X_train[distance_indices] @ adata.uns['seed_obj'].choice([0,1], [0.02, 0.98]).reshape((len(distance_indices), 50))
+
+        else:
+            X_train = X_train[distance_indices, :]
+
+        if scipy.sparse.issparse(X_train):
+            X_train = X_train.toarray()
 
         # Calculate Distance Matrix with specified metric
         sigma = scipy.spatial.distance.cdist(X_train[distance_indices,:], 

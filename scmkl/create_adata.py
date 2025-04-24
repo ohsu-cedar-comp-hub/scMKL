@@ -216,7 +216,8 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
                  remove_features = True, train_ratio = 0.8,
                  distance_metric = 'euclidean', kernel_type = 'Gaussian', 
                  random_state : int = 1, allow_multiclass : bool = False, 
-                 class_threshold : str | int = 'median'):
+                 class_threshold : str | int = 'median',
+                 reduction: str | None = None, tfidf: bool = False):
     '''
     Function to create an AnnData object to carry all relevant 
     information going forward.
@@ -292,6 +293,15 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
         cells per cell class will be the threshold for number of 
         samples per class.
 
+    **reduction**: *str* | *None*
+        > Choose which dimension reduction technique to perform on features
+        within a group.  'svd' will run sklearn.decomposition.TruncatedSVD,
+        'linear' will multiply by an array of 1s down to 50 dimensions.
+        
+    **tfidf**: *bool*
+        > Whether to calculate TFIDF transformation on peaks within 
+        groupings.
+        
     Returns
     -------
     **adata** : *AnnData*
@@ -322,6 +332,10 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     > `adata.uns['distance_metric']` : Distance metric as given.
     
     > `adata.uns['kernel_type']` : Kernel function as given.
+
+    > `adata.uns['svd'] : *bool* for whether to calculate svd reduction.
+
+    > `adata.uns['tfidf'] : *bool* for whether to calculate tfidf per grouping.
 
     Examples
     --------
@@ -372,6 +386,8 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
     adata.uns['D'] = D if D is not None else calculate_d(adata.shape[0])
     adata.uns['kernel_type'] = kernel_type
     adata.uns['distance_metric'] = distance_metric
+    adata.uns['reduction'] = reduction if isinstance(reduction, str) else 'None'
+    adata.uns['tfidf'] = tfidf
 
     if (split_data is None):
         assert X.shape[0] == len(cell_labels), ("Different number of cells "

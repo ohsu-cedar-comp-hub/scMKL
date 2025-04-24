@@ -1,7 +1,8 @@
 import numpy as np
 import scipy
 import anndata as ad
-
+from sklearn.decomposition import TruncatedSVD, PCA
+from scmkl.tfidf_normalize import _tfidf_train_test
 
 def _sparse_var(X, axis = None):
     '''
@@ -38,7 +39,7 @@ def _process_data(X_train, X_test = None, scale_data = True,
     Function to preprocess data matrix according to type of data 
     (counts- e.g. rna, or binary- atac). Will process test data 
     according to parameters calculated from test data
-
+    
     Parameters
     ----------
     X_train : A scipy sparse or numpy array
@@ -88,11 +89,13 @@ def _process_data(X_train, X_test = None, scale_data = True,
         X_train = (X_train - train_means) / train_sds
         X_test = (X_test - train_means) / train_sds
 
+
     if return_dense and scipy.sparse.issparse(X_train):
         X_train = X_train.toarray()
         X_test = X_test.toarray()
 
-    if orig_test == None:
+
+    if orig_test is None:
         return X_train
     else:
         return X_train, X_test
@@ -164,12 +167,38 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
         X_train = adata[adata.uns['train_indices'],:][:, group_features].X
         X_test = adata[adata.uns['test_indices'],:][:, group_features].X
 
+        if adata.uns['tfidf']:
+            X_train, X_test = _tfidf_train_test(X_train, X_test)
+
         # Data filtering, and transformation according to given data_type
         # Will remove low variance (< 1e5) features regardless of data_type
         # If given data_type is 'counts' will log scale and z-score the data
         X_train, X_test = _process_data(X_train = X_train, X_test = X_test, 
                                         scale_data = adata.uns['scale_data'], 
-                                        return_dense = True)
+                                        return_dense = True)          
+
+        if adata.uns['reduction'].lower() == 'svd':
+
+            SVD_func = TruncatedSVD(n_components = np.min([50, X_train.shape[1]]), random_state = 1)
+            
+            # Remove first component as it corresponds with sequencing depth
+            X_train = SVD_func.fit_transform(scipy.sparse.csr_array(X_train))[:, 1:]
+            X_test = SVD_func.transform(scipy.sparse.csr_array(X_test))[:, 1:]
+
+        elif adata.uns['reduction'].lower() == 'pca':
+            PCA_func = PCA(n_components = np.min([50, X_train.shape[1]]), random_state = 1)
+
+            X_train = PCA_func.fit_transform(np.asarray(X_train))
+            X_test = PCA_func.transform(np.asarray(X_test))
+
+        elif adata.uns['reduction'] == 'linear':
+
+            X_train = X_train @ adata.uns['seed_obj'].choice([0,1], p = [0.02, 0.98], size = X_train.shape[1] * 50).reshape((X_train.shape[1], 50))
+            X_test = X_test @ adata.uns['seed_obj'].choice([0,1], p = [0.02, 0.98], size = X_test.shape[1] * 50).reshape((X_train.shape[1], 50))
+
+        if scipy.sparse.issparse(X_train):
+            X_train = X_train.toarray().astype(np.float16)
+            X_test = X_test.toarray().astype(np.float16)
 
         # Extract pre-calculated sigma used for approximating kernel
         adjusted_sigma = adata.uns['sigma'][m]
