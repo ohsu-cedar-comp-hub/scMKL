@@ -89,7 +89,7 @@ def _multimodal_optimize_alpha(adatas : list, group_size = 1,
         alpha : The alpha value yielding the number of selected groups 
                 closest to the target.
     '''
-
+    tracemalloc.start()
     assert isinstance(k, int) and k > 0, ("Must be a positive integer "
                                           "number of folds")
 
@@ -144,11 +144,10 @@ def _multimodal_optimize_alpha(adatas : list, group_size = 1,
         # Necessary for interpretability but not for AUROC cv
         dummy_names = [f'adata {i}' for i in range(len(cv_adatas))]
 
-        # Calculate the Z's for each modality independently
         fold_cv_adata = multimodal_processing(adatas = cv_adatas, 
                                               names = dummy_names, 
                                               tfidf = tfidf)
-        
+
         fold_cv_adata.uns['seed_obj'] = cv_adatas[0].uns['seed_obj']
 
         gc.collect()

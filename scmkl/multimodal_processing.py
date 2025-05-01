@@ -42,7 +42,7 @@ def _combine_modalities(adatas : list, names : list,
     # Combining modalities
     combined_adata = ad.concat(adatas, uns_merge = 'same', 
                                axis = 1, label = 'labels')
-
+    
     assert 'train_indices' in combined_adata.uns.keys(), ("Different train "
                                                           "test splits "
                                                           "between AnnData "
@@ -191,12 +191,10 @@ def multimodal_processing(adatas : list, names : list, tfidf: list):
         if tfidf[i]:
             adatas[i] = tfidf_normalize(adata)
 
-        if 'Z_train' not in adatas[i].uns.keys():
-            # AnnData update must be pointing at the object in list
-            print(f'Estimating Sigma for {names[i]}', flush = True)
-            adatas[i] = estimate_sigma(adata, n_features= 200)
-            print(f'Calculating Z for {names[i]}', flush = True)
-            adatas[i] = calculate_z(adata, n_features = 5000)
+        print(f'Estimating Sigma for {names[i]}', flush = True)
+        adatas[i] = estimate_sigma(adata, n_features= 200)
+        print(f'Calculating Z for {names[i]}', flush = True)
+        adatas[i] = calculate_z(adata, n_features = 5000)
 
     if 'labels' in adatas[0].obs:
         all_labels = [adata.obs['labels'] for adata in adatas]

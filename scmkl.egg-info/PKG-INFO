@@ -1,4 +1,4 @@
-Metadata-Version: 2.2
+Metadata-Version: 2.1
 Name: scmkl
 Version: 0.1.7
 Summary: Single-cell analysis using Multiple Kernel Learning
@@ -20,15 +20,6 @@ Requires-Dist: scikit-learn==1.5.1
 Requires-Dist: scipy==1.14.1
 Requires-Dist: plotnine==0.14.3
 Requires-Dist: matplotlib==3.9.3
-Dynamic: author
-Dynamic: author-email
-Dynamic: classifier
-Dynamic: description
-Dynamic: description-content-type
-Dynamic: home-page
-Dynamic: requires-dist
-Dynamic: requires-python
-Dynamic: summary
 
 <h1 align="center">
 <img src="https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/scMKL_logo.png?raw=true" width="500"/>

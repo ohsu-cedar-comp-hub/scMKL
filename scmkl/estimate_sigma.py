@@ -46,14 +46,24 @@ def estimate_sigma(adata, n_features = 5000):
 
         # Use on the train data to estimate sigma
         X_train = adata[adata.uns['train_indices'], group_features].X
-        X_train = _process_data(X_train = X_train, 
-                                scale_data = adata.uns['scale_data'], 
-                                return_dense = True)
+        # X_train = _process_data(X_train = X_train, 
+        #                         scale_data = adata.uns['scale_data'], 
+        #                         return_dense = True)
         
+        # # Sample cells for scalability
+        # sample_idx = np.arange(X_train.shape[0])
+        # n_samples = np.min((2000, X_train.shape[0]))
+        # distance_indices = adata.uns['seed_obj'].choice(sample_idx, n_samples)
+
+        X_train = _process_data(X_train = X_train, 
+                                 scale_data = adata.uns['scale_data'], 
+                                 return_dense = True)
+         
         # Sample cells for scalability
         sample_idx = np.arange(X_train.shape[0])
         n_samples = np.min((2000, X_train.shape[0]))
-        distance_indices = adata.uns['seed_obj'].choice(sample_idx, n_samples)
+        distance_indices = adata.uns['seed_obj'].choice(sample_idx, n_samples, replace = False)
+        
 
         if adata.uns['tfidf']:
             X_train = _tfidf(X_train, mode = 'normalize')
@@ -78,8 +88,8 @@ def estimate_sigma(adata, n_features = 5000):
             X_train = X_train.toarray()
 
         # Calculate Distance Matrix with specified metric
-        sigma = scipy.spatial.distance.cdist(X_train[distance_indices,:], 
-                                             X_train[distance_indices,:], 
+        sigma = scipy.spatial.distance.cdist(X_train, 
+                                             X_train, 
                                              adata.uns['distance_metric'])
         sigma = np.mean(sigma)
 

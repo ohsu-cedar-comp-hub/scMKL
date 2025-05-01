@@ -148,6 +148,7 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
     Z_train = np.zeros((train_idx.shape[0], n_cols))
     Z_test = np.zeros((test_idx.shape[0], n_cols))
 
+
     # Loop over each of the groups and creating Z for each
     for m, group_features in enumerate(adata.uns['group_dict'].values()):
         
