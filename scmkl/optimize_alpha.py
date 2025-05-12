@@ -11,34 +11,6 @@ from scmkl.multimodal_processing import multimodal_processing
 from scmkl.test import predict
 
 
-def _calculate_auroc(adata)-> float:
-    '''
-    Function to calculate the AUROC for a classification. 
-    Designed as a helper function.  Recommended to use Predict() for model evaluation.
-    Input:  
-            adata- adata object with trained model and Z matrices in uns
-    Output:
-            Calculated AUROC value
-    '''
-
-    y_test = adata.obs['labels'].iloc[adata.uns['test_indices']].to_numpy()
-    X_test = adata.uns['Z_test']
-
-    y_test = y_test.ravel()
-    assert X_test.shape[0] == len(y_test), f'X has {X_test.shape[0]} samples and y has {len(y_test)} samples.'
-
-    # Sigmoid function to force probabilities into [0,1]
-    probabilities = 1 / (1 + np.exp(-adata.uns['model'].predict(X_test)))
-    # Group Lasso requires 'continous' y values need to re-descritize it
-
-    y = np.zeros((len(y_test)))
-    y[y_test == np.unique(y_test)[0]] = 1
-    fpr, tpr, _ = sklearn.metrics.roc_curve(y, probabilities)
-    auc = sklearn.metrics.auc(fpr, tpr)
-    
-    return(auc)
-
-
 def _multimodal_optimize_alpha(adatas : list, group_size = 1, tfidf = [False, False],
                                alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4,
                                metric = 'AUROC'):
