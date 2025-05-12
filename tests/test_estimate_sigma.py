@@ -36,10 +36,10 @@ class TestEstimateSigma(unittest.TestCase):
                         "Cityblock sigmas are not postive")
         
         # Checking that each has expected mean values
-        self.assertAlmostEqual(np.mean(euclidean_sigmas), 8.33503, 
+        self.assertAlmostEqual(np.mean(euclidean_sigmas), 8.34712, 
                                places = 4, msg = ("Euclidean sigmas mean is "
                                                   "not expected value"))
-        self.assertAlmostEqual(np.mean(cityblock_sigmas), 45.10473, 
+        self.assertAlmostEqual(np.mean(cityblock_sigmas), 45.06624, 
                                places = 4, msg = ("Cityblock sigmas mean is "
                                                   "not expected value"))
 

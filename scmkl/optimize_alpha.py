@@ -1,7 +1,6 @@
 import numpy as np
 import gc
 import tracemalloc
-import sklearn
 
 from scmkl.tfidf_normalize import tfidf_normalize
 from scmkl.estimate_sigma import estimate_sigma
@@ -78,7 +77,7 @@ def _multimodal_optimize_alpha(adatas : list, group_size = 1, tfidf = [False, Fa
         dummy_names = [f'adata {i}' for i in range(len(cv_adatas))]
 
         # Calculate the Z's for each modality independently
-        fold_cv_adata = multimodal_processing(adatas = cv_adatas, names = dummy_names, tfidf = tfidf, z_calculation = True)
+        fold_cv_adata = multimodal_processing(adatas = cv_adatas, names = dummy_names, tfidf = tfidf)
         fold_cv_adata.uns['seed_obj'] = cv_adatas[0].uns['seed_obj']
 
         gc.collect()
@@ -87,14 +86,14 @@ def _multimodal_optimize_alpha(adatas : list, group_size = 1, tfidf = [False, Fa
 
             fold_cv_adata = train_model(fold_cv_adata, group_size, alpha = alpha)
 
-            _, metrics = predict(cv_adata, metrics = [metric])
-            metric_array[i, fold] = metrics[metric]
+            _, metrics = predict(fold_cv_adata, metrics = [metric])
+            metric_array[j, fold] = metrics[metric]
 
         del fold_cv_adata
         gc.collect()
 
     # Take AUROC mean across the k folds and select the alpha resulting in highest AUROC
-    alpha_star = metric_array[np.argmax(np.mean(metric_array, axis = 1))]
+    alpha_star = alpha_array[np.argmax(np.mean(metric_array, axis = 1))]
     del cv_adatas
     gc.collect()
     

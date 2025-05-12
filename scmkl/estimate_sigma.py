@@ -31,7 +31,6 @@ def estimate_sigma(adata, n_features = 5000):
     >>> adata.uns['sigma']
     array([10.4640895 , 10.82011454,  6.16769438,  9.86156855, ...])
     '''
- 
     sigma_list = []
 
     # Loop over every group in group_dict
@@ -46,23 +45,17 @@ def estimate_sigma(adata, n_features = 5000):
 
         # Use on the train data to estimate sigma
         X_train = adata[adata.uns['train_indices'], group_features].X
-        # X_train = _process_data(X_train = X_train, 
-        #                         scale_data = adata.uns['scale_data'], 
-        #                         return_dense = True)
+
         
-        # # Sample cells for scalability
-        # sample_idx = np.arange(X_train.shape[0])
-        # n_samples = np.min((2000, X_train.shape[0]))
-        # distance_indices = adata.uns['seed_obj'].choice(sample_idx, n_samples)
+        # Sample cells for scalability
+        sample_idx = np.arange(X_train.shape[0])
+        n_samples = np.min((2000, X_train.shape[0]))
+        distance_indices = adata.uns['seed_obj'].choice(sample_idx, n_samples, 
+                                                        replace = False)
 
         X_train = _process_data(X_train = X_train, 
                                  scale_data = adata.uns['scale_data'], 
                                  return_dense = True)
-         
-        # Sample cells for scalability
-        sample_idx = np.arange(X_train.shape[0])
-        n_samples = np.min((2000, X_train.shape[0]))
-        distance_indices = adata.uns['seed_obj'].choice(sample_idx, n_samples, replace = False)
         
 
         if adata.uns['tfidf']:

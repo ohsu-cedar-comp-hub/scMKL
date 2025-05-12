@@ -57,7 +57,7 @@ class TestCalculateZ(unittest.TestCase):
         self.assertAlmostEqual(np.max(adata.uns['Z_train']), 0.12803687, 
                                places = 4, msg = ("Z_train max outside of "
                                                   "expected distribution"))
-        self.assertAlmostEqual(np.median(adata.uns['Z_train']), 0.08233,
+        self.assertAlmostEqual(np.median(adata.uns['Z_train']), 0.082275,
                                places = 4, msg = ("Z_train median is out of "
                                                   "bounds for expected dist"))
 
@@ -68,7 +68,7 @@ class TestCalculateZ(unittest.TestCase):
         self.assertAlmostEqual(np.max(adata.uns['Z_test']), 0.12803687, 
                                places = 4, msg = ("Z_test max outside of "
                                                   "expected distribution"))
-        self.assertAlmostEqual(np.median(adata.uns['Z_test']), 0.08231,
+        self.assertAlmostEqual(np.median(adata.uns['Z_test']), 0.0820394,
                                places = 4, msg = ("Z_test median is out of "
                                                   "bounds for expected dist"))
 

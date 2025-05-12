@@ -28,6 +28,7 @@ class TestOptimizeAlpha(unittest.TestCase):
                          ("scmkl.optimize_alpha chose the wrong alpha "
                           "as optimal for unimodal"))
         
+
     def test_multimodal_optimize_alpha(self):
         '''
         This function ensure that scmkl.optimize_alpha works correctly 
