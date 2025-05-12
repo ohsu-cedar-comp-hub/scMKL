@@ -1,54 +1,19 @@
 import numpy as np
 import gc
 import tracemalloc
-import sklearn
 
 from scmkl.tfidf_normalize import tfidf_normalize
 from scmkl.estimate_sigma import estimate_sigma
 from scmkl.calculate_z import calculate_z
 from scmkl.train_model import train_model
 from scmkl.multimodal_processing import multimodal_processing
-
-
-def _calculate_auroc(adata)-> float:
-    '''
-    Function to calculate the AUROC for a classification. 
-    Designed as a helper function.  Recommended to use Predict() for 
-    model evaluation.
-    
-    Parameters
-    ----------  
-    adata : adata object with trained model and Z matrices in 
-            uns
-
-    Returns
-    -------
-    Calculated AUROC value
-    '''
-    y_test = adata.obs['labels'].iloc[adata.uns['test_indices']].to_numpy()
-    y_test = y_test.ravel()
-    X_test = adata.uns['Z_test']
-
-    assert X_test.shape[0] == len(y_test), (f"X has {X_test.shape[0]} "
-                                            "samples and y has "
-                                            f"{len(y_test)} samples.")
-
-    # Sigmoid function to force probabilities into [0,1]
-    probabilities = 1 / (1 + np.exp(-adata.uns['model'].predict(X_test)))
-    
-    # Group Lasso requires 'continous' y values need to re-descritize it
-    y = np.zeros((len(y_test)))
-    y[y_test == np.unique(y_test)[0]] = 1
-    fpr, tpr, _ = sklearn.metrics.roc_curve(y, probabilities)
-    auc = sklearn.metrics.auc(fpr, tpr)
-    
-    return(auc)
+from scmkl.metrics import calculate_metric
 
 
 def _multimodal_optimize_alpha(adatas : list, group_size = 1, 
                                tfidf = [False, False], 
                                alpha_array = np.linspace(1.9, 0.1, 10), 
-                               k = 4):
+                               k = 4, t_metric = 'AUROC'):
     '''
     Iteratively train a grouplasso model and update alpha to find the 
     parameter yielding the desired sparsity. This function is meant to 
@@ -157,7 +122,7 @@ def _multimodal_optimize_alpha(adatas : list, group_size = 1,
             fold_cv_adata = train_model(fold_cv_adata, group_size, 
                                         alpha = alpha)
 
-            auc_array[j, fold] = _calculate_auroc(fold_cv_adata)
+            auc_array[j, fold] = calculate_metric(fold_cv_adata, t_metric)
 
         del fold_cv_adata
         gc.collect()
@@ -172,7 +137,8 @@ def _multimodal_optimize_alpha(adatas : list, group_size = 1,
 
 
 def optimize_alpha(adata, group_size = None, tfidf = False, 
-                   alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4):
+                   alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4,
+                   t_metric = 'AUROC'):
     '''
     Iteratively train a grouplasso model and update alpha to find the 
     parameter yielding best performing sparsity. This function 
@@ -276,7 +242,7 @@ def optimize_alpha(adata, group_size = None, tfidf = False,
         for i, alpha in enumerate(alpha_array):
 
             cv_adata = train_model(cv_adata, group_size, alpha = alpha)
-            auc_array[i, fold] = _calculate_auroc(cv_adata)
+            auc_array[i, fold] = calculate_metric(cv_adata, t_metric)
 
             gc.collect()
 
