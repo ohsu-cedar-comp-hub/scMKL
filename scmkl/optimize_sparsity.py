@@ -81,7 +81,7 @@ def optimize_sparsity(adata, group_size, starting_alpha = 1.9,
                 # between alpha values
                 increment /= 2
             # Ensures that alpha will never be negative
-            alpha = np.max([alpha - increment, 1e-1]) 
+            alpha = np.max([alpha - increment, 1e-3]) 
 
         elif num_selected > target:
             if alpha + increment in sparsity_dict.keys():
