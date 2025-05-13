@@ -18,8 +18,7 @@ __all__ = ['calculate_z',
            'optimize_sparsity',
            'plotting',
            'run',
-           'test', 
-           'test_import',
+           'test',
            'tfidf_normalize',
            'train_model'
            ]
