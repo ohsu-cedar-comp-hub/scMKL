@@ -38,3 +38,4 @@ from scmkl.run import *
 from scmkl.test import *
 from scmkl.tfidf_normalize import *
 from scmkl.train_model import *
+from scmkl.compiled import *

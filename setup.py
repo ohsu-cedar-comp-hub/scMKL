@@ -6,7 +6,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name = 'scmkl',
-    version = '0.2.0',
+    version = '0.2.0a0',
     description = "Single-cell analysis using Multiple Kernel Learning",
     long_description = long_description,
     long_description_content_type = 'text/markdown',
@@ -23,6 +23,7 @@ setup(
         'pandas==2.2.2',
         'scikit-learn==1.5.1',
         'scipy==1.14.1',
+        'numba==0.61.2',
         'plotnine==0.14.3',
         'matplotlib==3.9.3'
     ],
