@@ -137,6 +137,8 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
     n_pathway = len(adata.uns['group_dict'].keys())
     D = adata.uns['D']
 
+    sq_i_d = np.sqrt(1/D)
+
     # Capturing training and testing indices
     train_idx = np.array(adata.uns['train_indices'], dtype = np.int_)
     test_idx = np.array(adata.uns['test_indices'], dtype = np.int_)
@@ -235,16 +237,18 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
         
         # Store group Z in whole-Z object. 
         # Preserves order to be able to extract meaningful groups
-        x_idx = np.arange( m * 2 * D , (m + 1) * 2 * D)
-        sq_i_d = np.sqrt(1/D)
+        x_idx = np.arange(m * 2 * D ,(m + 1) * 2 * D)
+        cos_idx = x_idx[:len(x_idx)//2]
+        sin_idx = x_idx[len(x_idx)//2:]
 
-        Z_train[0:, x_idx] = sq_i_d * np.hstack((np.cos(train_projection), 
-                                                 np.sin(train_projection)))
-        Z_test[0:, x_idx] = sq_i_d * np.hstack((np.cos(test_projection), 
-                                                np.sin(test_projection)))
+        Z_train[0:, cos_idx] = np.cos(train_projection)
+        Z_train[0:, sin_idx] = np.sin(train_projection)
 
-    adata.uns['Z_train'] = Z_train
-    adata.uns['Z_test'] = Z_test
+        Z_test[0:, cos_idx] = np.cos(test_projection)
+        Z_test[0:, sin_idx] = np.sin(test_projection)
+
+    adata.uns['Z_train'] = Z_train * sq_i_d
+    adata.uns['Z_test'] = Z_test * sq_i_d
 
     return adata
 
@@ -287,9 +291,6 @@ def transform_z(adata, new_sigmas)-> ad.AnnData:
 
         arcsin_train = np.arcsin(adata.uns['Z_train'][:, sin_idx]) * sigma / new_sigma
         arcsin_test = np.arcsin(adata.uns['Z_test'][:, sin_idx]) * sigma / new_sigma
-
-        combined_train = np.hstack((np.cos(arccos_train * arccos_train_signs), np.sin(arcsin_train)))
-        combined_test = np.hstack((np.cos(arccos_test * arccos_test_signs), np.sin(arcsin_test)))
 
         adata.uns['Z_train'][:, cos_idx] = np.cos(arccos_train * arccos_train_signs)
         adata.uns['Z_test'][:, cos_idx] = np.cos(arccos_test * arccos_test_signs)
