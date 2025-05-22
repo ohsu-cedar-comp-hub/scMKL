@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: scmkl
-Version: 0.2.0a0
+Version: 0.2.1
 Summary: Single-cell analysis using Multiple Kernel Learning
 Home-page: https://github.com/ohsu-cedar-comp-hub/scMKL/tree/main
 Author: Sam Kupp, Ian VanGordon, Cigdem Ak

@@ -1,8 +1,8 @@
 import numpy as np
 import anndata as ad
+import gc
 
-
-def _filter_features(X, feature_names, group_dict, remove_features):
+def _filter_features(feature_names, group_dict):
     '''
     Function to remove unused features from X matrix. Any features not 
     included in group_dict will be removed from the matrix. Also puts 
@@ -10,19 +10,17 @@ def _filter_features(X, feature_names, group_dict, remove_features):
     
     Parameters
     ----------
-    X : Data array. Can be Numpy array or Scipy Sparse Array
     feature_names : Numpy array of corresponding feature names
     group_dict : Dictionary containing feature grouping information.
                  Example: {geneset: np.array(gene_1, gene_2, ..., 
                  gene_n)}
     Returns
     -------
-    X : Data array containing data only for features in the group_dict
     feature_names : Numpy array of corresponding feature names from 
-                    group_dict
-    '''
-    assert X.shape[1] == len(feature_names), ("Given features do not "
-                                              "correspond with features in X")  
+                    group_dict.
+    group_dict : Dictionary containing features overlapping input
+                    grouping information and full feature names.
+    ''' 
 
     group_features = set()
     feature_set = set(feature_names)
@@ -40,18 +38,7 @@ def _filter_features(X, feature_names, group_dict, remove_features):
     group_dict = {group : group_dict[group] for group in group_dict.keys()
                   if len(group_dict[group]) > 1}
 
-    if remove_features:
-        # Find location of desired features in whole feature set
-        g_features = np.array(list(group_features))
-        group_feature_indices = np.where(np.in1d(feature_names, 
-                                                 g_features, 
-                                                 assume_unique = True))[0]
-
-        # Subset only the desired features and data
-        X = X[:,group_feature_indices]
-        feature_names = np.array(list(feature_names))[group_feature_indices]
-
-    return X, feature_names, group_dict
+    return feature_names, group_dict
 
 
 def _multi_class_split(y, train_ratio = 0.8, class_threshold = 'median', 
@@ -370,14 +357,17 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
                                                    "are the acceptable "
                                                    "types.")
 
-    X, feature_names, group_dict = _filter_features(X, 
-                                                    feature_names, 
-                                                    group_dict, 
-                                                    remove_features)
-
     # Create adata object and add column names
     adata = ad.AnnData(X)
     adata.var_names = feature_names
+
+    filtered_feature_names, group_dict = _filter_features(feature_names, 
+                                                          group_dict)
+
+    if remove_features:
+        adata = adata[:, filtered_feature_names]
+    
+    gc.collect()
 
     # Add metadata to adata object
     adata.uns['group_dict'] = group_dict

@@ -140,6 +140,8 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
     n_pathway = len(adata.uns['group_dict'].keys())
     D = adata.uns['D']
 
+    sq_i_d = np.sqrt(1/D)
+
     # Capturing training and testing indices
     train_idx = np.array(adata.uns['train_indices'], dtype = np.int_)
     test_idx = np.array(adata.uns['test_indices'], dtype = np.int_)
@@ -250,15 +252,66 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
         
         # Store group Z in whole-Z object. 
         # Preserves order to be able to extract meaningful groups
-        x_idx = np.arange( m * 2 * D , (m + 1) * 2 * D)
-        sq_i_d = np.sqrt(1 / D)
+        x_idx = np.arange(m * 2 * D ,(m + 1) * 2 * D)
+        cos_idx = x_idx[:len(x_idx)//2]
+        sin_idx = x_idx[len(x_idx)//2:]
 
-        Z_train[0:, x_idx] = sq_i_d * np.hstack((np.cos(train_projection), 
-                                                 np.sin(train_projection)))
-        Z_test[0:, x_idx] = sq_i_d * np.hstack((np.cos(test_projection), 
-                                                np.sin(test_projection)))
+        Z_train[0:, cos_idx] = np.cos(train_projection)
+        Z_train[0:, sin_idx] = np.sin(train_projection)
 
-    adata.uns['Z_train'] = Z_train
-    adata.uns['Z_test'] = Z_test
+        Z_test[0:, cos_idx] = np.cos(test_projection)
+        Z_test[0:, sin_idx] = np.sin(test_projection)
+
+    adata.uns['Z_train'] = Z_train * sq_i_d
+    adata.uns['Z_test'] = Z_test * sq_i_d
+
+    return adata
+
+
+def transform_z(adata, new_sigmas)-> ad.AnnData:
+
+    '''
+    This functions takes an adata object with Z_train and Z_test already 
+    calculated and transforms it as if calculated with a different distribution.
+
+    This is primarily used during optimize_alpha to remove dependence on fold
+    train data without need to recalculate Z_train and Z_test.
+
+    i.e. (X @ W_old) * old_sigma / new_sigma == (X @ W_new) (the inverse relationship
+    between the distribution and the sigma parameter is because the standard deviation
+    of the distribution is proportional to 1/sigma).
+    '''
+
+    assert 'Z_train' in adata.uns.keys() and 'Z_test' in adata.uns.keys(), 'Z_train and Z_test must be present in adata'
+    assert all(new_sigmas > 0), 'Sigma must be positive'
+    assert len(new_sigmas) == len(adata.uns['sigma']), 'Length of new sigmas must be equal to length of old sigmas'
+
+
+    for i, (sigma, new_sigma) in enumerate(zip(adata.uns['sigma'], new_sigmas)):
+        # if sigma == new_sigma:
+        #     continue
+
+        group_idx = np.arange(i * 2 * adata.uns['D'], (i + 1) * 2 * adata.uns['D'])
+        cos_idx = group_idx[:len(group_idx)//2]
+        sin_idx = group_idx[len(group_idx)//2:]
+
+        # Undo the cos/sin and transform the recovered X @ W and transforms the distribution
+        arccos_train = np.arccos(adata.uns['Z_train'][:, cos_idx]) * sigma / new_sigma
+        arccos_test = np.arccos(adata.uns['Z_test'][:, cos_idx]) * sigma / new_sigma
+
+        # Need to preserve the sign of the cos because the range of arccos is [0, pi]
+        # so we need to account for negative values)
+        arccos_train_signs = np.sign(adata.uns['Z_train'][:, cos_idx])
+        arccos_test_signs = np.sign(adata.uns['Z_test'][:, cos_idx])
+
+        arcsin_train = np.arcsin(adata.uns['Z_train'][:, sin_idx]) * sigma / new_sigma
+        arcsin_test = np.arcsin(adata.uns['Z_test'][:, sin_idx]) * sigma / new_sigma
+        
+
+        adata.uns['Z_train'][:, cos_idx] = np.cos(arccos_train * arccos_train_signs)
+        adata.uns['Z_test'][:, cos_idx] = np.cos(arccos_test * arccos_test_signs)
+
+        adata.uns['Z_train'][:, sin_idx] = np.sin(arcsin_train)
+        adata.uns['Z_test'][:, sin_idx] = np.sin(arcsin_test)
 
     return adata
