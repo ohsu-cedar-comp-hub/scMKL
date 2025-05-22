@@ -1,10 +1,8 @@
 import numpy as np
-from numba import njit            
+import numba as nb        
 
 
-
-
-@njit
+@nb.njit(fastmath = True, cache = True)
 def gaussian_trans(x, adjusted_sigma, seed_obj, d):
     '''
     '''
@@ -17,7 +15,7 @@ def gaussian_trans(x, adjusted_sigma, seed_obj, d):
     return w
 
 
-@njit
+@nb.njit(fastmath = True, cache = True)
 def laplacian_trans(x, adjusted_sigma, seed_obj, d):
     '''
     
@@ -30,7 +28,7 @@ def laplacian_trans(x, adjusted_sigma, seed_obj, d):
     return w
 
 
-@njit
+@nb.njit(fastmath = True, cache = True)
 def cauchy_trans(x, adjusted_sigma, seed_obj, d):
     '''
     
@@ -43,11 +41,14 @@ def cauchy_trans(x, adjusted_sigma, seed_obj, d):
 
     return w
 
-@njit
-def mul_mats(x, w):
+@nb.njit(fastmath = True, cache = True)
+def add_projections(Z, x_idx, projection, sq_i_d):
     '''
     
     '''
-    x = np.matmul(x, w)
+    new_aks = np.hstack((np.cos(projection), np.sin(projection)))
+    new_aks *= sq_i_d
 
-    return x
+    Z[0:, x_idx] = new_aks
+
+    return Z

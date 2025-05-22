@@ -6,8 +6,10 @@ scmkl/_checks.py
 scmkl/calculate_z.py
 scmkl/create_adata.py
 scmkl/dataframes.py
+scmkl/distances.py
 scmkl/estimate_sigma.py
 scmkl/get_atac_groupings.py
+scmkl/kernels.py
 scmkl/multimodal_processing.py
 scmkl/one_v_rest.py
 scmkl/optimize_alpha.py
@@ -22,9 +24,6 @@ scmkl.egg-info/SOURCES.txt
 scmkl.egg-info/dependency_links.txt
 scmkl.egg-info/requires.txt
 scmkl.egg-info/top_level.txt
-scmkl/compiled/__init__.py
-scmkl/compiled/data_scaling.py
-scmkl/compiled/kernels.py
 tests/__init__.py
 tests/test_calculate_z.py
 tests/test_create_adata.py

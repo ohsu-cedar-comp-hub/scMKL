@@ -2,11 +2,9 @@ import numpy as np
 import scipy
 import anndata as ad
 from sklearn.decomposition import TruncatedSVD, PCA
-from scmkl.tfidf_normalize import _tfidf_train_test
 
-from scmkl.compiled.data_scaling import center_data
-from scmkl.compiled.kernels import (gaussian_trans, laplacian_trans, 
-                              cauchy_trans, mul_mats)
+from scmkl.tfidf_normalize import _tfidf_train_test
+from scmkl.kernels import *
 
 
 def _sparse_var(X, axis = None):
@@ -91,8 +89,8 @@ def _process_data(X_train, X_test = None, scale_data = True,
 
         # Perform transformation on test data according to parameters 
         # of the training data
-        X_train = center_data(X_train, train_means, train_sds)
-        X_test = center_data(X_test, train_means, train_sds)
+        X_train = (X_train - train_means) / train_sds
+        X_test = (X_test - train_means) / train_sds
 
 
     if return_dense and scipy.sparse.issparse(X_train):
@@ -249,9 +247,6 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
 
         train_projection = np.matmul(X_train, w)
         test_projection = np.matmul(X_test, w)
-
-        # train_projection = mul_mats(X_train, w)
-        # test_projection = mul_mats(X_test, w)
         
         # Store group Z in whole-Z object. 
         # Preserves order to be able to extract meaningful groups
