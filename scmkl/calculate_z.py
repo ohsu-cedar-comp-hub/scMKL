@@ -2,7 +2,10 @@ import numpy as np
 import scipy
 import anndata as ad
 from sklearn.decomposition import TruncatedSVD, PCA
+
 from scmkl.tfidf_normalize import _tfidf_train_test
+from scmkl.kernels import *
+
 
 def _sparse_var(X, axis = None):
     '''
@@ -70,7 +73,7 @@ def _process_data(X_train, X_test = None, scale_data = True,
     X_train = X_train[:,variable_features]
     X_test = X_test[:, variable_features]
 
-    #Data processing according to data type
+    # Data processing according to data type
     if scale_data:
 
         if scipy.sparse.issparse(X_train):
@@ -151,6 +154,16 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
     Z_test = np.zeros((test_idx.shape[0], n_cols))
 
 
+    # Setting kernel function 
+    match adata.uns['kernel_type'].lower():
+        case 'gaussian':
+            kernel_func = gaussian_trans
+        case 'laplacian':
+            kernel_func = laplacian_trans
+        case 'cauchy':
+            kernel_func = cauchy_trans
+
+
     # Loop over each of the groups and creating Z for each
     for m, group_features in enumerate(adata.uns['group_dict'].values()):
         
@@ -208,32 +221,34 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
 
         # Calculates approximate kernel according to chosen kernel function
         # Distribution data comes from Fourier Transform of kernel function
-        if adata.uns['kernel_type'].lower() == 'gaussian':
+        # if adata.uns['kernel_type'].lower() == 'gaussian':
 
-            gamma = 1/(2*adjusted_sigma**2)
-            sigma_p = 0.5*np.sqrt(2*gamma)
+        #     gamma = 1/(2*adjusted_sigma**2)
+        #     sigma_p = 0.5*np.sqrt(2*gamma)
 
-            W = adata.uns['seed_obj'].normal(0, sigma_p, X_train.shape[1] * D)
-            W = W.reshape((X_train.shape[1]), D)
+        #     W = adata.uns['seed_obj'].normal(0, sigma_p, X_train.shape[1] * D)
+        #     W = W.reshape((X_train.shape[1]), D)
 
-        elif adata.uns['kernel_type'].lower() == 'laplacian':
+        # elif adata.uns['kernel_type'].lower() == 'laplacian':
 
-            gamma = 1 / (2 * adjusted_sigma)
+        #     gamma = 1 / (2 * adjusted_sigma)
 
-            W = adata.uns['seed_obj'].standard_cauchy(X_train.shape[1] * D)
-            W = gamma * W.reshape((X_train.shape[1], D))
+        #     W = adata.uns['seed_obj'].standard_cauchy(X_train.shape[1] * D)
+        #     W = gamma * W.reshape((X_train.shape[1], D))
 
-        elif adata.uns['kernel_type'].lower() == 'cauchy':
+        # elif adata.uns['kernel_type'].lower() == 'cauchy':
 
-            gamma = 1 / (2 * adjusted_sigma ** 2)
-            b = 0.5 * np.sqrt(gamma)
+        #     gamma = 1 / (2 * adjusted_sigma ** 2)
+        #     b = 0.5 * np.sqrt(gamma)
 
-            W = adata.uns['seed_obj'].laplace(0, b, X_train.shape[1] * D)
-            W = W.reshape((X_train.shape[1], D))
+        #     W = adata.uns['seed_obj'].laplace(0, b, X_train.shape[1] * D)
+        #     W = W.reshape((X_train.shape[1], D))
+
+        w = kernel_func(X_train, adjusted_sigma, adata.uns['seed_obj'], D)
 
 
-        train_projection = np.matmul(X_train, W)
-        test_projection = np.matmul(X_test, W)
+        train_projection = np.matmul(X_train, w)
+        test_projection = np.matmul(X_test, w)
         
         # Store group Z in whole-Z object. 
         # Preserves order to be able to extract meaningful groups
@@ -291,6 +306,7 @@ def transform_z(adata, new_sigmas)-> ad.AnnData:
 
         arcsin_train = np.arcsin(adata.uns['Z_train'][:, sin_idx]) * sigma / new_sigma
         arcsin_test = np.arcsin(adata.uns['Z_test'][:, sin_idx]) * sigma / new_sigma
+        
 
         adata.uns['Z_train'][:, cos_idx] = np.cos(arccos_train * arccos_train_signs)
         adata.uns['Z_test'][:, cos_idx] = np.cos(arccos_test * arccos_test_signs)
