@@ -20,8 +20,7 @@ __all__ = ['calculate_z',
            'run',
            'test',
            'tfidf_normalize',
-           'train_model',
-           'cdist'
+           'train_model'
            ]
 
 from scmkl._checks import *
@@ -39,5 +38,4 @@ from scmkl.run import *
 from scmkl.test import *
 from scmkl.tfidf_normalize import *
 from scmkl.train_model import *
-from scmkl.distances import *
 from scmkl.kernels import *

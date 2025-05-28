@@ -4,23 +4,6 @@ from sklearn.decomposition import TruncatedSVD, PCA
 
 from scmkl.calculate_z import _process_data
 from scmkl.tfidf_normalize import _tfidf
-from scmkl.distances import *
-
-
-def get_distance_metric(metric):
-    '''
-    
-    '''
-    match metric:
-        case 'euclidean':
-            dist = euclidean_distance
-        case 'cityblock':
-            dist = cityblock_distance
-        case _:
-            print('Invalid distance metric choice')
-            exit()
-    
-    return dist
 
 
 def estimate_sigma(adata, n_features = 5000):
@@ -50,8 +33,6 @@ def estimate_sigma(adata, n_features = 5000):
     array([10.4640895 , 10.82011454,  6.16769438,  9.86156855, ...])
     '''
     sigma_list = []
-
-    dist_function = get_distance_metric(adata.uns['distance_metric'])
 
     # Loop over every group in group_dict
     for m, group_features in enumerate(adata.uns['group_dict'].values()):
@@ -99,9 +80,10 @@ def estimate_sigma(adata, n_features = 5000):
 
         if scipy.sparse.issparse(X_train):
             X_train = X_train.toarray()
+            X_train = np.array(X_train, dtype = np.float32)
 
         # Calculating distances
-        sigma = cdist(X_train, dist_function)
+        sigma = scipy.spatial.distance.pdist(X_train, adata.uns['distance_metric'])
 
         sigma = np.mean(sigma)
 
