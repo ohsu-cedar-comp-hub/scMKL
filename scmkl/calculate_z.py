@@ -188,7 +188,7 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
 
         # Data filtering, and transformation according to given data_type
         # Will remove low variance (< 1e5) features regardless of data_type
-        # If given data_type is 'counts' will log scale and z-score the data
+        # If scale_data will log scale and z-score the data
         X_train, X_test = _process_data(X_train = X_train, X_test = X_test, 
                                         scale_data = adata.uns['scale_data'], 
                                         return_dense = True)          
@@ -207,10 +207,6 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
             X_train = PCA_func.fit_transform(np.asarray(X_train))
             X_test = PCA_func.transform(np.asarray(X_test))
 
-        elif adata.uns['reduction'] == 'linear':
-
-            X_train = X_train @ adata.uns['seed_obj'].choice([0,1], p = [0.02, 0.98], size = X_train.shape[1] * 50).reshape((X_train.shape[1], 50))
-            X_test = X_test @ adata.uns['seed_obj'].choice([0,1], p = [0.02, 0.98], size = X_test.shape[1] * 50).reshape((X_train.shape[1], 50))
 
         if scipy.sparse.issparse(X_train):
             X_train = X_train.toarray().astype(np.float16)
@@ -218,31 +214,6 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
 
         # Extract pre-calculated sigma used for approximating kernel
         adjusted_sigma = adata.uns['sigma'][m]
-
-        # Calculates approximate kernel according to chosen kernel function
-        # Distribution data comes from Fourier Transform of kernel function
-        # if adata.uns['kernel_type'].lower() == 'gaussian':
-
-        #     gamma = 1/(2*adjusted_sigma**2)
-        #     sigma_p = 0.5*np.sqrt(2*gamma)
-
-        #     W = adata.uns['seed_obj'].normal(0, sigma_p, X_train.shape[1] * D)
-        #     W = W.reshape((X_train.shape[1]), D)
-
-        # elif adata.uns['kernel_type'].lower() == 'laplacian':
-
-        #     gamma = 1 / (2 * adjusted_sigma)
-
-        #     W = adata.uns['seed_obj'].standard_cauchy(X_train.shape[1] * D)
-        #     W = gamma * W.reshape((X_train.shape[1], D))
-
-        # elif adata.uns['kernel_type'].lower() == 'cauchy':
-
-        #     gamma = 1 / (2 * adjusted_sigma ** 2)
-        #     b = 0.5 * np.sqrt(gamma)
-
-        #     W = adata.uns['seed_obj'].laplace(0, b, X_train.shape[1] * D)
-        #     W = W.reshape((X_train.shape[1], D))
 
         w = kernel_func(X_train, adjusted_sigma, adata.uns['seed_obj'], D)
 
@@ -283,35 +254,42 @@ def transform_z(adata, new_sigmas)-> ad.AnnData:
     '''
 
     assert 'Z_train' in adata.uns.keys() and 'Z_test' in adata.uns.keys(), 'Z_train and Z_test must be present in adata'
-    assert all(new_sigmas > 0), 'Sigma must be positive'
+    assert all(new_sigmas > 0) and all(adata.uns['sigma'] > 0), 'Sigma must be positive'
     assert len(new_sigmas) == len(adata.uns['sigma']), 'Length of new sigmas must be equal to length of old sigmas'
+
+    Z_train = adata.uns['Z_train']
+    Z_test = adata.uns['Z_test']
 
 
     for i, (sigma, new_sigma) in enumerate(zip(adata.uns['sigma'], new_sigmas)):
-        # if sigma == new_sigma:
-        #     continue
+        if sigma == new_sigma:
+            continue
 
         group_idx = np.arange(i * 2 * adata.uns['D'], (i + 1) * 2 * adata.uns['D'])
         cos_idx = group_idx[:len(group_idx)//2]
         sin_idx = group_idx[len(group_idx)//2:]
 
         # Undo the cos/sin and transform the recovered X @ W and transforms the distribution
-        arccos_train = np.arccos(adata.uns['Z_train'][:, cos_idx]) * sigma / new_sigma
-        arccos_test = np.arccos(adata.uns['Z_test'][:, cos_idx]) * sigma / new_sigma
+        cos_train = Z_train[:, cos_idx]
+        cos_test = Z_test[:, cos_idx]
+        sin_train = Z_train[:, sin_idx]
+        sin_test = Z_test[:, sin_idx]
 
-        # Need to preserve the sign of the cos because the range of arccos is [0, pi]
-        # so we need to account for negative values)
-        arccos_train_signs = np.sign(adata.uns['Z_train'][:, cos_idx])
-        arccos_test_signs = np.sign(adata.uns['Z_test'][:, cos_idx])
+        orig_train_projection = np.arctan2(sin_train, cos_train)
+        orig_test_projection = np.arctan2(sin_test, cos_test)
 
-        arcsin_train = np.arcsin(adata.uns['Z_train'][:, sin_idx]) * sigma / new_sigma
-        arcsin_test = np.arcsin(adata.uns['Z_test'][:, sin_idx]) * sigma / new_sigma
         
+        transformed_train_projection = orig_train_projection * (sigma / new_sigma)
+        transformed_test_projection = orig_test_projection * (sigma / new_sigma)
 
-        adata.uns['Z_train'][:, cos_idx] = np.cos(arccos_train * arccos_train_signs)
-        adata.uns['Z_test'][:, cos_idx] = np.cos(arccos_test * arccos_test_signs)
 
-        adata.uns['Z_train'][:, sin_idx] = np.sin(arcsin_train)
-        adata.uns['Z_test'][:, sin_idx] = np.sin(arcsin_test)
+        Z_train[:, cos_idx] = np.cos(transformed_train_projection)
+        Z_test[:, cos_idx] = np.cos(transformed_test_projection)
+
+        Z_train[:, sin_idx] = np.sin(transformed_train_projection)
+        Z_test[:, sin_idx] = np.sin(transformed_test_projection)
+
+    adata.uns['Z_train'] = Z_train
+    adata.uns['Z_test'] = Z_test
 
     return adata

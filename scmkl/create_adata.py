@@ -1,6 +1,8 @@
 import numpy as np
 import anndata as ad
 import gc
+import warnings 
+
 
 def _filter_features(feature_names, group_dict):
     '''
@@ -365,6 +367,7 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
                                                           group_dict)
 
     if remove_features:
+        warnings.filterwarnings('ignore', category = ad.ImplicitModificationWarning)
         adata = adata[:, filtered_feature_names]
     
     gc.collect()

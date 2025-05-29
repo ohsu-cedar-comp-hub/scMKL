@@ -5,8 +5,12 @@ from sklearn.decomposition import TruncatedSVD, PCA
 from scmkl.calculate_z import _process_data
 from scmkl.tfidf_normalize import _tfidf
 
+<<<<<<< HEAD
 
 def estimate_sigma(adata, n_features = 5000):
+=======
+def estimate_sigma(adata, n_features = 5000, batches = 10, batch_size = 100):
+>>>>>>> 9c3e639 (Added batching option for estimate_sigma for improved scalability)
     '''
     Calculate kernel widths to inform distribution for projection of 
     Fourier Features. Calculates one sigma per group of features.
@@ -20,7 +24,15 @@ def estimate_sigma(adata, n_features = 5000):
         > Number of random features to include when estimating sigma. 
         Will be scaled for the whole pathway set according to a 
         heuristic. Used for scalability.
-    
+    **batches**: *int*
+        > The number of batches to use for the distance calculation.
+        This will average the result of `batches` distance calculations
+        of `batch_size` randomly sampled cells. More batches will converge
+        to population distance values at the cost of scalability.
+    **batch_size**: *int*
+        > The number of cells to include per batch for distance
+        calculations. Higher batch size will converge to population
+        distance values at the cost of scalability.
     Returns
     -------
     **adata** : *AnnData*
@@ -33,6 +45,13 @@ def estimate_sigma(adata, n_features = 5000):
     array([10.4640895 , 10.82011454,  6.16769438,  9.86156855, ...])
     '''
     sigma_list = []
+
+    assert batch_size < len(adata.uns['train_indices']),\
+        'Batch size much be smaller than the training set.'
+
+    if batch_size > 2000:
+        print('Warning: Batch sizes over 2000 may \
+               result in long run-time.')
 
     # Loop over every group in group_dict
     for m, group_features in enumerate(adata.uns['group_dict'].values()):
@@ -65,18 +84,11 @@ def estimate_sigma(adata, n_features = 5000):
         if adata.uns['reduction'].lower() == 'svd':
 
             SVD_func = TruncatedSVD(n_components = np.min([50, X_train.shape[1]]), random_state = 1)
-            X_train = SVD_func.fit_transform(scipy.sparse.csr_array(X_train[distance_indices,:]))[:,1:]
+            X_train = SVD_func.fit_transform(scipy.sparse.csr_array(X_train))[:,1:]
 
         elif adata.uns['reduction'].lower() == 'pca':
             PCA_func = PCA(n_components = np.min([50, X_train.shape[1]]), random_state = 1)
-            X_train = PCA_func.fit_transform(np.asarray(X_train[distance_indices,:]))
-
-        elif adata.uns['reduction'].lower() == 'linear':
-
-            X_train = X_train[distance_indices] @ adata.uns['seed_obj'].choice([0,1], [0.02, 0.98]).reshape((len(distance_indices), 50))
-
-        else:
-            X_train = X_train[distance_indices, :]
+            X_train = PCA_func.fit_transform(np.asarray(X_train))
 
         if scipy.sparse.issparse(X_train):
             X_train = X_train.toarray()
@@ -85,7 +97,20 @@ def estimate_sigma(adata, n_features = 5000):
         # Calculating distances
         sigma = scipy.spatial.distance.pdist(X_train, adata.uns['distance_metric'])
 
+<<<<<<< HEAD
         sigma = np.mean(sigma)
+=======
+        # Calculate Distance Matrix with specified metric
+        batch_sigmas = np.zeros((batches))
+
+        for i in np.arange(batches):
+            batch_indices = adata.uns['seed_obj'].choice(np.arange(X_train.shape[0]), batch_size, replace = False)
+            batch_sigma = scipy.spatial.distance.pdist(X_train[batch_indices, :], 
+                                                       metric = adata.uns['distance_metric'])
+            batch_sigmas[i] = np.mean(batch_sigma)
+
+        sigma = np.mean(batch_sigmas)
+>>>>>>> 9c3e639 (Added batching option for estimate_sigma for improved scalability)
 
         # sigma = 0 is numerically unusable in later steps
         # Using such a small sigma will result in wide distribution, and 
