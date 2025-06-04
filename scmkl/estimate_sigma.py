@@ -5,12 +5,8 @@ from sklearn.decomposition import TruncatedSVD, PCA
 from scmkl.calculate_z import _process_data
 from scmkl.tfidf_normalize import _tfidf
 
-<<<<<<< HEAD
 
-def estimate_sigma(adata, n_features = 5000):
-=======
 def estimate_sigma(adata, n_features = 5000, batches = 10, batch_size = 100):
->>>>>>> 9c3e639 (Added batching option for estimate_sigma for improved scalability)
     '''
     Calculate kernel widths to inform distribution for projection of 
     Fourier Features. Calculates one sigma per group of features.
@@ -24,15 +20,18 @@ def estimate_sigma(adata, n_features = 5000, batches = 10, batch_size = 100):
         > Number of random features to include when estimating sigma. 
         Will be scaled for the whole pathway set according to a 
         heuristic. Used for scalability.
+
     **batches**: *int*
         > The number of batches to use for the distance calculation.
         This will average the result of `batches` distance calculations
         of `batch_size` randomly sampled cells. More batches will converge
         to population distance values at the cost of scalability.
+
     **batch_size**: *int*
         > The number of cells to include per batch for distance
         calculations. Higher batch size will converge to population
         distance values at the cost of scalability.
+        
     Returns
     -------
     **adata** : *AnnData*
@@ -97,9 +96,6 @@ def estimate_sigma(adata, n_features = 5000, batches = 10, batch_size = 100):
         # Calculating distances
         sigma = scipy.spatial.distance.pdist(X_train, adata.uns['distance_metric'])
 
-<<<<<<< HEAD
-        sigma = np.mean(sigma)
-=======
         # Calculate Distance Matrix with specified metric
         batch_sigmas = np.zeros((batches))
 
@@ -110,7 +106,6 @@ def estimate_sigma(adata, n_features = 5000, batches = 10, batch_size = 100):
             batch_sigmas[i] = np.mean(batch_sigma)
 
         sigma = np.mean(batch_sigmas)
->>>>>>> 9c3e639 (Added batching option for estimate_sigma for improved scalability)
 
         # sigma = 0 is numerically unusable in later steps
         # Using such a small sigma will result in wide distribution, and 
