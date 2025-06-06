@@ -1,112 +1,102 @@
 import numpy as np
 import scipy
 import anndata as ad
-from sklearn.decomposition import TruncatedSVD, PCA
 
 from scmkl.tfidf_normalize import _tfidf_train_test
+from scmkl.estimate_sigma import *
 from scmkl.kernels import *
 
 
-def _sparse_var(X, axis = None):
+def get_z_indices(m, D):
     '''
-    Function to calculate variance on a scipy sparse matrix.
-    
+    Takes the number associated with the group as `m` and returns the 
+    indices for cos and sin functions to be applied.
+
     Parameters
     ----------
-    X : A scipy sparse or numpy array
-    axis : Determines which axis variance is calculated on. Same usage 
-    as Numpy.
-        axis = 0 => column variances
-        axis = 1 => row variances
-        axis = None => total variance (calculated on all data)
-    
+    m : int
+        > The chronological number of the group being processed.
+
+    D : int
+        > The number of dimensions per group.
+
     Returns
     -------
-    var : Variance values calculated over the given axis
+    cos_idx, sin_idx : np.ndarray
+        > The indices for cos and sin projections in overall Z matrix.
     '''
+    x_idx = np.arange(m * 2 * D ,(m + 1) * 2 * D)
+    cos_idx = x_idx[:len(x_idx)//2]
+    sin_idx = x_idx[len(x_idx)//2:]
 
-    # E[X^2] - E[X]^2
-    if scipy.sparse.issparse(X):
-        exp_mean = (X.power(2).mean(axis = axis))
-        sq_mean = np.square(X.mean(axis = axis))
-        var = np.array(exp_mean - sq_mean)
-    else:
-        var = np.var(X, axis = axis)
-
-    return var.ravel()
+    return cos_idx, sin_idx
 
 
-def _process_data(X_train, X_test = None, scale_data = True, 
-                  return_dense = True):
+def calc_groupz(X_train, X_test, adata, D, sigma, kernel_func):
     '''
-    Function to preprocess data matrix according to type of data 
-    (counts- e.g. rna, or binary- atac). Will process test data 
-    according to parameters calculated from test data
-    
+    Calculates the Z matrix for grouping.
+
     Parameters
     ----------
-    X_train : A scipy sparse or numpy array
-    X_train : A scipy sparse or numpy array
-    data_type : 'counts' or 'binary'.  Determines what preprocessing is 
-                applied to the data. Log transforms and standard scales 
-                counts data TFIDF filters ATAC data to remove 
-                uninformative columns
+    X_train : np.ndarray
+        > The filtered data matrix to calculate train Z mat for.
     
+    X_train : np.ndarray
+        > The filtered data matrix to calculate train Z mat for.
+
+    adata : anndata.AnnData 
+        > anndata object containing `seed_obj` in `.uns` attribute.
+
+    D : int
+        > Number of dimensions per grouping.
+
+    sigma : float
+        > Kernel width for grouping.
+
+    kernel_func : function
+        > The kernel function used to be applied to data.
+
     Returns
     -------
-    X_train, X_test : Numpy arrays with the process train/test data 
-    respectively.
+    train_projections, test_projections : np.ndarray
+        > Training and testing Z matrices for group.
     '''
-    if X_test is None:
-            # Creates dummy matrix to for the sake of calculation without 
-            # increasing computational time
-            X_test = X_train[:1,:] 
-            orig_test = None
-    else:
-        orig_test = 'given'
+    if adata.uns['tfidf']:
+        X_train, X_test = _tfidf_train_test(X_train, X_test)
 
-    # Remove features that have no variance in the training data 
-    # (will be uniformative)
-    var = _sparse_var(X_train, axis = 0)
-    variable_features = np.where(var > 1e-5)[0]
-
-    X_train = X_train[:,variable_features]
-    X_test = X_test[:, variable_features]
-
-    # Data processing according to data type
-    if scale_data:
-
-        if scipy.sparse.issparse(X_train):
-            X_train = X_train.log1p()
-            X_test = X_test.log1p()
-        else:
-            X_train = np.log1p(X_train)
-            X_test = np.log1p(X_test)
-            
-        #Center and scale count data
-        train_means = np.mean(X_train, 0)
-        train_sds = np.sqrt(var[variable_features])
-
-        # Perform transformation on test data according to parameters 
-        # of the training data
-        X_train = (X_train - train_means) / train_sds
-        X_test = (X_test - train_means) / train_sds
+    # Data filtering, and transformation according to given data_type
+    # Will remove low variance (< 1e5) features regardless of data_type
+    # If scale_data will log scale and z-score the data
+    X_train, X_test = process_data(X_train = X_train, X_test = X_test, 
+                                    scale_data = adata.uns['scale_data'], 
+                                    return_dense = True)          
 
 
-    if return_dense and scipy.sparse.issparse(X_train):
-        X_train = X_train.toarray()
-        X_test = X_test.toarray()
+    if adata.uns['reduction'].lower() == 'svd':
+        X_train, X_test = svd_transformation(X_train, X_test)
 
 
-    if orig_test is None:
-        return X_train
-    else:
-        return X_train, X_test
+    elif adata.uns['reduction'].lower() == 'pca':
+        X_train, X_test = pca_transformation(X_train, X_test)
 
 
-def calculate_z(adata, n_features = 5000) -> ad.AnnData:
+    if scipy.sparse.issparse(X_train):
+        X_train = X_train.toarray().astype(np.float16)
+        X_test = X_test.toarray().astype(np.float16)
+
+    w = kernel_func(X_train, sigma, adata.uns['seed_obj'], D)
+    
+    train_projection = np.matmul(X_train, w)
+    test_projection = np.matmul(X_test, w)
+
+    return train_projection, test_projection
+
+
+def calculate_z(adata, n_features = 5000, batches = 10, 
+                batch_size = 100) -> ad.AnnData:
     '''
-    Function to calculate Z matrix.
+    Function to calculate Z matrices for all groups in both training 
+    and testing data.
 
     Parameters
     ----------
@@ -134,8 +124,6 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
     dict_keys(['Z_train', 'Z_test', 'sigmas', 'train_indices', 
     'test_indices'])
     '''
-    assert np.all(adata.uns['sigma'] > 0), 'Sigma must be positive'
-
     # Number of groupings taking from group_dict
     n_pathway = len(adata.uns['group_dict'].keys())
     D = adata.uns['D']
@@ -143,15 +131,14 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
     sq_i_d = np.sqrt(1/D)
 
     # Capturing training and testing indices
-    train_idx = np.array(adata.uns['train_indices'], dtype = np.int_)
-    test_idx = np.array(adata.uns['test_indices'], dtype = np.int_)
+    train_len = len(adata.uns['train_indices'])
+    test_len = len(adata.uns['test_indices'])
 
-    # Create Arrays to store concatenated group Z
+    # Create Arrays to store concatenated group Zs
     # Each group of features will have a corresponding entry in each array
     n_cols = 2 * adata.uns['D'] * n_pathway
-
-    Z_train = np.zeros((train_idx.shape[0], n_cols))
-    Z_test = np.zeros((test_idx.shape[0], n_cols))
+    Z_train = np.zeros((train_len, n_cols))
+    Z_test = np.zeros((test_len, n_cols))
 
 
     # Setting kernel function 
@@ -166,66 +153,27 @@ def calculate_z(adata, n_features = 5000) -> ad.AnnData:
 
     # Loop over each of the groups and creating Z for each
     for m, group_features in enumerate(adata.uns['group_dict'].values()):
-        
-        #Extract features from mth group
-        num_group_features = len(group_features)
 
-        # Sample up to n_features features- important for scalability if 
-        # using large groupings
-        # Will use all features if the grouping contains fewer than n_features
-        number_features = np.min([n_features, num_group_features])
-        group_array = np.array(list(group_features))
-        group_features = adata.uns['seed_obj'].choice(group_array, 
-                                                      number_features, 
-                                                      replace = False) 
+        n_group_features = len(group_features)
 
-        # Create data arrays containing only features within this group
-        X_train = adata[adata.uns['train_indices'],:][:, group_features].X
-        X_test = adata[adata.uns['test_indices'],:][:, group_features].X
+        X_train, X_test = get_group_mat(adata, n_features, group_features, 
+                                        n_group_features)
 
-        if adata.uns['tfidf']:
-            X_train, X_test = _tfidf_train_test(X_train, X_test)
-
-        # Data filtering, and transformation according to given data_type
-        # Will remove low variance (< 1e5) features regardless of data_type
-        # If scale_data will log scale and z-score the data
-        X_train, X_test = _process_data(X_train = X_train, X_test = X_test, 
-                                        scale_data = adata.uns['scale_data'], 
-                                        return_dense = True)          
-
-        if adata.uns['reduction'].lower() == 'svd':
-
-            SVD_func = TruncatedSVD(n_components = np.min([50, X_train.shape[1]]), random_state = 1)
+        # Getting sigma
+        if 'sigma' in adata.uns.keys():
+            sigma = adata.uns['sigma'][m]
+        else:
+            sigma = est_group_sigma(adata, X_train, n_group_features, 
+                                    n_features, batches, batch_size)
             
-            # Remove first component as it corresponds with sequencing depth
-            X_train = SVD_func.fit_transform(scipy.sparse.csr_array(X_train))[:, 1:]
-            X_test = SVD_func.transform(scipy.sparse.csr_array(X_test))[:, 1:]
+        assert sigma > 0, "Sigma must be more than 0"
+        train_projection, test_projection = calc_groupz(X_train, X_test, 
+                                                        adata, D, sigma, 
+                                                        kernel_func)
 
-        elif adata.uns['reduction'].lower() == 'pca':
-            PCA_func = PCA(n_components = np.min([50, X_train.shape[1]]), random_state = 1)
-
-            X_train = PCA_func.fit_transform(np.asarray(X_train))
-            X_test = PCA_func.transform(np.asarray(X_test))
-
-
-        if scipy.sparse.issparse(X_train):
-            X_train = X_train.toarray().astype(np.float16)
-            X_test = X_test.toarray().astype(np.float16)
-
-        # Extract pre-calculated sigma used for approximating kernel
-        adjusted_sigma = adata.uns['sigma'][m]
-
-        w = kernel_func(X_train, adjusted_sigma, adata.uns['seed_obj'], D)
-
-
-        train_projection = np.matmul(X_train, w)
-        test_projection = np.matmul(X_test, w)
-        
-        # Store group Z in whole-Z object. 
+        # Store group Z in whole-Z object
         # Preserves order to be able to extract meaningful groups
-        x_idx = np.arange(m * 2 * D ,(m + 1) * 2 * D)
-        cos_idx = x_idx[:len(x_idx)//2]
-        sin_idx = x_idx[len(x_idx)//2:]
+        cos_idx, sin_idx = get_z_indices(m, D)
 
         Z_train[0:, cos_idx] = np.cos(train_projection)
         Z_train[0:, sin_idx] = np.sin(train_projection)

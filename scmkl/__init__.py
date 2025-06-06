@@ -9,6 +9,7 @@
 
 __all__ = ['calculate_z', 
            'create_adata', 
+           'data_processing',
            'dataframes',
            'estimate_sigma', 
            'get_atac_groupings',
@@ -26,6 +27,7 @@ __all__ = ['calculate_z',
 from scmkl._checks import *
 from scmkl.calculate_z import *
 from scmkl.create_adata import *
+from scmkl.data_processing import *
 from scmkl.dataframes import *
 from scmkl.estimate_sigma import *
 from scmkl.get_atac_groupings import *
