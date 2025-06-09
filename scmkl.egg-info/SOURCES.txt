@@ -5,8 +5,8 @@ scmkl/__init__.py
 scmkl/_checks.py
 scmkl/calculate_z.py
 scmkl/create_adata.py
+scmkl/data_processing.py
 scmkl/dataframes.py
-scmkl/distances.py
 scmkl/estimate_sigma.py
 scmkl/get_atac_groupings.py
 scmkl/kernels.py

@@ -6,7 +6,53 @@ from scmkl.data_processing import *
 from scmkl.tfidf_normalize import _tfidf
 
 
-def batch_sigma(X_train, adata, batches, batch_size) -> float:
+def get_batches(sample_range, seed_obj, batches, batch_size) -> np.ndarray:
+    '''
+    Gets batch indices for estimating sigma.
+
+    Parameters
+    ----------
+    sample_range : list | np.ndarray
+        > A 1D array with first element being 0 and last element being 
+        (1 - number of samples from X_train).
+
+    seed_obj : np.random._generator.Generator
+        > Numpy random generator object from `adata.uns['seed_obj']`.
+
+    batches : int
+        > Number of batches to calculate indices for.
+
+    batch_size : int
+        > Number of samples in each batch.
+
+    Returns
+    -------
+    batches_idx : np.ndarray
+        > A 2D array with each row cooresponding to the sample indices 
+        for each batch.
+    '''
+    required_n = batches * batch_size
+    train_n = len(sample_range)
+    assert required_n <= train_n, (f"{required_n} cells required for "
+                                   f"{batches} batches of {batch_size} cells; "
+                                   f"only {train_n} cells present")
+
+    # Creating a mat of batch x sample indices for estimating sigma
+    batches_idx = np.zeros((batches, batch_size), dtype = np.int16)
+
+    for i in range(batches):
+        batches_idx[i] = seed_obj.choice(sample_range, 
+                                         batch_size, 
+                                         replace = False)
+        
+        # Removing selected indices from sample options
+        rm_indices = np.isin(sample_range, batches_idx[i])
+        sample_range = np.delete(sample_range, rm_indices)
+
+    return batches_idx
+
+
+def batch_sigma(X_train, distance_metric, batch_idx) -> float:
     '''
     Calculates the kernel width (sigma) for a feature grouping through 
     sample batching.
@@ -34,13 +80,13 @@ def batch_sigma(X_train, adata, batches, batch_size) -> float:
         adjustments for small kernel width or large groupings.
     '''
     # Calculate Distance Matrix with specified metric
-    batch_sigmas = np.zeros(batches)
+    n_batches = batch_idx.shape[0]
+    batch_sigmas = np.zeros(n_batches)
 
-    for i in np.arange(batches):
-        batch_indices = adata.uns['seed_obj'].choice(np.arange(X_train.shape[0]), 
-                                                     batch_size, replace = False)
-        batch_sigma = scipy.spatial.distance.pdist(X_train[batch_indices, :], 
-                                                   metric = adata.uns['distance_metric'])
+    for i in np.arange(n_batches):
+        idx = batch_idx[i]
+        batch_sigma = scipy.spatial.distance.pdist(X_train[idx,:], 
+                                                   distance_metric)
         batch_sigmas[i] = np.mean(batch_sigma)
 
     sigma = np.mean(batch_sigmas)
@@ -99,8 +145,13 @@ def est_group_sigma(adata, X_train, n_group_features, n_features, batches,
         X_train = X_train.toarray()
         X_train = np.array(X_train, dtype = np.float32)
 
+    # Getting batch indices
+    sample_range = np.arange(X_train.shape[0])
+    batch_idx = get_batches(sample_range, adata.uns['seed_obj'], 
+                            batches, batch_size)
+
     # Calculates mean sigma from all batches
-    sigma = batch_sigma(X_train, adata, batches, batch_size)
+    sigma = batch_sigma(X_train, adata.uns['distance_metric'], batch_idx)
 
     # sigma = 0 is numerically unusable in later steps
     # Using such a small sigma will result in wide distribution, and 
