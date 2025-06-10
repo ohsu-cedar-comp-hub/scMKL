@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
-
-from plotnine import *
 from sklearn.metrics import confusion_matrix
+from plotnine import (ggplot, aes, theme_classic, ylim, 
+                      geom_point, scale_x_reverse, annotate)
 
 
 def plot_conf_mat(results, title = '', cmap = None, normalize = True,

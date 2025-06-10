@@ -188,7 +188,7 @@ def optimize_alpha(adata, group_size = None, tfidf = False,
         if tfidf:
             cv_adata = tfidf_normalize(cv_adata, binarize= True)
 
-        cv_adata = estimate_sigma(cv_adata, n_features = 200)
+        # Estimating kernel widths and calculating Zs
         cv_adata = calculate_z(cv_adata, n_features= 5000)
 
         gc.collect()

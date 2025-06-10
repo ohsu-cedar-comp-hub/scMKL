@@ -40,15 +40,3 @@ def cauchy_trans(x, adjusted_sigma, seed_obj, d):
     w = w.reshape((x.shape[1], d))
 
     return w
-
-@nb.njit(fastmath = True, cache = True)
-def add_projections(Z, x_idx, projection, sq_i_d):
-    '''
-    
-    '''
-    new_aks = np.hstack((np.cos(projection), np.sin(projection)))
-    new_aks *= sq_i_d
-
-    Z[0:, x_idx] = new_aks
-
-    return Z
