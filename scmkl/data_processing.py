@@ -185,14 +185,15 @@ def get_reduction(reduction: str):
     Function used to identify reduction type and return function to 
     apply to data matrices.
     '''
-    # Avoiding conditional statements in for loop
-    red_funcs = {
-        'pca'  : pca_transformation,
-        'svd'  : svd_transformation,
-        'None' : no_transformation
-    }
+    match reduction:
+        case 'pca':
+            red_func = pca_transformation
+        case 'svd':
+            red_func = svd_transformation
+        case 'None':
+            red_func = no_transformation
 
-    return red_funcs[reduction]
+    return red_func
 
 
 def get_group_mat(adata, n_features, group_features, n_group_features, 

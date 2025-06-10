@@ -5,7 +5,6 @@ import gc
 from scmkl.tfidf_normalize import tfidf_normalize
 from scmkl.estimate_sigma import estimate_sigma
 from scmkl.calculate_z import calculate_z
-from scmkl.data_processing import sparse_var
 
 
 def _combine_modalities(adatas : list, names : list, 
