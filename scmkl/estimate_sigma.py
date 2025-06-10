@@ -2,7 +2,7 @@ import scipy
 import anndata
 import numpy as np
 
-from scmkl.data_processing import *
+from scmkl.data_processing import process_data, get_group_mat
 from scmkl.tfidf_normalize import _tfidf
 
 
@@ -127,19 +127,12 @@ def est_group_sigma(adata, X_train, n_group_features, n_features, batches,
     sigma : float
         > The estimated group kernel with for Z projection.
     '''    
-    X_train = process_data(X_train, 
-                            scale_data = adata.uns['scale_data'], 
-                            return_dense = True)
-    
-
     if adata.uns['tfidf']:
         X_train = _tfidf(X_train, mode = 'normalize')
 
-    if adata.uns['reduction'].lower() == 'svd':
-        X_train = svd_transformation(X_train)
-
-    elif adata.uns['reduction'].lower() == 'pca':
-        X_train = pca_transformation(X_train)
+    X_train = process_data(X_train, 
+                        scale_data = adata.uns['scale_data'], 
+                        return_dense = True)
 
     if scipy.sparse.issparse(X_train):
         X_train = X_train.toarray()
@@ -216,7 +209,7 @@ def estimate_sigma(adata, n_features = 5000, batches = 10,
                "result in long run-time.")
 
     # Loop over every group in group_dict
-    for m, group_features in enumerate(adata.uns['group_dict'].values()):
+    for group_features in adata.uns['group_dict'].values():
 
         n_group_features = len(group_features)
         n_samples = np.min((adata.uns['train_indices'].shape[0], 2000))
@@ -226,6 +219,16 @@ def estimate_sigma(adata, n_features = 5000, batches = 10,
                             group_features = group_features, 
                             n_group_features = n_group_features,
                             n_samples = n_samples)
+        
+        if adata.uns['tfidf']:
+            X_train = _tfidf(X_train, mode='normalize')
+
+        # Data filtering, and transformation according to given data_type
+        # Will remove low variance (< 1e5) features regardless of data_type
+        # If scale_data will log scale and z-score the data
+        X_train = process_data(X_train=X_train,
+                               scale_data=adata.uns['scale_data'], 
+                               return_dense=True)    
 
         # Estimating sigma
         sigma = est_group_sigma(adata, X_train, n_group_features, 

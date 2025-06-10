@@ -3,8 +3,9 @@ import scipy
 import anndata as ad
 
 from scmkl.tfidf_normalize import _tfidf_train_test
-from scmkl.estimate_sigma import *
-from scmkl.kernels import *
+from scmkl.estimate_sigma import est_group_sigma
+from scmkl.data_processing import process_data, get_group_mat
+from scmkl.projections import gaussian_trans, laplacian_trans, cauchy_trans
 
 
 def get_z_indices(m, D):
@@ -32,7 +33,7 @@ def get_z_indices(m, D):
     return cos_idx, sin_idx
 
 
-def calc_groupz(X_train, X_test, adata, D, sigma, kernel_func):
+def calc_groupz(X_train, X_test, adata, D, sigma, proj_func):
     '''
     Calculates the Z matrix for grouping.
 
@@ -53,38 +54,19 @@ def calc_groupz(X_train, X_test, adata, D, sigma, kernel_func):
     sigma : float
         > Kernel width for grouping.
 
-    kernel_func : function
-        > The kernel function used to be applied to data.
+    proj_func : function
+        > The projection direction function to be applied to data.
 
     Returns
     -------
     train_projections, test_projections : np.ndarray
         > Training and testing Z matrices for group.
-    '''
-    if adata.uns['tfidf']:
-        X_train, X_test = _tfidf_train_test(X_train, X_test)
-
-    # Data filtering, and transformation according to given data_type
-    # Will remove low variance (< 1e5) features regardless of data_type
-    # If scale_data will log scale and z-score the data
-    X_train, X_test = process_data(X_train = X_train, X_test = X_test, 
-                                    scale_data = adata.uns['scale_data'], 
-                                    return_dense = True)          
-
-
-    if adata.uns['reduction'].lower() == 'svd':
-        X_train, X_test = svd_transformation(X_train, X_test)
-
-
-    elif adata.uns['reduction'].lower() == 'pca':
-        X_train, X_test = pca_transformation(X_train, X_test)
-
-
+    '''   
     if scipy.sparse.issparse(X_train):
         X_train = X_train.toarray().astype(np.float16)
         X_test = X_test.toarray().astype(np.float16)
 
-    w = kernel_func(X_train, sigma, adata.uns['seed_obj'], D)
+    w = proj_func(X_train, sigma, adata.uns['seed_obj'], D)
     
     train_projection = np.matmul(X_train, w)
     test_projection = np.matmul(X_test, w)
@@ -144,20 +126,31 @@ def calculate_z(adata, n_features = 5000, batches = 10,
     # Setting kernel function 
     match adata.uns['kernel_type'].lower():
         case 'gaussian':
-            kernel_func = gaussian_trans
+            proj_func = gaussian_trans
         case 'laplacian':
-            kernel_func = laplacian_trans
+            proj_func = laplacian_trans
         case 'cauchy':
-            kernel_func = cauchy_trans
+            proj_func = cauchy_trans
 
 
     # Loop over each of the groups and creating Z for each
+    sigma_list = list()
     for m, group_features in enumerate(adata.uns['group_dict'].values()):
 
         n_group_features = len(group_features)
 
         X_train, X_test = get_group_mat(adata, n_features, group_features, 
                                         n_group_features)
+        
+        if adata.uns['tfidf']:
+            X_train, X_test = _tfidf_train_test(X_train, X_test)
+
+        # Data filtering, and transformation according to given data_type
+        # Will remove low variance (< 1e5) features regardless of data_type
+        # If scale_data will log scale and z-score the data
+        X_train, X_test = process_data(X_train=X_train, X_test=X_test, 
+                                       scale_data=adata.uns['scale_data'], 
+                                       return_dense = True)    
 
         # Getting sigma
         if 'sigma' in adata.uns.keys():
@@ -165,11 +158,12 @@ def calculate_z(adata, n_features = 5000, batches = 10,
         else:
             sigma = est_group_sigma(adata, X_train, n_group_features, 
                                     n_features, batches, batch_size)
+            sigma_list.append(sigma)
             
         assert sigma > 0, "Sigma must be more than 0"
         train_projection, test_projection = calc_groupz(X_train, X_test, 
                                                         adata, D, sigma, 
-                                                        kernel_func)
+                                                        proj_func)
 
         # Store group Z in whole-Z object
         # Preserves order to be able to extract meaningful groups
@@ -183,6 +177,9 @@ def calculate_z(adata, n_features = 5000, batches = 10,
 
     adata.uns['Z_train'] = Z_train * sq_i_d
     adata.uns['Z_test'] = Z_test * sq_i_d
+
+    if 'sigma' not in adata.uns.keys():
+        adata.uns['sigma'] = np.array(sigma_list)
 
     return adata
 

@@ -3,7 +3,7 @@ import scipy
 from sklearn.decomposition import TruncatedSVD, PCA
 
 
-def sparse_var(X, axis = None):
+def sparse_var(X, axis=None):
     '''
     Function to calculate variance on a scipy sparse matrix.
     
@@ -20,7 +20,6 @@ def sparse_var(X, axis = None):
     -------
     var : Variance values calculated over the given axis
     '''
-
     # E[X^2] - E[X]^2
     if scipy.sparse.issparse(X):
         exp_mean = (X.power(2).mean(axis = axis))
@@ -32,8 +31,8 @@ def sparse_var(X, axis = None):
     return var.ravel()
 
 
-def process_data(X_train, X_test = None, scale_data = True, 
-                  return_dense = True):
+def process_data(X_train, X_test=None, scale_data=True, 
+                  return_dense=True):
     '''
     Function to preprocess data matrix according to type of data 
     (counts- e.g. rna, or binary- atac). Will process test data 
@@ -109,7 +108,7 @@ def process_data(X_train, X_test = None, scale_data = True,
         return X_train, X_test
     
 
-def svd_transformation(X_train, X_test = None):
+def svd_transformation(X_train, X_test=None):
     '''
     Returns matrices with SVD reduction. If `X_test is None`, only 
     X_train is returned.
@@ -138,13 +137,11 @@ def svd_transformation(X_train, X_test = None):
 
     if X_test is not None:
         X_test = SVD_func.transform(scipy.sparse.csr_array(X_test))[:, 1:]
-        return X_train, X_test
     
-    else:
-        return X_train
+    return X_train, X_test
 
 
-def pca_transformation(X_train, X_test = None):
+def pca_transformation(X_train, X_test=None):
     '''
     Returns matrices with PCA reduction. If `X_test is None`, only 
     X_train is returned.
@@ -172,14 +169,34 @@ def pca_transformation(X_train, X_test = None):
 
     if X_test is not None:
         X_test = PCA_func.transform(np.asarray(X_test))
-        return X_train, X_test
     
-    else:
-        return X_train
+    return X_train, X_test
+
+
+def no_transformation(X_train, X_test=None):
+    '''
+    Dummy function used to return mat inputs.
+    '''
+    return X_train, X_test
+
+
+def get_reduction(reduction: str):
+    '''
+    Function used to identify reduction type and return function to 
+    apply to data matrices.
+    '''
+    # Avoiding conditional statements in for loop
+    red_funcs = {
+        'pca'  : pca_transformation,
+        'svd'  : svd_transformation,
+        'None' : no_transformation
+    }
+
+    return red_funcs[reduction]
 
 
 def get_group_mat(adata, n_features, group_features, n_group_features, 
-                  n_samples = None) -> np.ndarray:
+                  n_samples=None) -> np.ndarray:
     '''
     Filters to only features in group. Will sample features if 
     `n_features < n_group_features`.
@@ -187,8 +204,8 @@ def get_group_mat(adata, n_features, group_features, n_group_features,
     Parameters
     ----------
     adata : anndata.AnnData
-        > anndata object with `seed_obj`, `train_indices`, and 
-        `test_indices` in `uns` attribute.
+        > anndata object with `'seed_obj'`, `'train_indices'`, and 
+        `'test_indices'` in `.uns`.
 
     n_features : int
         > Maximum number of features to keep in matrix. Only 
@@ -207,8 +224,12 @@ def get_group_mat(adata, n_features, group_features, n_group_features,
     -------
     X_train, X_test : np.ndarray
         > Filtered matrices. If `n_samples` is provided, only X_train 
-        is returned.
+        is returned. If `adata.uns['reduction']` is `'pca'` or `'svd'` 
+        the matrices are transformed before being returned.
     '''
+    # Getting reduction function
+    reduction_func = get_reduction(adata.uns['reduction'])
+
     # Sample up to n_features features- important for scalability if 
     # using large groupings
     # Will use all features if the grouping contains fewer than n_features
@@ -223,6 +244,7 @@ def get_group_mat(adata, n_features, group_features, n_group_features,
 
     if n_samples is None:
         X_test = adata[adata.uns['test_indices'],:][:, group_features].X
+        X_train, X_test = reduction_func(X_train, X_test)
         return X_train, X_test
 
     else:
@@ -233,4 +255,7 @@ def get_group_mat(adata, n_features, group_features, n_group_features,
                                                         replace = False)
         
         X_train = X_train[distance_indices]
+
+        X_train, _ = reduction_func(X_train)
+
         return X_train
