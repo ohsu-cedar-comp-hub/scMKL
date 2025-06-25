@@ -6,9 +6,10 @@ import warnings
 
 def _filter_features(feature_names, group_dict):
     '''
-    Function to remove unused features from X matrix. Any features not 
-    included in group_dict will be removed from the matrix. Also puts 
-    the features in the same relative order (of included features)
+    Function to remove features only in feature names or group_dict.
+    Any features not included in group_dict will be removed from the
+    matrix. Also puts the features in the same relative order (of 
+    included features)
     
     Parameters
     ----------
@@ -40,7 +41,9 @@ def _filter_features(feature_names, group_dict):
     group_dict = {group : group_dict[group] for group in group_dict.keys()
                   if len(group_dict[group]) > 1}
 
-    return feature_names, group_dict
+    group_features = np.array(list(group_features.intersection(feature_set)))
+
+    return group_features, group_dict
 
 
 def _multi_class_split(y, train_ratio = 0.8, class_threshold = 'median', 
@@ -98,11 +101,14 @@ def _multi_class_split(y, train_ratio = 0.8, class_threshold = 'median',
     
     # Applying threshold for samples per class
     if class_threshold == 'median':
-        all_train = [idx for class_ in train_samples.keys()
-                         for idx in train_samples[class_]]
-        _, class_threshold = np.unique(y[all_train], return_counts = True)
-        class_threshold = int(np.median(class_threshold))
+        # I believe this does the same as the commented code below
+        class_threshold = int(np.median([len(values) for values in train_samples.values()]))
+        # all_train = [idx for class_ in train_samples.keys()
+        #                  for idx in train_samples[class_]]
+        # _, class_threshold = np.unique(y[all_train], return_counts = True)
+        # class_threshold = int(np.median(class_threshold))
     
+    # Down sample to class_threshold
     for class_ in train_samples.keys():
         if len(train_samples[class_]) > class_threshold:
             train_samples[class_] = seed_obj.choice(train_samples[class_], 
@@ -149,7 +155,7 @@ def _binary_split(y, train_indices = None, train_ratio = 0.8,
 
         for label in unique_labels:
 
-            # Find index of each unique label
+            # Find indices of each unique label
             label_indices = np.where(y == label)[0]
 
             # Sample these indices according to train ratio
