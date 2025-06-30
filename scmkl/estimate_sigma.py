@@ -2,7 +2,7 @@ import scipy
 import anndata
 import numpy as np
 
-from scmkl.data_processing import process_data, get_group_mat
+from scmkl.data_processing import process_data, get_group_mat, sample_cells
 from scmkl.tfidf_normalize import _tfidf
 
 
@@ -94,8 +94,7 @@ def batch_sigma(X_train, distance_metric, batch_idx) -> float:
     return sigma
 
 
-def est_group_sigma(adata, X_train, n_group_features, n_features, batches, 
-                    batch_size) -> float:
+def est_group_sigma(adata, X_train, n_group_features, n_features, batch_idx) -> float:
     '''
     Processes data and calculates the kernel width (sigma) for a 
     feature grouping through sample batching.
@@ -137,11 +136,6 @@ def est_group_sigma(adata, X_train, n_group_features, n_features, batches,
     if scipy.sparse.issparse(X_train):
         X_train = X_train.toarray()
         X_train = np.array(X_train, dtype = np.float32)
-
-    # Getting batch indices
-    sample_range = np.arange(X_train.shape[0])
-    batch_idx = get_batches(sample_range, adata.uns['seed_obj'], 
-                            batches, batch_size)
 
     # Calculates mean sigma from all batches
     sigma = batch_sigma(X_train, adata.uns['distance_metric'], batch_idx)
@@ -207,18 +201,26 @@ def estimate_sigma(adata, n_features = 5000, batches = 10,
     if batch_size > 2000:
         print("Warning: Batch sizes over 2000 may "
                "result in long run-time.")
+        
+    # Getting subsample indices
+    sample_size = np.min((2000, adata.uns['train_indices'].shape[0]))
+    indices = sample_cells(adata.uns['train_indices'], sample_size=sample_size, 
+                           seed_obj=adata.uns['seed_obj'])
+
+    # Getting batch indices
+    sample_range = np.arange(sample_size)
+    batch_idx = get_batches(sample_range, adata.uns['seed_obj'], 
+                            batches, batch_size)
 
     # Loop over every group in group_dict
     for group_features in adata.uns['group_dict'].values():
 
         n_group_features = len(group_features)
-        n_samples = np.min((adata.uns['train_indices'].shape[0], 2000))
 
-        # Filtering to only features in grouping and subsampling
-        X_train = get_group_mat(adata, n_features = n_features, 
-                            group_features = group_features, 
-                            n_group_features = n_group_features,
-                            n_samples = n_samples)
+        # Filtering to only features in grouping using filtered view of adata
+        X_train = get_group_mat(adata[indices], n_features=n_features, 
+                            group_features=group_features, 
+                            n_group_features=n_group_features)
         
         if adata.uns['tfidf']:
             X_train = _tfidf(X_train, mode='normalize')
@@ -232,7 +234,7 @@ def estimate_sigma(adata, n_features = 5000, batches = 10,
 
         # Estimating sigma
         sigma = est_group_sigma(adata, X_train, n_group_features, 
-                                n_features, batches, batch_size)
+                                n_features, batch_idx=batch_idx)
 
         sigma_list.append(sigma)
     

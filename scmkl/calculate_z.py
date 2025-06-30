@@ -3,8 +3,8 @@ import scipy
 import anndata as ad
 
 from scmkl.tfidf_normalize import _tfidf_train_test
-from scmkl.estimate_sigma import est_group_sigma
-from scmkl.data_processing import process_data, get_group_mat
+from scmkl.estimate_sigma import est_group_sigma, get_batches
+from scmkl.data_processing import process_data, get_group_mat, sample_cells
 from scmkl.projections import gaussian_trans, laplacian_trans, cauchy_trans
 
 
@@ -112,9 +112,16 @@ def calculate_z(adata, n_features = 5000, batches = 10,
 
     sq_i_d = np.sqrt(1/D)
 
-    # Capturing training and testing indices
+    # Capturing training and testing sizes
     train_len = len(adata.uns['train_indices'])
     test_len = len(adata.uns['test_indices'])
+
+    if 'sigma' not in adata.uns.keys():
+        n_samples = np.min((2000, adata.uns['train_indices'].shape[0]))
+        sample_range = np.arange(n_samples)
+        batch_idx = get_batches(sample_range, adata.uns['seed_obj'], 
+                                batches=batches, batch_size=batch_size)
+        sigma_indices = sample_cells(adata.uns['train_indices'], n_samples, adata.uns['seed_obj'])
 
     # Create Arrays to store concatenated group Zs
     # Each group of features will have a corresponding entry in each array
@@ -140,7 +147,7 @@ def calculate_z(adata, n_features = 5000, batches = 10,
         n_group_features = len(group_features)
 
         X_train, X_test = get_group_mat(adata, n_features, group_features, 
-                                        n_group_features)
+                                        n_group_features, process_test=True)
         
         if adata.uns['tfidf']:
             X_train, X_test = _tfidf_train_test(X_train, X_test)
@@ -157,7 +164,7 @@ def calculate_z(adata, n_features = 5000, batches = 10,
             sigma = adata.uns['sigma'][m]
         else:
             sigma = est_group_sigma(adata, X_train, n_group_features, 
-                                    n_features, batches, batch_size)
+                                    n_features, batch_idx=batch_idx)
             sigma_list.append(sigma)
             
         assert sigma > 0, "Sigma must be more than 0"

@@ -105,7 +105,7 @@ def _prob_table(results : dict, alpha):
 
 
 def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray, 
-              tfidf : list) -> dict:
+              tfidf : list, batches=10, batch_size=100) -> dict:
     '''
     For each cell class, creates model(s) comparing that class to all 
     others. Then, predicts on the training data using `scmkl.run()`.
@@ -165,14 +165,15 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
 
     # Calculating Z matrices, method depends on whether there are multiple 
     # adatas (modalities)
-    if len(adatas) == 1:
-        adata = estimate_sigma(adatas[0], n_features = 200)
-        adata = calculate_z(adata, n_features = 5000)
-    else:
+    if (len(adatas) == 1) and ('Z_train' not in adatas[0].uns.keys()):
+        adata = calculate_z(adata, n_features = 5000, batches=batches, batch_size=batch_size)
+    elif len(adatas) > 1:
         adata = multimodal_processing(adatas = adatas, 
                                         names = names, 
                                         tfidf = tfidf, 
                                         z_calculation = True)
+    else:
+        adata = adatas[0].copy()
 
     del adatas
     gc.collect()

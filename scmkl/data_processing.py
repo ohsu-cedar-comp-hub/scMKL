@@ -22,11 +22,11 @@ def sparse_var(X, axis=None):
     '''
     # E[X^2] - E[X]^2
     if scipy.sparse.issparse(X):
-        exp_mean = (X.power(2).mean(axis = axis))
-        sq_mean = np.square(X.mean(axis = axis))
+        exp_mean = np.asarray(X.power(2).mean(axis = axis)).flatten()
+        sq_mean = np.asarray(np.square(X.mean(axis = axis))).flatten()
         var = np.array(exp_mean - sq_mean)
     else:
-        var = np.var(X, axis = axis)
+        var = np.asarray(np.var(X, axis = axis)).flatten()
 
     return var.ravel()
 
@@ -141,6 +141,16 @@ def svd_transformation(X_train, X_test=None):
     return X_train, X_test
 
 
+def sample_cells(train_indices, sample_size, seed_obj):
+    '''
+    
+    '''
+    n_samples = np.min((train_indices.shape[0], sample_size))
+    indices = seed_obj.choice(train_indices, n_samples, replace = False)
+
+    return indices
+
+
 def pca_transformation(X_train, X_test=None):
     '''
     Returns matrices with PCA reduction. If `X_test is None`, only 
@@ -197,7 +207,7 @@ def get_reduction(reduction: str):
 
 
 def get_group_mat(adata, n_features, group_features, n_group_features, 
-                  n_samples=None) -> np.ndarray:
+                  process_test=False) -> np.ndarray:
     '''
     Filters to only features in group. Will sample features if 
     `n_features < n_group_features`.
@@ -241,22 +251,12 @@ def get_group_mat(adata, n_features, group_features, n_group_features,
                                                   replace = False) 
 
     # Create data arrays containing only features within this group
-    X_train = adata[adata.uns['train_indices'],:][:, group_features].X
-
-    if n_samples is None:
+    if process_test:
+        X_train = adata[adata.uns['train_indices'],:][:, group_features].X
         X_test = adata[adata.uns['test_indices'],:][:, group_features].X
         X_train, X_test = reduction_func(X_train, X_test)
         return X_train, X_test
 
     else:
-        # Sample cells for scalability
-        sample_idx = np.arange(X_train.shape[0])
-        n_samples = np.min((n_samples, X_train.shape[0]))
-        distance_indices = adata.uns['seed_obj'].choice(sample_idx, n_samples, 
-                                                        replace = False)
-        
-        X_train = X_train[distance_indices]
-
-        X_train, _ = reduction_func(X_train)
-
+        X_train = adata[:, group_features].X
         return X_train
