@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from sklearn.metrics import f1_score
 import gc
 
 from scmkl.run import run
@@ -198,10 +199,12 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
     # Getting final predictions
     alpha = np.min(alpha_list)
     prob_table, pred_class, low_conf = _prob_table(results, alpha)
+    macro_f1 = f1_score(cell_labels, pred_class, average='macro')
 
     results['Probability_table'] = prob_table
     results['Predicted_class'] = pred_class
     results['Truth_labels'] = cell_labels[adata.uns['test_indices']]
     results['Low_confidence'] = low_conf
+    results['Macro_F1-Score'] = macro_f1
 
     return results
