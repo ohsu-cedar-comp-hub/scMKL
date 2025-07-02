@@ -250,9 +250,9 @@ def _compare_regions(feature_dict : dict, ga_regions : dict,
                     gene = peak_gene_dict[(chrom, anno[0], anno[1])]
                     for group in gene_sets.keys():
                         if gene in gene_sets[group]:
-                            feat_region = ''.join(chrom, chr_sep, 
+                            feat_region = ''.join((chrom, chr_sep, 
                                                   str(region[0]), "-", 
-                                                  str(region[1]))
+                                                  str(region[1])))
                             atac_grouping[group].append(feat_region)
 
     return atac_grouping
