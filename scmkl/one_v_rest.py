@@ -170,9 +170,10 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
         adata = calculate_z(adata, n_features = 5000, batches=batches, batch_size=batch_size)
     elif len(adatas) > 1:
         adata = multimodal_processing(adatas = adatas, 
-                                        names = names, 
-                                        tfidf = tfidf, 
-                                        z_calculation = True)
+                                      names = names, 
+                                      tfidf = tfidf,
+                                      batches=batches,
+                                      batch_size=batch_size)
     else:
         adata = adatas[0].copy()
 

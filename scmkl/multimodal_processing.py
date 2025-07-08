@@ -3,7 +3,7 @@ import anndata as ad
 import gc
 
 from scmkl.tfidf_normalize import tfidf_normalize
-from scmkl.estimate_sigma import estimate_sigma
+from scmkl.data_processing import sparse_var
 from scmkl.calculate_z import calculate_z
 
 
@@ -93,7 +93,8 @@ def _combine_modalities(adatas : list, names : list,
     return combined_adata
 
 
-def multimodal_processing(adatas : list, names : list, tfidf: list):
+def multimodal_processing(adatas : list, names : list, tfidf: list, 
+                          batches: int=10, batch_size: int=100):
     '''
     Combines and processes a list of adata objects.
 
@@ -165,7 +166,7 @@ def multimodal_processing(adatas : list, names : list, tfidf: list):
     assert same_test, 'Different test indices'
 
     # Creates a boolean array for each modality of cells with non-empty rows
-    non_empty_rows = [np.array(_sparse_var(adata.X, axis = 1) != 0).ravel() 
+    non_empty_rows = [np.array(sparse_var(adata.X, axis = 1) != 0).ravel() 
                       for adata in adatas]
 
     # Returns a 1d array where sample feature sums
@@ -191,10 +192,9 @@ def multimodal_processing(adatas : list, names : list, tfidf: list):
         if tfidf[i]:
             adatas[i] = tfidf_normalize(adata)
 
-        print(f'Estimating Sigma for {names[i]}', flush = True)
-        adatas[i] = estimate_sigma(adata, n_features= 200)
-        print(f'Calculating Z for {names[i]}', flush = True)
-        adatas[i] = calculate_z(adata, n_features = 5000)
+        print(f'Estimating sigma and calculating Z for {names[i]}', flush = True)
+        adatas[i] = calculate_z(adata, n_features = 5000, batches=batches, 
+                                batch_size=batch_size)
 
     if 'labels' in adatas[0].obs:
         all_labels = [adata.obs['labels'] for adata in adatas]
