@@ -205,6 +205,19 @@ def calculate_d(num_samples : int):
     return d
 
 
+def sort_samples(train_indices, test_indices):
+    '''
+    
+    '''
+    sort_idx = np.concatenate([train_indices, test_indices])
+
+    train_indices = np.arange(0, train_indices.shape[0])
+    test_indices = np.arange(train_indices.shape[0], 
+                             train_indices.shape[0] + test_indices.shape[0])
+    
+    return sort_idx, train_indices, test_indices
+
+
 def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, 
                  group_dict: dict, scale_data: bool = True, 
                  split_data : np.ndarray | None = None, D : int | None = None, 
@@ -430,11 +443,19 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
             adata.obs['labels'] = cell_labels
             adata.uns['labeled_test'] = True
 
+    # Ensuring all train samples are first in adata object followed by test
+    sort_idx, train_indices, test_indices = sort_samples(train_indices, 
+                                                         test_indices)
+    
+    adata = adata[sort_idx]
+    adata.obs = adata.obs.reset_index(drop=True)
+    adata.obs.index = adata.obs.index.astype('O')
+
     adata.uns['train_indices'] = train_indices
     adata.uns['test_indices'] = test_indices
 
     if not scale_data:
-        print("WARNING: Data will not be log transformed and scaled "
+        print("WARNING: Data will not be log transformed and scaled. "
               "To change this behavior, set scale_data to True")
 
     return adata

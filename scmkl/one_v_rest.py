@@ -4,7 +4,6 @@ from sklearn.metrics import f1_score
 import gc
 
 from scmkl.run import run
-from scmkl.estimate_sigma import estimate_sigma
 from scmkl.calculate_z import calculate_z
 from scmkl.multimodal_processing import multimodal_processing
 from scmkl._checks import _check_adatas
@@ -105,8 +104,95 @@ def _prob_table(results : dict, alpha):
     return prob_table, pred_class, low_conf
 
 
+def per_model_summary(results: dict, uniq_labels: np.ndarray | list | tuple, 
+                      alpha: float) -> pd.DataFrame:
+    '''
+    Takes the results dictionary from scmkl.one_v_rest() and adds a 
+    summary dataframe show metrics for each model generated from the 
+    runs.
+
+    Parameters
+    ----------
+    results : dict
+        > A results dictionary from scmkl.one_v_rest().
+
+    uniq_labels : np.ndarray | list | tuple
+        > A list of unique cell classes from the runs.
+
+    alpha : float
+        > The alpha for the model desired for creating the summary 
+        dataframe.
+
+    Returns
+    -------
+    summary_df : pd.DataFrame
+        > A data frame with classes on rows and metrics as cols.
+    '''
+    # Getting metrics availible in results
+    avail_mets = list(results[uniq_labels[0]]['Metrics'][alpha])
+
+    summary_df = {metric : list()
+                  for metric in avail_mets}
+    summary_df['Class'] = uniq_labels
+
+    for lab in summary_df['Class']:
+        for met in avail_mets:
+            val = results[lab]['Metrics'][alpha][met]
+            summary_df[met].append(val)
+
+    return pd.DataFrame(summary_df)
+
+
+def get_class_train(train_indices, cell_labels, seed_obj, other_factor = 1.5):
+    '''
+    This function returns a dict with each entry being a set of 
+    training indices for each cell class to be used in 
+    scmkl.one_v_rest().
+
+    Parameters
+    ----------
+    train_indices : np.ndarray
+        > The indices in the anndata of samples availible to train on.
+
+    cell_labels : np.ndarray | list | pd.Series
+        > The identity of all cells in the anndata object.
+
+    seed_obj : np.random._generator.Generator
+        > The seed object used to randomly sample non-target samples.
+
+    Returns
+    -------
+    train_idx : dict
+        > A dictionary with keys being cell classes and values being 
+        the train indices to train scmkl that include both target and 
+        non-target samples.
+    '''
+    uniq_labels = set(cell_labels)
+    train_idx = dict()
+
+    for lab in uniq_labels:
+        target_pos = np.where(lab == cell_labels[train_indices])[0]
+        overlap = np.isin(target_pos, train_indices)
+
+        target_pos = target_pos[overlap]
+        other_pos = np.setdiff1d(train_indices, target_pos)
+
+        if (other_factor*target_pos.shape[0]) <= other_pos.shape[0]:
+            n_samples = int(other_factor*target_pos.shape[0])
+        else:
+            n_samples = other_pos.shape[0]
+
+        other_pos = seed_obj.choice(other_pos, n_samples, False)
+
+        lab_train = np.concatenate([target_pos, other_pos])
+        train_idx[lab] = lab_train.copy()
+
+    return train_idx
+
+
 def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray, 
-              tfidf : list, batches=10, batch_size=100) -> dict:
+              tfidf : list, batches=10, batch_size=100, 
+              force_balance: bool=False, other_factor: float = 1.0) -> dict:
     '''
     For each cell class, creates model(s) comparing that class to all 
     others. Then, predicts on the training data using `scmkl.run()`.
@@ -181,18 +267,29 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
     gc.collect()
 
     # Initializing for capturing model outputs
-    results = {}
+    results = dict()
 
     # Capturing cell labels before overwriting
     cell_labels = np.array(adata.obs['labels'])
 
+    # Capturing perfect train/test splits for each class
+    if force_balance:
+        train_idx = get_class_train(adata.uns['train_indices'], 
+                                    cell_labels, 
+                                    adata.uns['seed_obj'],
+                                    other_factor)
+
     for label in uniq_labels:
+
         print(f"Comparing {label} to other types", flush = True)
         cur_labels = cell_labels.copy()
         cur_labels[cell_labels != label] = 'other'
-        
+
         # Replacing cell labels for current cell type vs rest
         adata.obs['labels'] = cur_labels
+
+        if force_balance:
+            adata.uns['train_indices'] = train_idx[label]
 
         # Running scMKL
         results[label] = run(adata, alpha_list, return_probs = True)
@@ -203,10 +300,17 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
     macro_f1 = f1_score(cell_labels[adata.uns['test_indices']], 
                         pred_class, average='macro')
 
+    model_summary = per_model_summary(results, uniq_labels, alpha)
+
+    results['Per_model_summary'] = model_summary
+    results['Classes'] = uniq_labels
     results['Probability_table'] = prob_table
     results['Predicted_class'] = pred_class
     results['Truth_labels'] = cell_labels[adata.uns['test_indices']]
     results['Low_confidence'] = low_conf
     results['Macro_F1-Score'] = macro_f1
+
+    if force_balance:
+        results['Training_indices'] = train_idx
 
     return results

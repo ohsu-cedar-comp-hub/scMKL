@@ -47,7 +47,7 @@ def train_model(adata, group_size = 1, alpha = 0.9):
     assert alpha > 0, 'Alpha must be positive'
 
     y_train = adata.obs['labels'].iloc[adata.uns['train_indices']]
-    X_train = adata.uns['Z_train']
+    X_train = adata.uns['Z_train'][adata.uns['train_indices']]
 
     cell_labels = np.unique(y_train)
 
