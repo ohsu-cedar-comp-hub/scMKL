@@ -180,6 +180,8 @@ def estimate_sigma(adata, n_features = 5000, batches = 10,
         > The number of cells to include per batch for distance
         calculations. Higher batch size will converge to population
         distance values at the cost of scalability.
+        If `batches` * `batch_size` > # training cells,
+        `batch_size` will be reduced to `int(# training cells / batches)`
         
     Returns
     -------
@@ -194,9 +196,16 @@ def estimate_sigma(adata, n_features = 5000, batches = 10,
     '''
     sigma_list = []
 
-    assert batch_size < len(adata.uns['train_indices']), ("Batch size much be "
+    assert batch_size <= len(adata.uns['train_indices']), ("Batch size much be "
                                                           "smaller than the "
                                                           "training set.")
+
+    if batch_size * batches > len(adata.uns['train_indices']):
+        old_batch_size = batch_size
+        batch_size = int(len(adata.uns['train_indices']) / batches)
+        print("Specified batch size required too many cells for "
+                "independent batches. Reduced batch size from "
+                f"{old_batch_size} to {batch_size}")
 
     if batch_size > 2000:
         print("Warning: Batch sizes over 2000 may "

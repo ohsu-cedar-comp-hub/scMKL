@@ -116,6 +116,13 @@ def calculate_z(adata, n_features = 5000, batches = 10,
     train_len = len(adata.uns['train_indices'])
     test_len = len(adata.uns['test_indices'])
 
+    if batch_size * batches > len(adata.uns['train_indices']):
+        old_batch_size = batch_size
+        batch_size = int(len(adata.uns['train_indices']) / batches)
+        print("Specified batch size required too many cells for "
+                "independent batches. Reduced batch size from "
+                f"{old_batch_size} to {batch_size}")
+
     if 'sigma' not in adata.uns.keys():
         n_samples = np.min((2000, adata.uns['train_indices'].shape[0]))
         sample_range = np.arange(n_samples)
