@@ -19,7 +19,9 @@ Single-cell analysis using Multiple Kernel Learning, scMKL, is a binary classifi
 Conda is the recommended method to install scMKL:
 
 ```
-conda create -n scMKL python=3.12 -c conda-forge ivango17::scmkl
+conda create -n scMKL python=3.12 
+conda activate scMKL
+conda install -c conda-forge ivango17::scmkl
 ```
 
 ### Pip install
