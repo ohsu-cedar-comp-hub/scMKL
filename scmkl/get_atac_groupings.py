@@ -303,22 +303,7 @@ def get_atac_groupings(gene_anno : pd.DataFrame, gene_sets : dict,
     >>> 
     >>> # Reading in GTF file
     >>> gtf_path = "data/hg38_subset_protein_coding.annotation.gtf"
-    >>> gtf = pd.read_csv(gtf_path, sep = "\t", header = None, 
-    ...                   skip_blank_lines = True, comment = "#")
-    >>> 
-    >>> # Naming columns
-    >>> gtf.columns = ['chr', 'source', 'feature', 'start', 'end', 
-    ...                'score', 'strand', 'frame', 'attribute']
-    >>>
-    >>> # Subsetting to only protein coding genes
-    >>> prot_rows = gtf['attribute'].str.contains('protein_coding')
-    >>> gtf = gtf[prot_rows]
-    >>> gtf = gtf[gtf['feature'] == 'gene']
-    >>> 
-    >>> # Capturing gene name from attributes column
-    >>> gtf['gene_name'] = [re.findall(r'(?<=gene_name ")[A-z0-9]+', 
-    ...                                attr)[0] 
-    ...                     for attr in gtf['attribute']]
+    >>> gtf = scmkl.read_gtf(gtf_path, filter_to_coding=True)
     >>>
     >>> atac_grouping = scmkl.get_atac_groupings(gene_anno = gtf,
     ...                                         gene_sets = gene_sets,

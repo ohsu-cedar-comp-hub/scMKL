@@ -434,3 +434,65 @@ def mean_groups_per_alpha(selection_df) -> dict:
         mean_groups[alpha] = np.mean(selection_df[rows]['Selection'])
 
     return mean_groups
+
+
+def read_gtf(path: str, filter_to_coding: bool=False, add_gname: bool=False):
+    """
+    Reads and formats a gtf file. Adds colnames: `['chr', 'source', 
+    'feature', 'start', 'end', 'score', 'strand', 'frame', 
+    'attribute']`.
+
+    Parameters
+    ----------
+    path : str
+        > The file path to the gtf file to be read in. If the file is 
+        gzipped, file name must end with .gz
+
+    filter_to_coding : bool
+        > If `True`, will filter rows in gtf data frame to only 
+        protein coding genes. Will add column `'gene_name'` containing 
+        the gene name for each row.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        > A pandas dataframe of the input gtf file.
+
+    Examples
+    --------
+    >>> import scmkl
+    >>>
+    >>> file = 'data/hg38_subset_protein_coding.annotation.gtf'
+    >>> gtf = scmkl.read_gtf(file)
+    >>>
+    >>> gtf.head()
+            chr  source     feature  start    end score strand frame                                          
+    0  chr1  HAVANA        gene  11869  14409     .      +     .  
+    1  chr1  HAVANA  transcript  11869  14409     .      +     .  
+    2  chr1  HAVANA        exon  11869  12227     .      +     .  
+    3  chr1  HAVANA        exon  12613  12721     .      +     .  
+    4  chr1  HAVANA        exon  13221  14409     .      +     .  
+    attribute
+    gene_id "ENSG00000223972.5"; gene_type "transc...
+    gene_id "ENSG00000223972.5"; transcript_id "EN...
+    gene_id "ENSG00000223972.5"; transcript_id "EN...
+    gene_id "ENSG00000223972.5"; transcript_id "EN...
+    gene_id "ENSG00000223972.5"; transcript_id "EN...
+    """
+    df = pd.read_csv(path, sep='\t', comment='#', 
+                     skip_blank_lines=True, header=None)
+    
+    df.columns = ['chr', 'source', 'feature', 'start', 'end', 
+                  'score', 'strand', 'frame', 'attribute']
+    
+    if filter_to_coding:
+        prot_rows = df['attribute'].str.contains('protein_coding')
+        df = df[prot_rows]
+        df = df[df['feature'] == 'gene']
+
+        # Capturing and adding gene name to df
+        df['gene_name'] = [re.findall(r'(?<=gene_name ")[A-z0-9]+', 
+                                      attr)[0] 
+                           for attr in df['attribute']]
+    
+    return df

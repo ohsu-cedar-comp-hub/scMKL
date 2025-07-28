@@ -1,6 +1,6 @@
-Metadata-Version: 2.4
+Metadata-Version: 2.2
 Name: scmkl
-Version: 0.3.1a0
+Version: 0.3.1b0
 Summary: Single-cell analysis using Multiple Kernel Learning
 Home-page: https://github.com/ohsu-cedar-comp-hub/scMKL/tree/main
 Author: Sam Kupp, Ian VanGordon, Cigdem Ak
@@ -27,7 +27,6 @@ Dynamic: classifier
 Dynamic: description
 Dynamic: description-content-type
 Dynamic: home-page
-Dynamic: license-file
 Dynamic: requires-dist
 Dynamic: requires-python
 Dynamic: summary
@@ -53,7 +52,9 @@ Single-cell analysis using Multiple Kernel Learning, scMKL, is a binary classifi
 Conda is the recommended method to install scMKL:
 
 ```
-conda create -n scMKL python=3.12 -c conda-forge ivango17::scmkl
+conda create -n scMKL python=3.12 
+conda activate scMKL
+conda install -c conda-forge ivango17::scmkl
 ```
 
 ### Pip install

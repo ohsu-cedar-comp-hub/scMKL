@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="generator" content="pdoc 15.0.0"/>
+    <meta name="generator" content="pdoc 15.0.1"/>
     <title>scmkl.one_v_rest API documentation</title>
 
     <style>/*! * Bootstrap Reboot v5.0.0 (https://getbootstrap.com/) * Copyright 2011-2021 The Bootstrap Authors * Copyright 2011-2021 Twitter, Inc. * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE) * Forked from Normalize.css, licensed MIT (https://github.com/necolas/normalize.css/blob/master/LICENSE.md) */*,::after,::before{box-sizing:border-box}@media (prefers-reduced-motion:no-preference){:root{scroll-behavior:smooth}}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-size:1rem;font-weight:400;line-height:1.5;color:#212529;background-color:#fff;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}hr{margin:1rem 0;color:inherit;background-color:currentColor;border:0;opacity:.25}hr:not([size]){height:1px}h1,h2,h3,h4,h5,h6{margin-top:0;margin-bottom:.5rem;font-weight:500;line-height:1.2}h1{font-size:calc(1.375rem + 1.5vw)}@media (min-width:1200px){h1{font-size:2.5rem}}h2{font-size:calc(1.325rem + .9vw)}@media (min-width:1200px){h2{font-size:2rem}}h3{font-size:calc(1.3rem + .6vw)}@media (min-width:1200px){h3{font-size:1.75rem}}h4{font-size:calc(1.275rem + .3vw)}@media (min-width:1200px){h4{font-size:1.5rem}}h5{font-size:1.25rem}h6{font-size:1rem}p{margin-top:0;margin-bottom:1rem}abbr[data-bs-original-title],abbr[title]{-webkit-text-decoration:underline dotted;text-decoration:underline dotted;cursor:help;-webkit-text-decoration-skip-ink:none;text-decoration-skip-ink:none}address{margin-bottom:1rem;font-style:normal;line-height:inherit}ol,ul{padding-left:2rem}dl,ol,ul{margin-top:0;margin-bottom:1rem}ol ol,ol ul,ul ol,ul ul{margin-bottom:0}dt{font-weight:700}dd{margin-bottom:.5rem;margin-left:0}blockquote{margin:0 0 1rem}b,strong{font-weight:bolder}small{font-size:.875em}mark{padding:.2em;background-color:#fcf8e3}sub,sup{position:relative;font-size:.75em;line-height:0;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}a{color:#0d6efd;text-decoration:underline}a:hover{color:#0a58ca}a:not([href]):not([class]),a:not([href]):not([class]):hover{color:inherit;text-decoration:none}code,kbd,pre,samp{font-family:SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:1em;direction:ltr;unicode-bidi:bidi-override}pre{display:block;margin-top:0;margin-bottom:1rem;overflow:auto;font-size:.875em}pre code{font-size:inherit;color:inherit;word-break:normal}code{font-size:.875em;color:#d63384;word-wrap:break-word}a>code{color:inherit}kbd{padding:.2rem .4rem;font-size:.875em;color:#fff;background-color:#212529;border-radius:.2rem}kbd kbd{padding:0;font-size:1em;font-weight:700}figure{margin:0 0 1rem}img,svg{vertical-align:middle}table{caption-side:bottom;border-collapse:collapse}caption{padding-top:.5rem;padding-bottom:.5rem;color:#6c757d;text-align:left}th{text-align:inherit;text-align:-webkit-match-parent}tbody,td,tfoot,th,thead,tr{border-color:inherit;border-style:solid;border-width:0}label{display:inline-block}button{border-radius:0}button:focus:not(:focus-visible){outline:0}button,input,optgroup,select,textarea{margin:0;font-family:inherit;font-size:inherit;line-height:inherit}button,select{text-transform:none}[role=button]{cursor:pointer}select{word-wrap:normal}select:disabled{opacity:1}[list]::-webkit-calendar-picker-indicator{display:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]:not(:disabled),[type=reset]:not(:disabled),[type=submit]:not(:disabled),button:not(:disabled){cursor:pointer}::-moz-focus-inner{padding:0;border-style:none}textarea{resize:vertical}fieldset{min-width:0;padding:0;margin:0;border:0}legend{float:left;width:100%;padding:0;margin-bottom:.5rem;font-size:calc(1.275rem + .3vw);line-height:inherit}@media (min-width:1200px){legend{font-size:1.5rem}}legend+*{clear:left}::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-fields-wrapper,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-text,::-webkit-datetime-edit-year-field{padding:0}::-webkit-inner-spin-button{height:auto}[type=search]{outline-offset:-2px;-webkit-appearance:textfield}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-color-swatch-wrapper{padding:0}::file-selector-button{font:inherit}::-webkit-file-upload-button{font:inherit;-webkit-appearance:button}output{display:inline-block}iframe{border:0}summary{display:list-item;cursor:pointer}progress{vertical-align:baseline}[hidden]{display:none!important}</style>
@@ -32,6 +32,12 @@
             <h2>API Documentation</h2>
                 <ul class="memberlist">
             <li>
+                    <a class="function" href="#per_model_summary">per_model_summary</a>
+            </li>
+            <li>
+                    <a class="function" href="#get_class_train">get_class_train</a>
+            </li>
+            <li>
                     <a class="function" href="#one_v_rest">one_v_rest</a>
             </li>
     </ul>
@@ -55,18 +61,18 @@
 
                         <label class="view-source-button" for="mod-one_v_rest-view-source"><span>View Source</span></label>
 
-                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">  1</span></a><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-</span><span id="L-2"><a href="#L-2"><span class="linenos">  2</span></a><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-</span><span id="L-3"><a href="#L-3"><span class="linenos">  3</span></a><span class="kn">import</span> <span class="nn">gc</span>
-</span><span id="L-4"><a href="#L-4"><span class="linenos">  4</span></a>
-</span><span id="L-5"><a href="#L-5"><span class="linenos">  5</span></a><span class="kn">from</span> <span class="nn">scmkl.run</span> <span class="kn">import</span> <span class="n">run</span>
-</span><span id="L-6"><a href="#L-6"><span class="linenos">  6</span></a><span class="kn">from</span> <span class="nn">scmkl.estimate_sigma</span> <span class="kn">import</span> <span class="n">estimate_sigma</span>
-</span><span id="L-7"><a href="#L-7"><span class="linenos">  7</span></a><span class="kn">from</span> <span class="nn">scmkl.calculate_z</span> <span class="kn">import</span> <span class="n">calculate_z</span>
-</span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a><span class="kn">from</span> <span class="nn">scmkl.multimodal_processing</span> <span class="kn">import</span> <span class="n">multimodal_processing</span>
-</span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a><span class="kn">from</span> <span class="nn">scmkl._checks</span> <span class="kn">import</span> <span class="n">_check_adatas</span>
+                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">  1</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="L-2"><a href="#L-2"><span class="linenos">  2</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</span><span id="L-3"><a href="#L-3"><span class="linenos">  3</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">f1_score</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos">  4</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
+</span><span id="L-5"><a href="#L-5"><span class="linenos">  5</span></a>
+</span><span id="L-6"><a href="#L-6"><span class="linenos">  6</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">scmkl.run</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos">  7</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">scmkl.calculate_z</span><span class="w"> </span><span class="kn">import</span> <span class="n">calculate_z</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">scmkl.multimodal_processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">multimodal_processing</span>
+</span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">scmkl._checks</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_adatas</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a>
 </span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a>
-</span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="k">def</span> <span class="nf">_eval_labels</span><span class="p">(</span><span class="n">cell_labels</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">train_indices</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="k">def</span><span class="w"> </span><span class="nf">_eval_labels</span><span class="p">(</span><span class="n">cell_labels</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">train_indices</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
 </span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a>                  <span class="n">test_indices</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 </span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 </span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a><span class="sd">    Takes an array of multiclass cell labels and returns a unique array </span>
@@ -109,7 +115,7 @@
 </span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a>    <span class="k">return</span> <span class="n">uniq_labels</span>
 </span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a>
 </span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>
-</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a><span class="k">def</span> <span class="nf">_prob_table</span><span class="p">(</span><span class="n">results</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a><span class="k">def</span><span class="w"> </span><span class="nf">_prob_table</span><span class="p">(</span><span class="n">results</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
 </span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 </span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a><span class="sd">    Takes a results dictionary with class and probabilities keys and </span>
 </span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a><span class="sd">    returns a table of probabilities for each class and the most </span>
@@ -161,221 +167,538 @@
 </span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>    <span class="k">return</span> <span class="n">prob_table</span><span class="p">,</span> <span class="n">pred_class</span><span class="p">,</span> <span class="n">low_conf</span>
 </span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>
 </span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>
-</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a><span class="k">def</span> <span class="nf">one_v_rest</span><span class="p">(</span><span class="n">adatas</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">names</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">alpha_list</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>              <span class="n">tfidf</span> <span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a><span class="k">def</span><span class="w"> </span><span class="nf">per_model_summary</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">uniq_labels</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">,</span> 
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>                      <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 </span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a><span class="sd">    For each cell class, creates model(s) comparing that class to all </span>
-</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a><span class="sd">    others. Then, predicts on the training data using `scmkl.run()`.</span>
-</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a><span class="sd">    Only labels in both training and testing will be run.</span>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a><span class="sd">    Takes the results dictionary from scmkl.one_v_rest() and adds a </span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a><span class="sd">    summary dataframe show metrics for each model generated from the </span>
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a><span class="sd">    runs.</span>
 </span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>
 </span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a><span class="sd">    Parameters</span>
 </span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a><span class="sd">    ----------</span>
-</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a><span class="sd">    **adatas** : *list[AnnData]* </span>
-</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a><span class="sd">        &gt; List of AnnData objects created by create_adata()</span>
-</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a><span class="sd">        where each AnnData is one modality and composed of both </span>
-</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a><span class="sd">        training and testing samples. Requires that `&#39;train_indices&#39;`</span>
-</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a><span class="sd">        and `&#39;test_indices&#39;` are the same across all AnnDatas.</span>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a><span class="sd">    results : dict</span>
+</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a><span class="sd">        &gt; A results dictionary from scmkl.one_v_rest().</span>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a><span class="sd">    uniq_labels : np.ndarray | list | tuple</span>
+</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a><span class="sd">        &gt; A list of unique cell classes from the runs.</span>
 </span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>
-</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a><span class="sd">    **names** : *list[str]* </span>
-</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a><span class="sd">        &gt; List of string variables that describe each modality</span>
-</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a><span class="sd">        respective to adatas for labeling.</span>
-</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a><span class="sd">        </span>
-</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a><span class="sd">    **alpha_list** : *np.ndarray* | *float*</span>
-</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a><span class="sd">        &gt; An array of alpha values to create each model with.</span>
-</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>
-</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a><span class="sd">    **tfidf** : *list[bool]* </span>
-</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a><span class="sd">        &gt; List where if element i is `True`, adata[i] will be TFIDF </span>
-</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a><span class="sd">        normalized.</span>
-</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>
-</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a><span class="sd">    Returns</span>
-</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a><span class="sd">    -------</span>
-</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a><span class="sd">    **results** : *dict*</span>
-</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a><span class="sd">    &gt; Contains keys for each cell class with results from cell class</span>
-</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a><span class="sd">    versus all other samples. See `scmkl.run()` for futher details.</span>
-</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>
-</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a><span class="sd">    Examples</span>
-</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a><span class="sd">    --------</span>
-</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a><span class="sd">    &gt;&gt;&gt; adata = scmkl.create_adata(X = data_mat, </span>
-</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a><span class="sd">    ...                            feature_names = gene_names, </span>
-</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a><span class="sd">    ...                            group_dict = group_dict)</span>
-</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a><span class="sd">    &gt;&gt;&gt; results = scmkl.one_v_rest(adatas = [adata], names = [&#39;rna&#39;],</span>
-</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a><span class="sd">    ...                           alpha_list = np.array([0.05, 0.1]),</span>
-</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a><span class="sd">    ...                           tfidf = [False])</span>
-</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a><span class="sd">    &gt;&gt;&gt; adata.keys()</span>
-</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a><span class="sd">    dict_keys([&#39;B cells&#39;, &#39;Monocytes&#39;, &#39;Dendritic cells&#39;, ...])</span>
-</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a><span class="sd">    &#39;&#39;&#39;</span>
-</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>    <span class="c1"># Formatting checks ensuring all adata elements are </span>
-</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>    <span class="c1"># AnnData objects and train/test indices are all the same</span>
-</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>    <span class="n">_check_adatas</span><span class="p">(</span><span class="n">adatas</span><span class="p">,</span> <span class="n">check_obs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_uns</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>
-</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a>    <span class="c1"># Extracting train and test indices</span>
-</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a>    <span class="n">train_indices</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">]</span>
-</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a>    <span class="n">test_indices</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]</span>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a><span class="sd">    alpha : float</span>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a><span class="sd">        &gt; The alpha for the model desired for creating the summary </span>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a><span class="sd">        dataframe.</span>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>
+</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a><span class="sd">    Returns</span>
+</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a><span class="sd">    -------</span>
+</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a><span class="sd">    summary_df : pd.DataFrame</span>
+</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a><span class="sd">        &gt; A data frame with classes on rows and metrics as cols.</span>
+</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>    <span class="c1"># Getting metrics availible in results</span>
+</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>    <span class="n">avail_mets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="n">uniq_labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s1">&#39;Metrics&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">])</span>
+</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>
+</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>    <span class="n">summary_df</span> <span class="o">=</span> <span class="p">{</span><span class="n">metric</span> <span class="p">:</span> <span class="nb">list</span><span class="p">()</span>
+</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>                  <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">avail_mets</span><span class="p">}</span>
+</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>    <span class="n">summary_df</span><span class="p">[</span><span class="s1">&#39;Class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uniq_labels</span>
+</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>
+</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>    <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="n">summary_df</span><span class="p">[</span><span class="s1">&#39;Class&#39;</span><span class="p">]:</span>
+</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>        <span class="k">for</span> <span class="n">met</span> <span class="ow">in</span> <span class="n">avail_mets</span><span class="p">:</span>
+</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>            <span class="n">val</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">lab</span><span class="p">][</span><span class="s1">&#39;Metrics&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">][</span><span class="n">met</span><span class="p">]</span>
+</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>            <span class="n">summary_df</span><span class="p">[</span><span class="n">met</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>
+</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">summary_df</span><span class="p">)</span>
+</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>
+</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>
+</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a><span class="k">def</span><span class="w"> </span><span class="nf">get_class_train</span><span class="p">(</span><span class="n">train_indices</span><span class="p">,</span> <span class="n">cell_labels</span><span class="p">,</span> <span class="n">seed_obj</span><span class="p">,</span> <span class="n">other_factor</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">):</span>
+</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a><span class="sd">    This function returns a dict with each entry being a set of </span>
+</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a><span class="sd">    training indices for each cell class to be used in </span>
+</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a><span class="sd">    scmkl.one_v_rest().</span>
+</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>
+</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a><span class="sd">    Parameters</span>
+</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a><span class="sd">    ----------</span>
+</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a><span class="sd">    train_indices : np.ndarray</span>
+</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a><span class="sd">        &gt; The indices in the anndata of samples availible to train on.</span>
+</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a>
+</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a><span class="sd">    cell_labels : np.ndarray | list | pd.Series</span>
+</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a><span class="sd">        &gt; The identity of all cells in the anndata object.</span>
 </span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a>
-</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a>    <span class="c1"># Checking and capturing cell labels</span>
-</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a>    <span class="n">uniq_labels</span> <span class="o">=</span> <span class="n">_eval_labels</span><span class="p">(</span>  <span class="n">cell_labels</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">],</span> 
-</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a>                                <span class="n">train_indices</span> <span class="o">=</span> <span class="n">train_indices</span><span class="p">,</span>
-</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a>                                 <span class="n">test_indices</span> <span class="o">=</span> <span class="n">test_indices</span><span class="p">)</span>
-</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a>
-</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>
-</span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a>    <span class="c1"># Calculating Z matrices, method depends on whether there are multiple </span>
-</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a>    <span class="c1"># adatas (modalities)</span>
-</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">adatas</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-</span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">estimate_sigma</span><span class="p">(</span><span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">200</span><span class="p">)</span>
-</span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">calculate_z</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">)</span>
-</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a>    <span class="k">else</span><span class="p">:</span>
-</span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">multimodal_processing</span><span class="p">(</span><span class="n">adatas</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">,</span> 
-</span><span id="L-173"><a href="#L-173"><span class="linenos">173</span></a>                                        <span class="n">names</span> <span class="o">=</span> <span class="n">names</span><span class="p">,</span> 
-</span><span id="L-174"><a href="#L-174"><span class="linenos">174</span></a>                                        <span class="n">tfidf</span> <span class="o">=</span> <span class="n">tfidf</span><span class="p">,</span> 
-</span><span id="L-175"><a href="#L-175"><span class="linenos">175</span></a>                                        <span class="n">z_calculation</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a><span class="sd">    seed_obj : np.random._generator.Generator</span>
+</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a><span class="sd">        &gt; The seed object used to randomly sample non-target samples.</span>
+</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a>
+</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a><span class="sd">    Returns</span>
+</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a><span class="sd">    -------</span>
+</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a><span class="sd">    train_idx : dict</span>
+</span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a><span class="sd">        &gt; A dictionary with keys being cell classes and values being </span>
+</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a><span class="sd">        the train indices to train scmkl that include both target and </span>
+</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a><span class="sd">        non-target samples.</span>
+</span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a>    <span class="n">uniq_labels</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">cell_labels</span><span class="p">)</span>
+</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a>    <span class="n">train_idx</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+</span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a>
+</span><span id="L-173"><a href="#L-173"><span class="linenos">173</span></a>    <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="n">uniq_labels</span><span class="p">:</span>
+</span><span id="L-174"><a href="#L-174"><span class="linenos">174</span></a>        <span class="n">target_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lab</span> <span class="o">==</span> <span class="n">cell_labels</span><span class="p">[</span><span class="n">train_indices</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="L-175"><a href="#L-175"><span class="linenos">175</span></a>        <span class="n">overlap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">target_pos</span><span class="p">,</span> <span class="n">train_indices</span><span class="p">)</span>
 </span><span id="L-176"><a href="#L-176"><span class="linenos">176</span></a>
-</span><span id="L-177"><a href="#L-177"><span class="linenos">177</span></a>    <span class="k">del</span> <span class="n">adatas</span>
-</span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a>    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+</span><span id="L-177"><a href="#L-177"><span class="linenos">177</span></a>        <span class="n">target_pos</span> <span class="o">=</span> <span class="n">target_pos</span><span class="p">[</span><span class="n">overlap</span><span class="p">]</span>
+</span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a>        <span class="n">other_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">setdiff1d</span><span class="p">(</span><span class="n">train_indices</span><span class="p">,</span> <span class="n">target_pos</span><span class="p">)</span>
 </span><span id="L-179"><a href="#L-179"><span class="linenos">179</span></a>
-</span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a>    <span class="c1"># Initializing for capturing model outputs</span>
-</span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a>    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a>
-</span><span id="L-183"><a href="#L-183"><span class="linenos">183</span></a>    <span class="c1"># Capturing cell labels before overwriting</span>
-</span><span id="L-184"><a href="#L-184"><span class="linenos">184</span></a>    <span class="n">cell_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">])</span>
-</span><span id="L-185"><a href="#L-185"><span class="linenos">185</span></a>
-</span><span id="L-186"><a href="#L-186"><span class="linenos">186</span></a>    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">uniq_labels</span><span class="p">:</span>
-</span><span id="L-187"><a href="#L-187"><span class="linenos">187</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Comparing </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> to other types&quot;</span><span class="p">,</span> <span class="n">flush</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-</span><span id="L-188"><a href="#L-188"><span class="linenos">188</span></a>        <span class="n">cur_labels</span> <span class="o">=</span> <span class="n">cell_labels</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span id="L-189"><a href="#L-189"><span class="linenos">189</span></a>        <span class="n">cur_labels</span><span class="p">[</span><span class="n">cell_labels</span> <span class="o">!=</span> <span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;other&#39;</span>
-</span><span id="L-190"><a href="#L-190"><span class="linenos">190</span></a>        
-</span><span id="L-191"><a href="#L-191"><span class="linenos">191</span></a>        <span class="c1"># Replacing cell labels for current cell type vs rest</span>
-</span><span id="L-192"><a href="#L-192"><span class="linenos">192</span></a>        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_labels</span>
-</span><span id="L-193"><a href="#L-193"><span class="linenos">193</span></a>
-</span><span id="L-194"><a href="#L-194"><span class="linenos">194</span></a>        <span class="c1"># Running scMKL</span>
-</span><span id="L-195"><a href="#L-195"><span class="linenos">195</span></a>        <span class="n">results</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">alpha_list</span><span class="p">,</span> <span class="n">return_probs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-</span><span id="L-196"><a href="#L-196"><span class="linenos">196</span></a>
-</span><span id="L-197"><a href="#L-197"><span class="linenos">197</span></a>    <span class="c1"># Getting final predictions</span>
-</span><span id="L-198"><a href="#L-198"><span class="linenos">198</span></a>    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">alpha_list</span><span class="p">)</span>
-</span><span id="L-199"><a href="#L-199"><span class="linenos">199</span></a>    <span class="n">prob_table</span><span class="p">,</span> <span class="n">pred_class</span><span class="p">,</span> <span class="n">low_conf</span> <span class="o">=</span> <span class="n">_prob_table</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+</span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a>        <span class="k">if</span> <span class="p">(</span><span class="n">other_factor</span><span class="o">*</span><span class="n">target_pos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">other_pos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+</span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a>            <span class="n">n_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">other_factor</span><span class="o">*</span><span class="n">target_pos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="L-183"><a href="#L-183"><span class="linenos">183</span></a>            <span class="n">n_samples</span> <span class="o">=</span> <span class="n">other_pos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="L-184"><a href="#L-184"><span class="linenos">184</span></a>
+</span><span id="L-185"><a href="#L-185"><span class="linenos">185</span></a>        <span class="n">other_pos</span> <span class="o">=</span> <span class="n">seed_obj</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">other_pos</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+</span><span id="L-186"><a href="#L-186"><span class="linenos">186</span></a>
+</span><span id="L-187"><a href="#L-187"><span class="linenos">187</span></a>        <span class="n">lab_train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">target_pos</span><span class="p">,</span> <span class="n">other_pos</span><span class="p">])</span>
+</span><span id="L-188"><a href="#L-188"><span class="linenos">188</span></a>        <span class="n">train_idx</span><span class="p">[</span><span class="n">lab</span><span class="p">]</span> <span class="o">=</span> <span class="n">lab_train</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="L-189"><a href="#L-189"><span class="linenos">189</span></a>
+</span><span id="L-190"><a href="#L-190"><span class="linenos">190</span></a>    <span class="k">return</span> <span class="n">train_idx</span>
+</span><span id="L-191"><a href="#L-191"><span class="linenos">191</span></a>
+</span><span id="L-192"><a href="#L-192"><span class="linenos">192</span></a>
+</span><span id="L-193"><a href="#L-193"><span class="linenos">193</span></a><span class="k">def</span><span class="w"> </span><span class="nf">one_v_rest</span><span class="p">(</span><span class="n">adatas</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">names</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">alpha_list</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="L-194"><a href="#L-194"><span class="linenos">194</span></a>              <span class="n">tfidf</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">batches</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> 
+</span><span id="L-195"><a href="#L-195"><span class="linenos">195</span></a>              <span class="n">force_balance</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">other_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="L-196"><a href="#L-196"><span class="linenos">196</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-197"><a href="#L-197"><span class="linenos">197</span></a><span class="sd">    For each cell class, creates model(s) comparing that class to all </span>
+</span><span id="L-198"><a href="#L-198"><span class="linenos">198</span></a><span class="sd">    others. Then, predicts on the training data using `scmkl.run()`.</span>
+</span><span id="L-199"><a href="#L-199"><span class="linenos">199</span></a><span class="sd">    Only labels in both training and testing will be run.</span>
 </span><span id="L-200"><a href="#L-200"><span class="linenos">200</span></a>
-</span><span id="L-201"><a href="#L-201"><span class="linenos">201</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Probability_table&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prob_table</span>
-</span><span id="L-202"><a href="#L-202"><span class="linenos">202</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Predicted_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pred_class</span>
-</span><span id="L-203"><a href="#L-203"><span class="linenos">203</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Truth_labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cell_labels</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]]</span>
-</span><span id="L-204"><a href="#L-204"><span class="linenos">204</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Low_confidence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">low_conf</span>
-</span><span id="L-205"><a href="#L-205"><span class="linenos">205</span></a>
-</span><span id="L-206"><a href="#L-206"><span class="linenos">206</span></a>    <span class="k">return</span> <span class="n">results</span>
+</span><span id="L-201"><a href="#L-201"><span class="linenos">201</span></a><span class="sd">    Parameters</span>
+</span><span id="L-202"><a href="#L-202"><span class="linenos">202</span></a><span class="sd">    ----------</span>
+</span><span id="L-203"><a href="#L-203"><span class="linenos">203</span></a><span class="sd">    **adatas** : *list[AnnData]* </span>
+</span><span id="L-204"><a href="#L-204"><span class="linenos">204</span></a><span class="sd">        &gt; List of AnnData objects created by create_adata()</span>
+</span><span id="L-205"><a href="#L-205"><span class="linenos">205</span></a><span class="sd">        where each AnnData is one modality and composed of both </span>
+</span><span id="L-206"><a href="#L-206"><span class="linenos">206</span></a><span class="sd">        training and testing samples. Requires that `&#39;train_indices&#39;`</span>
+</span><span id="L-207"><a href="#L-207"><span class="linenos">207</span></a><span class="sd">        and `&#39;test_indices&#39;` are the same across all AnnDatas.</span>
+</span><span id="L-208"><a href="#L-208"><span class="linenos">208</span></a>
+</span><span id="L-209"><a href="#L-209"><span class="linenos">209</span></a><span class="sd">    **names** : *list[str]* </span>
+</span><span id="L-210"><a href="#L-210"><span class="linenos">210</span></a><span class="sd">        &gt; List of string variables that describe each modality</span>
+</span><span id="L-211"><a href="#L-211"><span class="linenos">211</span></a><span class="sd">        respective to adatas for labeling.</span>
+</span><span id="L-212"><a href="#L-212"><span class="linenos">212</span></a><span class="sd">        </span>
+</span><span id="L-213"><a href="#L-213"><span class="linenos">213</span></a><span class="sd">    **alpha_list** : *np.ndarray* | *float*</span>
+</span><span id="L-214"><a href="#L-214"><span class="linenos">214</span></a><span class="sd">        &gt; An array of alpha values to create each model with.</span>
+</span><span id="L-215"><a href="#L-215"><span class="linenos">215</span></a>
+</span><span id="L-216"><a href="#L-216"><span class="linenos">216</span></a><span class="sd">    **tfidf** : *list[bool]* </span>
+</span><span id="L-217"><a href="#L-217"><span class="linenos">217</span></a><span class="sd">        &gt; List where if element i is `True`, adata[i] will be TFIDF </span>
+</span><span id="L-218"><a href="#L-218"><span class="linenos">218</span></a><span class="sd">        normalized.</span>
+</span><span id="L-219"><a href="#L-219"><span class="linenos">219</span></a>
+</span><span id="L-220"><a href="#L-220"><span class="linenos">220</span></a><span class="sd">    Returns</span>
+</span><span id="L-221"><a href="#L-221"><span class="linenos">221</span></a><span class="sd">    -------</span>
+</span><span id="L-222"><a href="#L-222"><span class="linenos">222</span></a><span class="sd">    **results** : *dict*</span>
+</span><span id="L-223"><a href="#L-223"><span class="linenos">223</span></a><span class="sd">    &gt; Contains keys for each cell class with results from cell class</span>
+</span><span id="L-224"><a href="#L-224"><span class="linenos">224</span></a><span class="sd">    versus all other samples. See `scmkl.run()` for futher details.</span>
+</span><span id="L-225"><a href="#L-225"><span class="linenos">225</span></a>
+</span><span id="L-226"><a href="#L-226"><span class="linenos">226</span></a><span class="sd">    Examples</span>
+</span><span id="L-227"><a href="#L-227"><span class="linenos">227</span></a><span class="sd">    --------</span>
+</span><span id="L-228"><a href="#L-228"><span class="linenos">228</span></a><span class="sd">    &gt;&gt;&gt; adata = scmkl.create_adata(X = data_mat, </span>
+</span><span id="L-229"><a href="#L-229"><span class="linenos">229</span></a><span class="sd">    ...                            feature_names = gene_names, </span>
+</span><span id="L-230"><a href="#L-230"><span class="linenos">230</span></a><span class="sd">    ...                            group_dict = group_dict)</span>
+</span><span id="L-231"><a href="#L-231"><span class="linenos">231</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="L-232"><a href="#L-232"><span class="linenos">232</span></a><span class="sd">    &gt;&gt;&gt; results = scmkl.one_v_rest(adatas = [adata], names = [&#39;rna&#39;],</span>
+</span><span id="L-233"><a href="#L-233"><span class="linenos">233</span></a><span class="sd">    ...                           alpha_list = np.array([0.05, 0.1]),</span>
+</span><span id="L-234"><a href="#L-234"><span class="linenos">234</span></a><span class="sd">    ...                           tfidf = [False])</span>
+</span><span id="L-235"><a href="#L-235"><span class="linenos">235</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="L-236"><a href="#L-236"><span class="linenos">236</span></a><span class="sd">    &gt;&gt;&gt; adata.keys()</span>
+</span><span id="L-237"><a href="#L-237"><span class="linenos">237</span></a><span class="sd">    dict_keys([&#39;B cells&#39;, &#39;Monocytes&#39;, &#39;Dendritic cells&#39;, ...])</span>
+</span><span id="L-238"><a href="#L-238"><span class="linenos">238</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-239"><a href="#L-239"><span class="linenos">239</span></a>    <span class="c1"># Formatting checks ensuring all adata elements are </span>
+</span><span id="L-240"><a href="#L-240"><span class="linenos">240</span></a>    <span class="c1"># AnnData objects and train/test indices are all the same</span>
+</span><span id="L-241"><a href="#L-241"><span class="linenos">241</span></a>    <span class="n">_check_adatas</span><span class="p">(</span><span class="n">adatas</span><span class="p">,</span> <span class="n">check_obs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_uns</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</span><span id="L-242"><a href="#L-242"><span class="linenos">242</span></a>
+</span><span id="L-243"><a href="#L-243"><span class="linenos">243</span></a>    <span class="c1"># Extracting train and test indices</span>
+</span><span id="L-244"><a href="#L-244"><span class="linenos">244</span></a>    <span class="n">train_indices</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">]</span>
+</span><span id="L-245"><a href="#L-245"><span class="linenos">245</span></a>    <span class="n">test_indices</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]</span>
+</span><span id="L-246"><a href="#L-246"><span class="linenos">246</span></a>
+</span><span id="L-247"><a href="#L-247"><span class="linenos">247</span></a>    <span class="c1"># Checking and capturing cell labels</span>
+</span><span id="L-248"><a href="#L-248"><span class="linenos">248</span></a>    <span class="n">uniq_labels</span> <span class="o">=</span> <span class="n">_eval_labels</span><span class="p">(</span>  <span class="n">cell_labels</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">],</span> 
+</span><span id="L-249"><a href="#L-249"><span class="linenos">249</span></a>                                <span class="n">train_indices</span> <span class="o">=</span> <span class="n">train_indices</span><span class="p">,</span>
+</span><span id="L-250"><a href="#L-250"><span class="linenos">250</span></a>                                 <span class="n">test_indices</span> <span class="o">=</span> <span class="n">test_indices</span><span class="p">)</span>
+</span><span id="L-251"><a href="#L-251"><span class="linenos">251</span></a>
+</span><span id="L-252"><a href="#L-252"><span class="linenos">252</span></a>
+</span><span id="L-253"><a href="#L-253"><span class="linenos">253</span></a>    <span class="c1"># Calculating Z matrices, method depends on whether there are multiple </span>
+</span><span id="L-254"><a href="#L-254"><span class="linenos">254</span></a>    <span class="c1"># adatas (modalities)</span>
+</span><span id="L-255"><a href="#L-255"><span class="linenos">255</span></a>    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">adatas</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;Z_train&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uns</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+</span><span id="L-256"><a href="#L-256"><span class="linenos">256</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">calculate_z</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span> <span class="n">batches</span><span class="o">=</span><span class="n">batches</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span>
+</span><span id="L-257"><a href="#L-257"><span class="linenos">257</span></a>    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">adatas</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+</span><span id="L-258"><a href="#L-258"><span class="linenos">258</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">multimodal_processing</span><span class="p">(</span><span class="n">adatas</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">,</span> 
+</span><span id="L-259"><a href="#L-259"><span class="linenos">259</span></a>                                      <span class="n">names</span> <span class="o">=</span> <span class="n">names</span><span class="p">,</span> 
+</span><span id="L-260"><a href="#L-260"><span class="linenos">260</span></a>                                      <span class="n">tfidf</span> <span class="o">=</span> <span class="n">tfidf</span><span class="p">,</span>
+</span><span id="L-261"><a href="#L-261"><span class="linenos">261</span></a>                                      <span class="n">batches</span><span class="o">=</span><span class="n">batches</span><span class="p">,</span>
+</span><span id="L-262"><a href="#L-262"><span class="linenos">262</span></a>                                      <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span>
+</span><span id="L-263"><a href="#L-263"><span class="linenos">263</span></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="L-264"><a href="#L-264"><span class="linenos">264</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="L-265"><a href="#L-265"><span class="linenos">265</span></a>
+</span><span id="L-266"><a href="#L-266"><span class="linenos">266</span></a>    <span class="k">del</span> <span class="n">adatas</span>
+</span><span id="L-267"><a href="#L-267"><span class="linenos">267</span></a>    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+</span><span id="L-268"><a href="#L-268"><span class="linenos">268</span></a>
+</span><span id="L-269"><a href="#L-269"><span class="linenos">269</span></a>    <span class="c1"># Initializing for capturing model outputs</span>
+</span><span id="L-270"><a href="#L-270"><span class="linenos">270</span></a>    <span class="n">results</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+</span><span id="L-271"><a href="#L-271"><span class="linenos">271</span></a>
+</span><span id="L-272"><a href="#L-272"><span class="linenos">272</span></a>    <span class="c1"># Capturing cell labels before overwriting</span>
+</span><span id="L-273"><a href="#L-273"><span class="linenos">273</span></a>    <span class="n">cell_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">])</span>
+</span><span id="L-274"><a href="#L-274"><span class="linenos">274</span></a>
+</span><span id="L-275"><a href="#L-275"><span class="linenos">275</span></a>    <span class="c1"># Capturing perfect train/test splits for each class</span>
+</span><span id="L-276"><a href="#L-276"><span class="linenos">276</span></a>    <span class="k">if</span> <span class="n">force_balance</span><span class="p">:</span>
+</span><span id="L-277"><a href="#L-277"><span class="linenos">277</span></a>        <span class="n">train_idx</span> <span class="o">=</span> <span class="n">get_class_train</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">],</span> 
+</span><span id="L-278"><a href="#L-278"><span class="linenos">278</span></a>                                    <span class="n">cell_labels</span><span class="p">,</span> 
+</span><span id="L-279"><a href="#L-279"><span class="linenos">279</span></a>                                    <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;seed_obj&#39;</span><span class="p">],</span>
+</span><span id="L-280"><a href="#L-280"><span class="linenos">280</span></a>                                    <span class="n">other_factor</span><span class="p">)</span>
+</span><span id="L-281"><a href="#L-281"><span class="linenos">281</span></a>
+</span><span id="L-282"><a href="#L-282"><span class="linenos">282</span></a>    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">uniq_labels</span><span class="p">:</span>
+</span><span id="L-283"><a href="#L-283"><span class="linenos">283</span></a>
+</span><span id="L-284"><a href="#L-284"><span class="linenos">284</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Comparing </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> to other types&quot;</span><span class="p">,</span> <span class="n">flush</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</span><span id="L-285"><a href="#L-285"><span class="linenos">285</span></a>        <span class="n">cur_labels</span> <span class="o">=</span> <span class="n">cell_labels</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="L-286"><a href="#L-286"><span class="linenos">286</span></a>        <span class="n">cur_labels</span><span class="p">[</span><span class="n">cell_labels</span> <span class="o">!=</span> <span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;other&#39;</span>
+</span><span id="L-287"><a href="#L-287"><span class="linenos">287</span></a>
+</span><span id="L-288"><a href="#L-288"><span class="linenos">288</span></a>        <span class="c1"># Replacing cell labels for current cell type vs rest</span>
+</span><span id="L-289"><a href="#L-289"><span class="linenos">289</span></a>        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_labels</span>
+</span><span id="L-290"><a href="#L-290"><span class="linenos">290</span></a>
+</span><span id="L-291"><a href="#L-291"><span class="linenos">291</span></a>        <span class="k">if</span> <span class="n">force_balance</span><span class="p">:</span>
+</span><span id="L-292"><a href="#L-292"><span class="linenos">292</span></a>            <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_idx</span><span class="p">[</span><span class="n">label</span><span class="p">]</span>
+</span><span id="L-293"><a href="#L-293"><span class="linenos">293</span></a>
+</span><span id="L-294"><a href="#L-294"><span class="linenos">294</span></a>        <span class="c1"># Running scMKL</span>
+</span><span id="L-295"><a href="#L-295"><span class="linenos">295</span></a>        <span class="n">results</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">alpha_list</span><span class="p">,</span> <span class="n">return_probs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</span><span id="L-296"><a href="#L-296"><span class="linenos">296</span></a>
+</span><span id="L-297"><a href="#L-297"><span class="linenos">297</span></a>    <span class="c1"># Getting final predictions</span>
+</span><span id="L-298"><a href="#L-298"><span class="linenos">298</span></a>    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">alpha_list</span><span class="p">)</span>
+</span><span id="L-299"><a href="#L-299"><span class="linenos">299</span></a>    <span class="n">prob_table</span><span class="p">,</span> <span class="n">pred_class</span><span class="p">,</span> <span class="n">low_conf</span> <span class="o">=</span> <span class="n">_prob_table</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+</span><span id="L-300"><a href="#L-300"><span class="linenos">300</span></a>    <span class="n">macro_f1</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">cell_labels</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]],</span> 
+</span><span id="L-301"><a href="#L-301"><span class="linenos">301</span></a>                        <span class="n">pred_class</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s1">&#39;macro&#39;</span><span class="p">)</span>
+</span><span id="L-302"><a href="#L-302"><span class="linenos">302</span></a>
+</span><span id="L-303"><a href="#L-303"><span class="linenos">303</span></a>    <span class="n">model_summary</span> <span class="o">=</span> <span class="n">per_model_summary</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">uniq_labels</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+</span><span id="L-304"><a href="#L-304"><span class="linenos">304</span></a>
+</span><span id="L-305"><a href="#L-305"><span class="linenos">305</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Per_model_summary&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_summary</span>
+</span><span id="L-306"><a href="#L-306"><span class="linenos">306</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Classes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uniq_labels</span>
+</span><span id="L-307"><a href="#L-307"><span class="linenos">307</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Probability_table&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prob_table</span>
+</span><span id="L-308"><a href="#L-308"><span class="linenos">308</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Predicted_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pred_class</span>
+</span><span id="L-309"><a href="#L-309"><span class="linenos">309</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Truth_labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cell_labels</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]]</span>
+</span><span id="L-310"><a href="#L-310"><span class="linenos">310</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Low_confidence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">low_conf</span>
+</span><span id="L-311"><a href="#L-311"><span class="linenos">311</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Macro_F1-Score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">macro_f1</span>
+</span><span id="L-312"><a href="#L-312"><span class="linenos">312</span></a>
+</span><span id="L-313"><a href="#L-313"><span class="linenos">313</span></a>    <span class="k">if</span> <span class="n">force_balance</span><span class="p">:</span>
+</span><span id="L-314"><a href="#L-314"><span class="linenos">314</span></a>        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Training_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_idx</span>
+</span><span id="L-315"><a href="#L-315"><span class="linenos">315</span></a>
+</span><span id="L-316"><a href="#L-316"><span class="linenos">316</span></a>    <span class="k">return</span> <span class="n">results</span>
 </span></pre></div>
 
 
             </section>
+                <section id="per_model_summary">
+                            <input id="per_model_summary-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">per_model_summary</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">results</span><span class="p">:</span> <span class="nb">dict</span>,</span><span class="param">	<span class="n">uniq_labels</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span>,</span><span class="param">	<span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span></span><span class="return-annotation">) -> <span class="n">pandas</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span>:</span></span>
+
+                <label class="view-source-button" for="per_model_summary-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#per_model_summary"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="per_model_summary-108"><a href="#per_model_summary-108"><span class="linenos">108</span></a><span class="k">def</span><span class="w"> </span><span class="nf">per_model_summary</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">uniq_labels</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">,</span> 
+</span><span id="per_model_summary-109"><a href="#per_model_summary-109"><span class="linenos">109</span></a>                      <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+</span><span id="per_model_summary-110"><a href="#per_model_summary-110"><span class="linenos">110</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="per_model_summary-111"><a href="#per_model_summary-111"><span class="linenos">111</span></a><span class="sd">    Takes the results dictionary from scmkl.one_v_rest() and adds a </span>
+</span><span id="per_model_summary-112"><a href="#per_model_summary-112"><span class="linenos">112</span></a><span class="sd">    summary dataframe show metrics for each model generated from the </span>
+</span><span id="per_model_summary-113"><a href="#per_model_summary-113"><span class="linenos">113</span></a><span class="sd">    runs.</span>
+</span><span id="per_model_summary-114"><a href="#per_model_summary-114"><span class="linenos">114</span></a>
+</span><span id="per_model_summary-115"><a href="#per_model_summary-115"><span class="linenos">115</span></a><span class="sd">    Parameters</span>
+</span><span id="per_model_summary-116"><a href="#per_model_summary-116"><span class="linenos">116</span></a><span class="sd">    ----------</span>
+</span><span id="per_model_summary-117"><a href="#per_model_summary-117"><span class="linenos">117</span></a><span class="sd">    results : dict</span>
+</span><span id="per_model_summary-118"><a href="#per_model_summary-118"><span class="linenos">118</span></a><span class="sd">        &gt; A results dictionary from scmkl.one_v_rest().</span>
+</span><span id="per_model_summary-119"><a href="#per_model_summary-119"><span class="linenos">119</span></a>
+</span><span id="per_model_summary-120"><a href="#per_model_summary-120"><span class="linenos">120</span></a><span class="sd">    uniq_labels : np.ndarray | list | tuple</span>
+</span><span id="per_model_summary-121"><a href="#per_model_summary-121"><span class="linenos">121</span></a><span class="sd">        &gt; A list of unique cell classes from the runs.</span>
+</span><span id="per_model_summary-122"><a href="#per_model_summary-122"><span class="linenos">122</span></a>
+</span><span id="per_model_summary-123"><a href="#per_model_summary-123"><span class="linenos">123</span></a><span class="sd">    alpha : float</span>
+</span><span id="per_model_summary-124"><a href="#per_model_summary-124"><span class="linenos">124</span></a><span class="sd">        &gt; The alpha for the model desired for creating the summary </span>
+</span><span id="per_model_summary-125"><a href="#per_model_summary-125"><span class="linenos">125</span></a><span class="sd">        dataframe.</span>
+</span><span id="per_model_summary-126"><a href="#per_model_summary-126"><span class="linenos">126</span></a>
+</span><span id="per_model_summary-127"><a href="#per_model_summary-127"><span class="linenos">127</span></a><span class="sd">    Returns</span>
+</span><span id="per_model_summary-128"><a href="#per_model_summary-128"><span class="linenos">128</span></a><span class="sd">    -------</span>
+</span><span id="per_model_summary-129"><a href="#per_model_summary-129"><span class="linenos">129</span></a><span class="sd">    summary_df : pd.DataFrame</span>
+</span><span id="per_model_summary-130"><a href="#per_model_summary-130"><span class="linenos">130</span></a><span class="sd">        &gt; A data frame with classes on rows and metrics as cols.</span>
+</span><span id="per_model_summary-131"><a href="#per_model_summary-131"><span class="linenos">131</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="per_model_summary-132"><a href="#per_model_summary-132"><span class="linenos">132</span></a>    <span class="c1"># Getting metrics availible in results</span>
+</span><span id="per_model_summary-133"><a href="#per_model_summary-133"><span class="linenos">133</span></a>    <span class="n">avail_mets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="n">uniq_labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s1">&#39;Metrics&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">])</span>
+</span><span id="per_model_summary-134"><a href="#per_model_summary-134"><span class="linenos">134</span></a>
+</span><span id="per_model_summary-135"><a href="#per_model_summary-135"><span class="linenos">135</span></a>    <span class="n">summary_df</span> <span class="o">=</span> <span class="p">{</span><span class="n">metric</span> <span class="p">:</span> <span class="nb">list</span><span class="p">()</span>
+</span><span id="per_model_summary-136"><a href="#per_model_summary-136"><span class="linenos">136</span></a>                  <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">avail_mets</span><span class="p">}</span>
+</span><span id="per_model_summary-137"><a href="#per_model_summary-137"><span class="linenos">137</span></a>    <span class="n">summary_df</span><span class="p">[</span><span class="s1">&#39;Class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uniq_labels</span>
+</span><span id="per_model_summary-138"><a href="#per_model_summary-138"><span class="linenos">138</span></a>
+</span><span id="per_model_summary-139"><a href="#per_model_summary-139"><span class="linenos">139</span></a>    <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="n">summary_df</span><span class="p">[</span><span class="s1">&#39;Class&#39;</span><span class="p">]:</span>
+</span><span id="per_model_summary-140"><a href="#per_model_summary-140"><span class="linenos">140</span></a>        <span class="k">for</span> <span class="n">met</span> <span class="ow">in</span> <span class="n">avail_mets</span><span class="p">:</span>
+</span><span id="per_model_summary-141"><a href="#per_model_summary-141"><span class="linenos">141</span></a>            <span class="n">val</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">lab</span><span class="p">][</span><span class="s1">&#39;Metrics&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">][</span><span class="n">met</span><span class="p">]</span>
+</span><span id="per_model_summary-142"><a href="#per_model_summary-142"><span class="linenos">142</span></a>            <span class="n">summary_df</span><span class="p">[</span><span class="n">met</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+</span><span id="per_model_summary-143"><a href="#per_model_summary-143"><span class="linenos">143</span></a>
+</span><span id="per_model_summary-144"><a href="#per_model_summary-144"><span class="linenos">144</span></a>    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">summary_df</span><span class="p">)</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>Takes the results dictionary from <a href="">scmkl.one_v_rest</a> and adds a 
+summary dataframe show metrics for each model generated from the 
+runs.</p>
+
+<h2 id="parameters">Parameters</h2>
+
+<p>results : dict</p>
+
+<blockquote>
+  <p>A results dictionary from <a href="">scmkl.one_v_rest</a>.</p>
+</blockquote>
+
+<p>uniq_labels : np.ndarray | list | tuple</p>
+
+<blockquote>
+  <p>A list of unique cell classes from the runs.</p>
+</blockquote>
+
+<p>alpha : float</p>
+
+<blockquote>
+  <p>The alpha for the model desired for creating the summary 
+      dataframe.</p>
+</blockquote>
+
+<h2 id="returns">Returns</h2>
+
+<p>summary_df : pd.DataFrame</p>
+
+<blockquote>
+  <p>A data frame with classes on rows and metrics as cols.</p>
+</blockquote>
+</div>
+
+
+                </section>
+                <section id="get_class_train">
+                            <input id="get_class_train-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">get_class_train</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">train_indices</span>, </span><span class="param"><span class="n">cell_labels</span>, </span><span class="param"><span class="n">seed_obj</span>, </span><span class="param"><span class="n">other_factor</span><span class="o">=</span><span class="mf">1.5</span></span><span class="return-annotation">):</span></span>
+
+                <label class="view-source-button" for="get_class_train-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#get_class_train"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="get_class_train-147"><a href="#get_class_train-147"><span class="linenos">147</span></a><span class="k">def</span><span class="w"> </span><span class="nf">get_class_train</span><span class="p">(</span><span class="n">train_indices</span><span class="p">,</span> <span class="n">cell_labels</span><span class="p">,</span> <span class="n">seed_obj</span><span class="p">,</span> <span class="n">other_factor</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">):</span>
+</span><span id="get_class_train-148"><a href="#get_class_train-148"><span class="linenos">148</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="get_class_train-149"><a href="#get_class_train-149"><span class="linenos">149</span></a><span class="sd">    This function returns a dict with each entry being a set of </span>
+</span><span id="get_class_train-150"><a href="#get_class_train-150"><span class="linenos">150</span></a><span class="sd">    training indices for each cell class to be used in </span>
+</span><span id="get_class_train-151"><a href="#get_class_train-151"><span class="linenos">151</span></a><span class="sd">    scmkl.one_v_rest().</span>
+</span><span id="get_class_train-152"><a href="#get_class_train-152"><span class="linenos">152</span></a>
+</span><span id="get_class_train-153"><a href="#get_class_train-153"><span class="linenos">153</span></a><span class="sd">    Parameters</span>
+</span><span id="get_class_train-154"><a href="#get_class_train-154"><span class="linenos">154</span></a><span class="sd">    ----------</span>
+</span><span id="get_class_train-155"><a href="#get_class_train-155"><span class="linenos">155</span></a><span class="sd">    train_indices : np.ndarray</span>
+</span><span id="get_class_train-156"><a href="#get_class_train-156"><span class="linenos">156</span></a><span class="sd">        &gt; The indices in the anndata of samples availible to train on.</span>
+</span><span id="get_class_train-157"><a href="#get_class_train-157"><span class="linenos">157</span></a>
+</span><span id="get_class_train-158"><a href="#get_class_train-158"><span class="linenos">158</span></a><span class="sd">    cell_labels : np.ndarray | list | pd.Series</span>
+</span><span id="get_class_train-159"><a href="#get_class_train-159"><span class="linenos">159</span></a><span class="sd">        &gt; The identity of all cells in the anndata object.</span>
+</span><span id="get_class_train-160"><a href="#get_class_train-160"><span class="linenos">160</span></a>
+</span><span id="get_class_train-161"><a href="#get_class_train-161"><span class="linenos">161</span></a><span class="sd">    seed_obj : np.random._generator.Generator</span>
+</span><span id="get_class_train-162"><a href="#get_class_train-162"><span class="linenos">162</span></a><span class="sd">        &gt; The seed object used to randomly sample non-target samples.</span>
+</span><span id="get_class_train-163"><a href="#get_class_train-163"><span class="linenos">163</span></a>
+</span><span id="get_class_train-164"><a href="#get_class_train-164"><span class="linenos">164</span></a><span class="sd">    Returns</span>
+</span><span id="get_class_train-165"><a href="#get_class_train-165"><span class="linenos">165</span></a><span class="sd">    -------</span>
+</span><span id="get_class_train-166"><a href="#get_class_train-166"><span class="linenos">166</span></a><span class="sd">    train_idx : dict</span>
+</span><span id="get_class_train-167"><a href="#get_class_train-167"><span class="linenos">167</span></a><span class="sd">        &gt; A dictionary with keys being cell classes and values being </span>
+</span><span id="get_class_train-168"><a href="#get_class_train-168"><span class="linenos">168</span></a><span class="sd">        the train indices to train scmkl that include both target and </span>
+</span><span id="get_class_train-169"><a href="#get_class_train-169"><span class="linenos">169</span></a><span class="sd">        non-target samples.</span>
+</span><span id="get_class_train-170"><a href="#get_class_train-170"><span class="linenos">170</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="get_class_train-171"><a href="#get_class_train-171"><span class="linenos">171</span></a>    <span class="n">uniq_labels</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">cell_labels</span><span class="p">)</span>
+</span><span id="get_class_train-172"><a href="#get_class_train-172"><span class="linenos">172</span></a>    <span class="n">train_idx</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+</span><span id="get_class_train-173"><a href="#get_class_train-173"><span class="linenos">173</span></a>
+</span><span id="get_class_train-174"><a href="#get_class_train-174"><span class="linenos">174</span></a>    <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="n">uniq_labels</span><span class="p">:</span>
+</span><span id="get_class_train-175"><a href="#get_class_train-175"><span class="linenos">175</span></a>        <span class="n">target_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lab</span> <span class="o">==</span> <span class="n">cell_labels</span><span class="p">[</span><span class="n">train_indices</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="get_class_train-176"><a href="#get_class_train-176"><span class="linenos">176</span></a>        <span class="n">overlap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">target_pos</span><span class="p">,</span> <span class="n">train_indices</span><span class="p">)</span>
+</span><span id="get_class_train-177"><a href="#get_class_train-177"><span class="linenos">177</span></a>
+</span><span id="get_class_train-178"><a href="#get_class_train-178"><span class="linenos">178</span></a>        <span class="n">target_pos</span> <span class="o">=</span> <span class="n">target_pos</span><span class="p">[</span><span class="n">overlap</span><span class="p">]</span>
+</span><span id="get_class_train-179"><a href="#get_class_train-179"><span class="linenos">179</span></a>        <span class="n">other_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">setdiff1d</span><span class="p">(</span><span class="n">train_indices</span><span class="p">,</span> <span class="n">target_pos</span><span class="p">)</span>
+</span><span id="get_class_train-180"><a href="#get_class_train-180"><span class="linenos">180</span></a>
+</span><span id="get_class_train-181"><a href="#get_class_train-181"><span class="linenos">181</span></a>        <span class="k">if</span> <span class="p">(</span><span class="n">other_factor</span><span class="o">*</span><span class="n">target_pos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">other_pos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+</span><span id="get_class_train-182"><a href="#get_class_train-182"><span class="linenos">182</span></a>            <span class="n">n_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">other_factor</span><span class="o">*</span><span class="n">target_pos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span id="get_class_train-183"><a href="#get_class_train-183"><span class="linenos">183</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="get_class_train-184"><a href="#get_class_train-184"><span class="linenos">184</span></a>            <span class="n">n_samples</span> <span class="o">=</span> <span class="n">other_pos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="get_class_train-185"><a href="#get_class_train-185"><span class="linenos">185</span></a>
+</span><span id="get_class_train-186"><a href="#get_class_train-186"><span class="linenos">186</span></a>        <span class="n">other_pos</span> <span class="o">=</span> <span class="n">seed_obj</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">other_pos</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+</span><span id="get_class_train-187"><a href="#get_class_train-187"><span class="linenos">187</span></a>
+</span><span id="get_class_train-188"><a href="#get_class_train-188"><span class="linenos">188</span></a>        <span class="n">lab_train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">target_pos</span><span class="p">,</span> <span class="n">other_pos</span><span class="p">])</span>
+</span><span id="get_class_train-189"><a href="#get_class_train-189"><span class="linenos">189</span></a>        <span class="n">train_idx</span><span class="p">[</span><span class="n">lab</span><span class="p">]</span> <span class="o">=</span> <span class="n">lab_train</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="get_class_train-190"><a href="#get_class_train-190"><span class="linenos">190</span></a>
+</span><span id="get_class_train-191"><a href="#get_class_train-191"><span class="linenos">191</span></a>    <span class="k">return</span> <span class="n">train_idx</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>This function returns a dict with each entry being a set of 
+training indices for each cell class to be used in 
+<a href="">scmkl.one_v_rest</a>.</p>
+
+<h2 id="parameters">Parameters</h2>
+
+<p>train_indices : np.ndarray</p>
+
+<blockquote>
+  <p>The indices in the anndata of samples availible to train on.</p>
+</blockquote>
+
+<p>cell_labels : np.ndarray | list | pd.Series</p>
+
+<blockquote>
+  <p>The identity of all cells in the anndata object.</p>
+</blockquote>
+
+<p>seed_obj : np.random._generator.Generator</p>
+
+<blockquote>
+  <p>The seed object used to randomly sample non-target samples.</p>
+</blockquote>
+
+<h2 id="returns">Returns</h2>
+
+<p>train_idx : dict</p>
+
+<blockquote>
+  <p>A dictionary with keys being cell classes and values being 
+      the train indices to train scmkl that include both target and 
+      non-target samples.</p>
+</blockquote>
+</div>
+
+
+                </section>
                 <section id="one_v_rest">
                             <input id="one_v_rest-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">one_v_rest</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">adatas</span><span class="p">:</span> <span class="nb">list</span>,</span><span class="param">	<span class="n">names</span><span class="p">:</span> <span class="nb">list</span>,</span><span class="param">	<span class="n">alpha_list</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>,</span><span class="param">	<span class="n">tfidf</span><span class="p">:</span> <span class="nb">list</span></span><span class="return-annotation">) -> <span class="nb">dict</span>:</span></span>
+        <span class="name">one_v_rest</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">adatas</span><span class="p">:</span> <span class="nb">list</span>,</span><span class="param">	<span class="n">names</span><span class="p">:</span> <span class="nb">list</span>,</span><span class="param">	<span class="n">alpha_list</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>,</span><span class="param">	<span class="n">tfidf</span><span class="p">:</span> <span class="nb">list</span>,</span><span class="param">	<span class="n">batches</span><span class="o">=</span><span class="mi">10</span>,</span><span class="param">	<span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span>,</span><span class="param">	<span class="n">force_balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>,</span><span class="param">	<span class="n">other_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span></span><span class="return-annotation">) -> <span class="nb">dict</span>:</span></span>
 
                 <label class="view-source-button" for="one_v_rest-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#one_v_rest"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="one_v_rest-108"><a href="#one_v_rest-108"><span class="linenos">108</span></a><span class="k">def</span> <span class="nf">one_v_rest</span><span class="p">(</span><span class="n">adatas</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">names</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">alpha_list</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="one_v_rest-109"><a href="#one_v_rest-109"><span class="linenos">109</span></a>              <span class="n">tfidf</span> <span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span id="one_v_rest-110"><a href="#one_v_rest-110"><span class="linenos">110</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-</span><span id="one_v_rest-111"><a href="#one_v_rest-111"><span class="linenos">111</span></a><span class="sd">    For each cell class, creates model(s) comparing that class to all </span>
-</span><span id="one_v_rest-112"><a href="#one_v_rest-112"><span class="linenos">112</span></a><span class="sd">    others. Then, predicts on the training data using `scmkl.run()`.</span>
-</span><span id="one_v_rest-113"><a href="#one_v_rest-113"><span class="linenos">113</span></a><span class="sd">    Only labels in both training and testing will be run.</span>
-</span><span id="one_v_rest-114"><a href="#one_v_rest-114"><span class="linenos">114</span></a>
-</span><span id="one_v_rest-115"><a href="#one_v_rest-115"><span class="linenos">115</span></a><span class="sd">    Parameters</span>
-</span><span id="one_v_rest-116"><a href="#one_v_rest-116"><span class="linenos">116</span></a><span class="sd">    ----------</span>
-</span><span id="one_v_rest-117"><a href="#one_v_rest-117"><span class="linenos">117</span></a><span class="sd">    **adatas** : *list[AnnData]* </span>
-</span><span id="one_v_rest-118"><a href="#one_v_rest-118"><span class="linenos">118</span></a><span class="sd">        &gt; List of AnnData objects created by create_adata()</span>
-</span><span id="one_v_rest-119"><a href="#one_v_rest-119"><span class="linenos">119</span></a><span class="sd">        where each AnnData is one modality and composed of both </span>
-</span><span id="one_v_rest-120"><a href="#one_v_rest-120"><span class="linenos">120</span></a><span class="sd">        training and testing samples. Requires that `&#39;train_indices&#39;`</span>
-</span><span id="one_v_rest-121"><a href="#one_v_rest-121"><span class="linenos">121</span></a><span class="sd">        and `&#39;test_indices&#39;` are the same across all AnnDatas.</span>
-</span><span id="one_v_rest-122"><a href="#one_v_rest-122"><span class="linenos">122</span></a>
-</span><span id="one_v_rest-123"><a href="#one_v_rest-123"><span class="linenos">123</span></a><span class="sd">    **names** : *list[str]* </span>
-</span><span id="one_v_rest-124"><a href="#one_v_rest-124"><span class="linenos">124</span></a><span class="sd">        &gt; List of string variables that describe each modality</span>
-</span><span id="one_v_rest-125"><a href="#one_v_rest-125"><span class="linenos">125</span></a><span class="sd">        respective to adatas for labeling.</span>
-</span><span id="one_v_rest-126"><a href="#one_v_rest-126"><span class="linenos">126</span></a><span class="sd">        </span>
-</span><span id="one_v_rest-127"><a href="#one_v_rest-127"><span class="linenos">127</span></a><span class="sd">    **alpha_list** : *np.ndarray* | *float*</span>
-</span><span id="one_v_rest-128"><a href="#one_v_rest-128"><span class="linenos">128</span></a><span class="sd">        &gt; An array of alpha values to create each model with.</span>
-</span><span id="one_v_rest-129"><a href="#one_v_rest-129"><span class="linenos">129</span></a>
-</span><span id="one_v_rest-130"><a href="#one_v_rest-130"><span class="linenos">130</span></a><span class="sd">    **tfidf** : *list[bool]* </span>
-</span><span id="one_v_rest-131"><a href="#one_v_rest-131"><span class="linenos">131</span></a><span class="sd">        &gt; List where if element i is `True`, adata[i] will be TFIDF </span>
-</span><span id="one_v_rest-132"><a href="#one_v_rest-132"><span class="linenos">132</span></a><span class="sd">        normalized.</span>
-</span><span id="one_v_rest-133"><a href="#one_v_rest-133"><span class="linenos">133</span></a>
-</span><span id="one_v_rest-134"><a href="#one_v_rest-134"><span class="linenos">134</span></a><span class="sd">    Returns</span>
-</span><span id="one_v_rest-135"><a href="#one_v_rest-135"><span class="linenos">135</span></a><span class="sd">    -------</span>
-</span><span id="one_v_rest-136"><a href="#one_v_rest-136"><span class="linenos">136</span></a><span class="sd">    **results** : *dict*</span>
-</span><span id="one_v_rest-137"><a href="#one_v_rest-137"><span class="linenos">137</span></a><span class="sd">    &gt; Contains keys for each cell class with results from cell class</span>
-</span><span id="one_v_rest-138"><a href="#one_v_rest-138"><span class="linenos">138</span></a><span class="sd">    versus all other samples. See `scmkl.run()` for futher details.</span>
-</span><span id="one_v_rest-139"><a href="#one_v_rest-139"><span class="linenos">139</span></a>
-</span><span id="one_v_rest-140"><a href="#one_v_rest-140"><span class="linenos">140</span></a><span class="sd">    Examples</span>
-</span><span id="one_v_rest-141"><a href="#one_v_rest-141"><span class="linenos">141</span></a><span class="sd">    --------</span>
-</span><span id="one_v_rest-142"><a href="#one_v_rest-142"><span class="linenos">142</span></a><span class="sd">    &gt;&gt;&gt; adata = scmkl.create_adata(X = data_mat, </span>
-</span><span id="one_v_rest-143"><a href="#one_v_rest-143"><span class="linenos">143</span></a><span class="sd">    ...                            feature_names = gene_names, </span>
-</span><span id="one_v_rest-144"><a href="#one_v_rest-144"><span class="linenos">144</span></a><span class="sd">    ...                            group_dict = group_dict)</span>
-</span><span id="one_v_rest-145"><a href="#one_v_rest-145"><span class="linenos">145</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="one_v_rest-146"><a href="#one_v_rest-146"><span class="linenos">146</span></a><span class="sd">    &gt;&gt;&gt; results = scmkl.one_v_rest(adatas = [adata], names = [&#39;rna&#39;],</span>
-</span><span id="one_v_rest-147"><a href="#one_v_rest-147"><span class="linenos">147</span></a><span class="sd">    ...                           alpha_list = np.array([0.05, 0.1]),</span>
-</span><span id="one_v_rest-148"><a href="#one_v_rest-148"><span class="linenos">148</span></a><span class="sd">    ...                           tfidf = [False])</span>
-</span><span id="one_v_rest-149"><a href="#one_v_rest-149"><span class="linenos">149</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="one_v_rest-150"><a href="#one_v_rest-150"><span class="linenos">150</span></a><span class="sd">    &gt;&gt;&gt; adata.keys()</span>
-</span><span id="one_v_rest-151"><a href="#one_v_rest-151"><span class="linenos">151</span></a><span class="sd">    dict_keys([&#39;B cells&#39;, &#39;Monocytes&#39;, &#39;Dendritic cells&#39;, ...])</span>
-</span><span id="one_v_rest-152"><a href="#one_v_rest-152"><span class="linenos">152</span></a><span class="sd">    &#39;&#39;&#39;</span>
-</span><span id="one_v_rest-153"><a href="#one_v_rest-153"><span class="linenos">153</span></a>    <span class="c1"># Formatting checks ensuring all adata elements are </span>
-</span><span id="one_v_rest-154"><a href="#one_v_rest-154"><span class="linenos">154</span></a>    <span class="c1"># AnnData objects and train/test indices are all the same</span>
-</span><span id="one_v_rest-155"><a href="#one_v_rest-155"><span class="linenos">155</span></a>    <span class="n">_check_adatas</span><span class="p">(</span><span class="n">adatas</span><span class="p">,</span> <span class="n">check_obs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_uns</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-</span><span id="one_v_rest-156"><a href="#one_v_rest-156"><span class="linenos">156</span></a>
-</span><span id="one_v_rest-157"><a href="#one_v_rest-157"><span class="linenos">157</span></a>    <span class="c1"># Extracting train and test indices</span>
-</span><span id="one_v_rest-158"><a href="#one_v_rest-158"><span class="linenos">158</span></a>    <span class="n">train_indices</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">]</span>
-</span><span id="one_v_rest-159"><a href="#one_v_rest-159"><span class="linenos">159</span></a>    <span class="n">test_indices</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]</span>
-</span><span id="one_v_rest-160"><a href="#one_v_rest-160"><span class="linenos">160</span></a>
-</span><span id="one_v_rest-161"><a href="#one_v_rest-161"><span class="linenos">161</span></a>    <span class="c1"># Checking and capturing cell labels</span>
-</span><span id="one_v_rest-162"><a href="#one_v_rest-162"><span class="linenos">162</span></a>    <span class="n">uniq_labels</span> <span class="o">=</span> <span class="n">_eval_labels</span><span class="p">(</span>  <span class="n">cell_labels</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">],</span> 
-</span><span id="one_v_rest-163"><a href="#one_v_rest-163"><span class="linenos">163</span></a>                                <span class="n">train_indices</span> <span class="o">=</span> <span class="n">train_indices</span><span class="p">,</span>
-</span><span id="one_v_rest-164"><a href="#one_v_rest-164"><span class="linenos">164</span></a>                                 <span class="n">test_indices</span> <span class="o">=</span> <span class="n">test_indices</span><span class="p">)</span>
-</span><span id="one_v_rest-165"><a href="#one_v_rest-165"><span class="linenos">165</span></a>
-</span><span id="one_v_rest-166"><a href="#one_v_rest-166"><span class="linenos">166</span></a>
-</span><span id="one_v_rest-167"><a href="#one_v_rest-167"><span class="linenos">167</span></a>    <span class="c1"># Calculating Z matrices, method depends on whether there are multiple </span>
-</span><span id="one_v_rest-168"><a href="#one_v_rest-168"><span class="linenos">168</span></a>    <span class="c1"># adatas (modalities)</span>
-</span><span id="one_v_rest-169"><a href="#one_v_rest-169"><span class="linenos">169</span></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">adatas</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-</span><span id="one_v_rest-170"><a href="#one_v_rest-170"><span class="linenos">170</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">estimate_sigma</span><span class="p">(</span><span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">200</span><span class="p">)</span>
-</span><span id="one_v_rest-171"><a href="#one_v_rest-171"><span class="linenos">171</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">calculate_z</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">)</span>
-</span><span id="one_v_rest-172"><a href="#one_v_rest-172"><span class="linenos">172</span></a>    <span class="k">else</span><span class="p">:</span>
-</span><span id="one_v_rest-173"><a href="#one_v_rest-173"><span class="linenos">173</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">multimodal_processing</span><span class="p">(</span><span class="n">adatas</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">,</span> 
-</span><span id="one_v_rest-174"><a href="#one_v_rest-174"><span class="linenos">174</span></a>                                        <span class="n">names</span> <span class="o">=</span> <span class="n">names</span><span class="p">,</span> 
-</span><span id="one_v_rest-175"><a href="#one_v_rest-175"><span class="linenos">175</span></a>                                        <span class="n">tfidf</span> <span class="o">=</span> <span class="n">tfidf</span><span class="p">,</span> 
-</span><span id="one_v_rest-176"><a href="#one_v_rest-176"><span class="linenos">176</span></a>                                        <span class="n">z_calculation</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-</span><span id="one_v_rest-177"><a href="#one_v_rest-177"><span class="linenos">177</span></a>
-</span><span id="one_v_rest-178"><a href="#one_v_rest-178"><span class="linenos">178</span></a>    <span class="k">del</span> <span class="n">adatas</span>
-</span><span id="one_v_rest-179"><a href="#one_v_rest-179"><span class="linenos">179</span></a>    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
-</span><span id="one_v_rest-180"><a href="#one_v_rest-180"><span class="linenos">180</span></a>
-</span><span id="one_v_rest-181"><a href="#one_v_rest-181"><span class="linenos">181</span></a>    <span class="c1"># Initializing for capturing model outputs</span>
-</span><span id="one_v_rest-182"><a href="#one_v_rest-182"><span class="linenos">182</span></a>    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="one_v_rest-183"><a href="#one_v_rest-183"><span class="linenos">183</span></a>
-</span><span id="one_v_rest-184"><a href="#one_v_rest-184"><span class="linenos">184</span></a>    <span class="c1"># Capturing cell labels before overwriting</span>
-</span><span id="one_v_rest-185"><a href="#one_v_rest-185"><span class="linenos">185</span></a>    <span class="n">cell_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">])</span>
-</span><span id="one_v_rest-186"><a href="#one_v_rest-186"><span class="linenos">186</span></a>
-</span><span id="one_v_rest-187"><a href="#one_v_rest-187"><span class="linenos">187</span></a>    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">uniq_labels</span><span class="p">:</span>
-</span><span id="one_v_rest-188"><a href="#one_v_rest-188"><span class="linenos">188</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Comparing </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> to other types&quot;</span><span class="p">,</span> <span class="n">flush</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-</span><span id="one_v_rest-189"><a href="#one_v_rest-189"><span class="linenos">189</span></a>        <span class="n">cur_labels</span> <span class="o">=</span> <span class="n">cell_labels</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span id="one_v_rest-190"><a href="#one_v_rest-190"><span class="linenos">190</span></a>        <span class="n">cur_labels</span><span class="p">[</span><span class="n">cell_labels</span> <span class="o">!=</span> <span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;other&#39;</span>
-</span><span id="one_v_rest-191"><a href="#one_v_rest-191"><span class="linenos">191</span></a>        
-</span><span id="one_v_rest-192"><a href="#one_v_rest-192"><span class="linenos">192</span></a>        <span class="c1"># Replacing cell labels for current cell type vs rest</span>
-</span><span id="one_v_rest-193"><a href="#one_v_rest-193"><span class="linenos">193</span></a>        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_labels</span>
-</span><span id="one_v_rest-194"><a href="#one_v_rest-194"><span class="linenos">194</span></a>
-</span><span id="one_v_rest-195"><a href="#one_v_rest-195"><span class="linenos">195</span></a>        <span class="c1"># Running scMKL</span>
-</span><span id="one_v_rest-196"><a href="#one_v_rest-196"><span class="linenos">196</span></a>        <span class="n">results</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">alpha_list</span><span class="p">,</span> <span class="n">return_probs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-</span><span id="one_v_rest-197"><a href="#one_v_rest-197"><span class="linenos">197</span></a>
-</span><span id="one_v_rest-198"><a href="#one_v_rest-198"><span class="linenos">198</span></a>    <span class="c1"># Getting final predictions</span>
-</span><span id="one_v_rest-199"><a href="#one_v_rest-199"><span class="linenos">199</span></a>    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">alpha_list</span><span class="p">)</span>
-</span><span id="one_v_rest-200"><a href="#one_v_rest-200"><span class="linenos">200</span></a>    <span class="n">prob_table</span><span class="p">,</span> <span class="n">pred_class</span><span class="p">,</span> <span class="n">low_conf</span> <span class="o">=</span> <span class="n">_prob_table</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="one_v_rest-194"><a href="#one_v_rest-194"><span class="linenos">194</span></a><span class="k">def</span><span class="w"> </span><span class="nf">one_v_rest</span><span class="p">(</span><span class="n">adatas</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">names</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">alpha_list</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="one_v_rest-195"><a href="#one_v_rest-195"><span class="linenos">195</span></a>              <span class="n">tfidf</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">batches</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> 
+</span><span id="one_v_rest-196"><a href="#one_v_rest-196"><span class="linenos">196</span></a>              <span class="n">force_balance</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">other_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="one_v_rest-197"><a href="#one_v_rest-197"><span class="linenos">197</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="one_v_rest-198"><a href="#one_v_rest-198"><span class="linenos">198</span></a><span class="sd">    For each cell class, creates model(s) comparing that class to all </span>
+</span><span id="one_v_rest-199"><a href="#one_v_rest-199"><span class="linenos">199</span></a><span class="sd">    others. Then, predicts on the training data using `scmkl.run()`.</span>
+</span><span id="one_v_rest-200"><a href="#one_v_rest-200"><span class="linenos">200</span></a><span class="sd">    Only labels in both training and testing will be run.</span>
 </span><span id="one_v_rest-201"><a href="#one_v_rest-201"><span class="linenos">201</span></a>
-</span><span id="one_v_rest-202"><a href="#one_v_rest-202"><span class="linenos">202</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Probability_table&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prob_table</span>
-</span><span id="one_v_rest-203"><a href="#one_v_rest-203"><span class="linenos">203</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Predicted_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pred_class</span>
-</span><span id="one_v_rest-204"><a href="#one_v_rest-204"><span class="linenos">204</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Truth_labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cell_labels</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]]</span>
-</span><span id="one_v_rest-205"><a href="#one_v_rest-205"><span class="linenos">205</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Low_confidence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">low_conf</span>
-</span><span id="one_v_rest-206"><a href="#one_v_rest-206"><span class="linenos">206</span></a>
-</span><span id="one_v_rest-207"><a href="#one_v_rest-207"><span class="linenos">207</span></a>    <span class="k">return</span> <span class="n">results</span>
+</span><span id="one_v_rest-202"><a href="#one_v_rest-202"><span class="linenos">202</span></a><span class="sd">    Parameters</span>
+</span><span id="one_v_rest-203"><a href="#one_v_rest-203"><span class="linenos">203</span></a><span class="sd">    ----------</span>
+</span><span id="one_v_rest-204"><a href="#one_v_rest-204"><span class="linenos">204</span></a><span class="sd">    **adatas** : *list[AnnData]* </span>
+</span><span id="one_v_rest-205"><a href="#one_v_rest-205"><span class="linenos">205</span></a><span class="sd">        &gt; List of AnnData objects created by create_adata()</span>
+</span><span id="one_v_rest-206"><a href="#one_v_rest-206"><span class="linenos">206</span></a><span class="sd">        where each AnnData is one modality and composed of both </span>
+</span><span id="one_v_rest-207"><a href="#one_v_rest-207"><span class="linenos">207</span></a><span class="sd">        training and testing samples. Requires that `&#39;train_indices&#39;`</span>
+</span><span id="one_v_rest-208"><a href="#one_v_rest-208"><span class="linenos">208</span></a><span class="sd">        and `&#39;test_indices&#39;` are the same across all AnnDatas.</span>
+</span><span id="one_v_rest-209"><a href="#one_v_rest-209"><span class="linenos">209</span></a>
+</span><span id="one_v_rest-210"><a href="#one_v_rest-210"><span class="linenos">210</span></a><span class="sd">    **names** : *list[str]* </span>
+</span><span id="one_v_rest-211"><a href="#one_v_rest-211"><span class="linenos">211</span></a><span class="sd">        &gt; List of string variables that describe each modality</span>
+</span><span id="one_v_rest-212"><a href="#one_v_rest-212"><span class="linenos">212</span></a><span class="sd">        respective to adatas for labeling.</span>
+</span><span id="one_v_rest-213"><a href="#one_v_rest-213"><span class="linenos">213</span></a><span class="sd">        </span>
+</span><span id="one_v_rest-214"><a href="#one_v_rest-214"><span class="linenos">214</span></a><span class="sd">    **alpha_list** : *np.ndarray* | *float*</span>
+</span><span id="one_v_rest-215"><a href="#one_v_rest-215"><span class="linenos">215</span></a><span class="sd">        &gt; An array of alpha values to create each model with.</span>
+</span><span id="one_v_rest-216"><a href="#one_v_rest-216"><span class="linenos">216</span></a>
+</span><span id="one_v_rest-217"><a href="#one_v_rest-217"><span class="linenos">217</span></a><span class="sd">    **tfidf** : *list[bool]* </span>
+</span><span id="one_v_rest-218"><a href="#one_v_rest-218"><span class="linenos">218</span></a><span class="sd">        &gt; List where if element i is `True`, adata[i] will be TFIDF </span>
+</span><span id="one_v_rest-219"><a href="#one_v_rest-219"><span class="linenos">219</span></a><span class="sd">        normalized.</span>
+</span><span id="one_v_rest-220"><a href="#one_v_rest-220"><span class="linenos">220</span></a>
+</span><span id="one_v_rest-221"><a href="#one_v_rest-221"><span class="linenos">221</span></a><span class="sd">    Returns</span>
+</span><span id="one_v_rest-222"><a href="#one_v_rest-222"><span class="linenos">222</span></a><span class="sd">    -------</span>
+</span><span id="one_v_rest-223"><a href="#one_v_rest-223"><span class="linenos">223</span></a><span class="sd">    **results** : *dict*</span>
+</span><span id="one_v_rest-224"><a href="#one_v_rest-224"><span class="linenos">224</span></a><span class="sd">    &gt; Contains keys for each cell class with results from cell class</span>
+</span><span id="one_v_rest-225"><a href="#one_v_rest-225"><span class="linenos">225</span></a><span class="sd">    versus all other samples. See `scmkl.run()` for futher details.</span>
+</span><span id="one_v_rest-226"><a href="#one_v_rest-226"><span class="linenos">226</span></a>
+</span><span id="one_v_rest-227"><a href="#one_v_rest-227"><span class="linenos">227</span></a><span class="sd">    Examples</span>
+</span><span id="one_v_rest-228"><a href="#one_v_rest-228"><span class="linenos">228</span></a><span class="sd">    --------</span>
+</span><span id="one_v_rest-229"><a href="#one_v_rest-229"><span class="linenos">229</span></a><span class="sd">    &gt;&gt;&gt; adata = scmkl.create_adata(X = data_mat, </span>
+</span><span id="one_v_rest-230"><a href="#one_v_rest-230"><span class="linenos">230</span></a><span class="sd">    ...                            feature_names = gene_names, </span>
+</span><span id="one_v_rest-231"><a href="#one_v_rest-231"><span class="linenos">231</span></a><span class="sd">    ...                            group_dict = group_dict)</span>
+</span><span id="one_v_rest-232"><a href="#one_v_rest-232"><span class="linenos">232</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="one_v_rest-233"><a href="#one_v_rest-233"><span class="linenos">233</span></a><span class="sd">    &gt;&gt;&gt; results = scmkl.one_v_rest(adatas = [adata], names = [&#39;rna&#39;],</span>
+</span><span id="one_v_rest-234"><a href="#one_v_rest-234"><span class="linenos">234</span></a><span class="sd">    ...                           alpha_list = np.array([0.05, 0.1]),</span>
+</span><span id="one_v_rest-235"><a href="#one_v_rest-235"><span class="linenos">235</span></a><span class="sd">    ...                           tfidf = [False])</span>
+</span><span id="one_v_rest-236"><a href="#one_v_rest-236"><span class="linenos">236</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="one_v_rest-237"><a href="#one_v_rest-237"><span class="linenos">237</span></a><span class="sd">    &gt;&gt;&gt; adata.keys()</span>
+</span><span id="one_v_rest-238"><a href="#one_v_rest-238"><span class="linenos">238</span></a><span class="sd">    dict_keys([&#39;B cells&#39;, &#39;Monocytes&#39;, &#39;Dendritic cells&#39;, ...])</span>
+</span><span id="one_v_rest-239"><a href="#one_v_rest-239"><span class="linenos">239</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="one_v_rest-240"><a href="#one_v_rest-240"><span class="linenos">240</span></a>    <span class="c1"># Formatting checks ensuring all adata elements are </span>
+</span><span id="one_v_rest-241"><a href="#one_v_rest-241"><span class="linenos">241</span></a>    <span class="c1"># AnnData objects and train/test indices are all the same</span>
+</span><span id="one_v_rest-242"><a href="#one_v_rest-242"><span class="linenos">242</span></a>    <span class="n">_check_adatas</span><span class="p">(</span><span class="n">adatas</span><span class="p">,</span> <span class="n">check_obs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_uns</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</span><span id="one_v_rest-243"><a href="#one_v_rest-243"><span class="linenos">243</span></a>
+</span><span id="one_v_rest-244"><a href="#one_v_rest-244"><span class="linenos">244</span></a>    <span class="c1"># Extracting train and test indices</span>
+</span><span id="one_v_rest-245"><a href="#one_v_rest-245"><span class="linenos">245</span></a>    <span class="n">train_indices</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">]</span>
+</span><span id="one_v_rest-246"><a href="#one_v_rest-246"><span class="linenos">246</span></a>    <span class="n">test_indices</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]</span>
+</span><span id="one_v_rest-247"><a href="#one_v_rest-247"><span class="linenos">247</span></a>
+</span><span id="one_v_rest-248"><a href="#one_v_rest-248"><span class="linenos">248</span></a>    <span class="c1"># Checking and capturing cell labels</span>
+</span><span id="one_v_rest-249"><a href="#one_v_rest-249"><span class="linenos">249</span></a>    <span class="n">uniq_labels</span> <span class="o">=</span> <span class="n">_eval_labels</span><span class="p">(</span>  <span class="n">cell_labels</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">],</span> 
+</span><span id="one_v_rest-250"><a href="#one_v_rest-250"><span class="linenos">250</span></a>                                <span class="n">train_indices</span> <span class="o">=</span> <span class="n">train_indices</span><span class="p">,</span>
+</span><span id="one_v_rest-251"><a href="#one_v_rest-251"><span class="linenos">251</span></a>                                 <span class="n">test_indices</span> <span class="o">=</span> <span class="n">test_indices</span><span class="p">)</span>
+</span><span id="one_v_rest-252"><a href="#one_v_rest-252"><span class="linenos">252</span></a>
+</span><span id="one_v_rest-253"><a href="#one_v_rest-253"><span class="linenos">253</span></a>
+</span><span id="one_v_rest-254"><a href="#one_v_rest-254"><span class="linenos">254</span></a>    <span class="c1"># Calculating Z matrices, method depends on whether there are multiple </span>
+</span><span id="one_v_rest-255"><a href="#one_v_rest-255"><span class="linenos">255</span></a>    <span class="c1"># adatas (modalities)</span>
+</span><span id="one_v_rest-256"><a href="#one_v_rest-256"><span class="linenos">256</span></a>    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">adatas</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;Z_train&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uns</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+</span><span id="one_v_rest-257"><a href="#one_v_rest-257"><span class="linenos">257</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">calculate_z</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span> <span class="n">batches</span><span class="o">=</span><span class="n">batches</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span>
+</span><span id="one_v_rest-258"><a href="#one_v_rest-258"><span class="linenos">258</span></a>    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">adatas</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+</span><span id="one_v_rest-259"><a href="#one_v_rest-259"><span class="linenos">259</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">multimodal_processing</span><span class="p">(</span><span class="n">adatas</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">,</span> 
+</span><span id="one_v_rest-260"><a href="#one_v_rest-260"><span class="linenos">260</span></a>                                      <span class="n">names</span> <span class="o">=</span> <span class="n">names</span><span class="p">,</span> 
+</span><span id="one_v_rest-261"><a href="#one_v_rest-261"><span class="linenos">261</span></a>                                      <span class="n">tfidf</span> <span class="o">=</span> <span class="n">tfidf</span><span class="p">,</span>
+</span><span id="one_v_rest-262"><a href="#one_v_rest-262"><span class="linenos">262</span></a>                                      <span class="n">batches</span><span class="o">=</span><span class="n">batches</span><span class="p">,</span>
+</span><span id="one_v_rest-263"><a href="#one_v_rest-263"><span class="linenos">263</span></a>                                      <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span>
+</span><span id="one_v_rest-264"><a href="#one_v_rest-264"><span class="linenos">264</span></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="one_v_rest-265"><a href="#one_v_rest-265"><span class="linenos">265</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="one_v_rest-266"><a href="#one_v_rest-266"><span class="linenos">266</span></a>
+</span><span id="one_v_rest-267"><a href="#one_v_rest-267"><span class="linenos">267</span></a>    <span class="k">del</span> <span class="n">adatas</span>
+</span><span id="one_v_rest-268"><a href="#one_v_rest-268"><span class="linenos">268</span></a>    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+</span><span id="one_v_rest-269"><a href="#one_v_rest-269"><span class="linenos">269</span></a>
+</span><span id="one_v_rest-270"><a href="#one_v_rest-270"><span class="linenos">270</span></a>    <span class="c1"># Initializing for capturing model outputs</span>
+</span><span id="one_v_rest-271"><a href="#one_v_rest-271"><span class="linenos">271</span></a>    <span class="n">results</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+</span><span id="one_v_rest-272"><a href="#one_v_rest-272"><span class="linenos">272</span></a>
+</span><span id="one_v_rest-273"><a href="#one_v_rest-273"><span class="linenos">273</span></a>    <span class="c1"># Capturing cell labels before overwriting</span>
+</span><span id="one_v_rest-274"><a href="#one_v_rest-274"><span class="linenos">274</span></a>    <span class="n">cell_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">])</span>
+</span><span id="one_v_rest-275"><a href="#one_v_rest-275"><span class="linenos">275</span></a>
+</span><span id="one_v_rest-276"><a href="#one_v_rest-276"><span class="linenos">276</span></a>    <span class="c1"># Capturing perfect train/test splits for each class</span>
+</span><span id="one_v_rest-277"><a href="#one_v_rest-277"><span class="linenos">277</span></a>    <span class="k">if</span> <span class="n">force_balance</span><span class="p">:</span>
+</span><span id="one_v_rest-278"><a href="#one_v_rest-278"><span class="linenos">278</span></a>        <span class="n">train_idx</span> <span class="o">=</span> <span class="n">get_class_train</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">],</span> 
+</span><span id="one_v_rest-279"><a href="#one_v_rest-279"><span class="linenos">279</span></a>                                    <span class="n">cell_labels</span><span class="p">,</span> 
+</span><span id="one_v_rest-280"><a href="#one_v_rest-280"><span class="linenos">280</span></a>                                    <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;seed_obj&#39;</span><span class="p">],</span>
+</span><span id="one_v_rest-281"><a href="#one_v_rest-281"><span class="linenos">281</span></a>                                    <span class="n">other_factor</span><span class="p">)</span>
+</span><span id="one_v_rest-282"><a href="#one_v_rest-282"><span class="linenos">282</span></a>
+</span><span id="one_v_rest-283"><a href="#one_v_rest-283"><span class="linenos">283</span></a>    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">uniq_labels</span><span class="p">:</span>
+</span><span id="one_v_rest-284"><a href="#one_v_rest-284"><span class="linenos">284</span></a>
+</span><span id="one_v_rest-285"><a href="#one_v_rest-285"><span class="linenos">285</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Comparing </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> to other types&quot;</span><span class="p">,</span> <span class="n">flush</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</span><span id="one_v_rest-286"><a href="#one_v_rest-286"><span class="linenos">286</span></a>        <span class="n">cur_labels</span> <span class="o">=</span> <span class="n">cell_labels</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="one_v_rest-287"><a href="#one_v_rest-287"><span class="linenos">287</span></a>        <span class="n">cur_labels</span><span class="p">[</span><span class="n">cell_labels</span> <span class="o">!=</span> <span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;other&#39;</span>
+</span><span id="one_v_rest-288"><a href="#one_v_rest-288"><span class="linenos">288</span></a>
+</span><span id="one_v_rest-289"><a href="#one_v_rest-289"><span class="linenos">289</span></a>        <span class="c1"># Replacing cell labels for current cell type vs rest</span>
+</span><span id="one_v_rest-290"><a href="#one_v_rest-290"><span class="linenos">290</span></a>        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cur_labels</span>
+</span><span id="one_v_rest-291"><a href="#one_v_rest-291"><span class="linenos">291</span></a>
+</span><span id="one_v_rest-292"><a href="#one_v_rest-292"><span class="linenos">292</span></a>        <span class="k">if</span> <span class="n">force_balance</span><span class="p">:</span>
+</span><span id="one_v_rest-293"><a href="#one_v_rest-293"><span class="linenos">293</span></a>            <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_idx</span><span class="p">[</span><span class="n">label</span><span class="p">]</span>
+</span><span id="one_v_rest-294"><a href="#one_v_rest-294"><span class="linenos">294</span></a>
+</span><span id="one_v_rest-295"><a href="#one_v_rest-295"><span class="linenos">295</span></a>        <span class="c1"># Running scMKL</span>
+</span><span id="one_v_rest-296"><a href="#one_v_rest-296"><span class="linenos">296</span></a>        <span class="n">results</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">alpha_list</span><span class="p">,</span> <span class="n">return_probs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</span><span id="one_v_rest-297"><a href="#one_v_rest-297"><span class="linenos">297</span></a>
+</span><span id="one_v_rest-298"><a href="#one_v_rest-298"><span class="linenos">298</span></a>    <span class="c1"># Getting final predictions</span>
+</span><span id="one_v_rest-299"><a href="#one_v_rest-299"><span class="linenos">299</span></a>    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">alpha_list</span><span class="p">)</span>
+</span><span id="one_v_rest-300"><a href="#one_v_rest-300"><span class="linenos">300</span></a>    <span class="n">prob_table</span><span class="p">,</span> <span class="n">pred_class</span><span class="p">,</span> <span class="n">low_conf</span> <span class="o">=</span> <span class="n">_prob_table</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+</span><span id="one_v_rest-301"><a href="#one_v_rest-301"><span class="linenos">301</span></a>    <span class="n">macro_f1</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">cell_labels</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]],</span> 
+</span><span id="one_v_rest-302"><a href="#one_v_rest-302"><span class="linenos">302</span></a>                        <span class="n">pred_class</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s1">&#39;macro&#39;</span><span class="p">)</span>
+</span><span id="one_v_rest-303"><a href="#one_v_rest-303"><span class="linenos">303</span></a>
+</span><span id="one_v_rest-304"><a href="#one_v_rest-304"><span class="linenos">304</span></a>    <span class="n">model_summary</span> <span class="o">=</span> <span class="n">per_model_summary</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">uniq_labels</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+</span><span id="one_v_rest-305"><a href="#one_v_rest-305"><span class="linenos">305</span></a>
+</span><span id="one_v_rest-306"><a href="#one_v_rest-306"><span class="linenos">306</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Per_model_summary&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_summary</span>
+</span><span id="one_v_rest-307"><a href="#one_v_rest-307"><span class="linenos">307</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Classes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uniq_labels</span>
+</span><span id="one_v_rest-308"><a href="#one_v_rest-308"><span class="linenos">308</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Probability_table&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prob_table</span>
+</span><span id="one_v_rest-309"><a href="#one_v_rest-309"><span class="linenos">309</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Predicted_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pred_class</span>
+</span><span id="one_v_rest-310"><a href="#one_v_rest-310"><span class="linenos">310</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Truth_labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cell_labels</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]]</span>
+</span><span id="one_v_rest-311"><a href="#one_v_rest-311"><span class="linenos">311</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Low_confidence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">low_conf</span>
+</span><span id="one_v_rest-312"><a href="#one_v_rest-312"><span class="linenos">312</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Macro_F1-Score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">macro_f1</span>
+</span><span id="one_v_rest-313"><a href="#one_v_rest-313"><span class="linenos">313</span></a>
+</span><span id="one_v_rest-314"><a href="#one_v_rest-314"><span class="linenos">314</span></a>    <span class="k">if</span> <span class="n">force_balance</span><span class="p">:</span>
+</span><span id="one_v_rest-315"><a href="#one_v_rest-315"><span class="linenos">315</span></a>        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Training_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_idx</span>
+</span><span id="one_v_rest-316"><a href="#one_v_rest-316"><span class="linenos">316</span></a>
+</span><span id="one_v_rest-317"><a href="#one_v_rest-317"><span class="linenos">317</span></a>    <span class="k">return</span> <span class="n">results</span>
 </span></pre></div>
 
 
