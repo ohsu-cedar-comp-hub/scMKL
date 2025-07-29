@@ -10,9 +10,10 @@ from scmkl.multimodal_processing import multimodal_processing
 from scmkl.test import predict
 
 
-def _multimodal_optimize_alpha(adatas : list, group_size = 1, tfidf = [False, False],
+def multimodal_optimize_alpha(adatas : list, group_size = 1, tfidf = [False, False],
                                alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4,
-                               metric = 'AUROC'):
+                               metric = 'AUROC',
+                               batches = 10, batch_size = 100):
     '''
     Iteratively train a grouplasso model and update alpha to find the parameter yielding the desired sparsity.
     This function is meant to find a good starting point for your model, and the alpha may need further fine tuning.
@@ -77,8 +78,17 @@ def _multimodal_optimize_alpha(adatas : list, group_size = 1, tfidf = [False, Fa
         dummy_names = [f'adata {i}' for i in range(len(cv_adatas))]
 
         # Calculate the Z's for each modality independently
-        fold_cv_adata = multimodal_processing(adatas = cv_adatas, names = dummy_names, tfidf = tfidf)
+        fold_cv_adata = multimodal_processing(adatas = cv_adatas, names = dummy_names, tfidf = tfidf, 
+                                              batch_size= batch_size, batches = batches)
+
         fold_cv_adata.uns['seed_obj'] = cv_adatas[0].uns['seed_obj']
+
+        if 'sigma' in fold_cv_adata.uns_keys():
+            del fold_cv_adata.uns['sigma']
+
+        # In train_model we index Z_train for use with multiclass labels. We just recreate
+        # dummy indices here that are unused for use in the binary case
+        fold_cv_adata.uns['train_indices'] = np.arange(0, len(fold_train))
 
         gc.collect()
 
@@ -102,7 +112,8 @@ def _multimodal_optimize_alpha(adatas : list, group_size = 1, tfidf = [False, Fa
 
 def optimize_alpha(adata, group_size = None, tfidf = False, 
                    alpha_array = np.round(np.linspace(1.9,0.1, 10),2), 
-                   k = 4, metric = 'AUROC'):
+                   k = 4, metric = 'AUROC', 
+                   batches = 10, batch_size = 100):
     '''
     Iteratively train a grouplasso model and update alpha to find the 
     parameter yielding best performing sparsity. This function 
@@ -156,7 +167,8 @@ def optimize_alpha(adata, group_size = None, tfidf = False,
         group_size = adata.uns['D'] * 2
 
     if type(adata) == list:
-        alpha_star = _multimodal_optimize_alpha(adatas = adata, group_size = group_size, tfidf = tfidf, alpha_array = alpha_array, metric = metric)
+        alpha_star = multimodal_optimize_alpha(adatas = adata, group_size = group_size, tfidf = tfidf, alpha_array = alpha_array, metric = metric,
+                                                batch_size = batch_size, batches = batches)
         return alpha_star
 
     y = adata.obs['labels'].iloc[adata.uns['train_indices']].to_numpy()
@@ -175,6 +187,9 @@ def optimize_alpha(adata, group_size = None, tfidf = False,
     for fold in np.arange(k):
 
         cv_adata = adata[adata.uns['train_indices'],:]
+
+        if 'sigma' in cv_adata.uns_keys():
+            del cv_adata.uns['sigma']
 
         # Create CV train/test indices
         fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], 
@@ -189,125 +204,12 @@ def optimize_alpha(adata, group_size = None, tfidf = False,
             cv_adata = tfidf_normalize(cv_adata, binarize= True)
 
         # Estimating kernel widths and calculating Zs
-        cv_adata = calculate_z(cv_adata, n_features= 5000)
+        cv_adata = calculate_z(cv_adata, n_features= 5000, batches = batches, batch_size = batch_size)
 
-        gc.collect()
+        # In train_model we index Z_train for use with multiclass labels. We just recreate
+        # dummy indices here that are unused for use in the binary case
+        cv_adata.uns['train_indices'] = np.arange(0, len(fold_train))
 
-        for i, alpha in enumerate(alpha_array):
-
-            cv_adata = train_model(cv_adata, group_size, alpha = alpha)
-            _, metrics = predict(cv_adata, metrics = [metric])
-            metric_array[i, fold] = metrics[metric]
-
-            gc.collect()
-
-        del cv_adata
-        gc.collect()
-        
-    # Take AUROC mean across the k folds to find alpha yielding highest AUROC
-    alpha_star = alpha_array[np.argmax(np.mean(metric_array, axis = 1))]
-    gc.collect()
-    
-
-    return alpha_star
-
-
-def optimize_alpha_w_transform_z(adata, group_size = None, tfidf = False, 
-                   alpha_array = np.round(np.linspace(1.9,0.1, 10),2), 
-                   k = 4, metric = 'AUROC'):
-    '''
-    Iteratively train a grouplasso model and update alpha to find the 
-    parameter yielding best performing sparsity. This function 
-    currently only works for binary experiments.
-
-    Parameters
-    ----------
-    **adata** : *AnnData* | *list[AnnData]*
-        > `AnnData`(s) with `'Z_train'` and `'Z_test'` in 
-        `adata.uns.keys()`.
-
-    **group_size** : *None* | *int*
-        > Argument describing how the features are grouped. If *None*, 
-        `2 * adata.uns['D'] will be used. 
-        For more information see 
-        [celer documentation](https://mathurinm.github.io/celer/generated/celer.GroupLasso.html).
-
-    **tfidf** : *bool* 
-        > If `True`, TFIDF normalization will be run at each fold.
-    
-    **alpha_array** : *np.ndarray*
-        > Array of all alpha values to be tested.
-
-    **k** : *int*
-        > Number of folds to perform cross validation over.
-            
-    **metric**: *str*
-        > Which metric to use to optimize alpha. Options
-        are `'AUROC'`, `'Accuracy'`, `'F1-Score'`, `'Precision'`, and 
-        `'Recall'`
-
-    Returns
-    -------
-    **alpha_star** : *int*
-        > The best performing alpha value from cross validation on 
-        training data.
-
-    Examples
-    --------
-    >>> alpha_star = scmkl.optimize_alpha(adata)
-    >>> alpha_star
-    0.1
-    '''
-
-    assert isinstance(k, int) and k > 0, 'Must be a positive integer number of folds'
-
-    import warnings 
-    warnings.filterwarnings('ignore')
-
-    if group_size == None:
-        group_size = adata.uns['D'] * 2
-
-    if type(adata) == list:
-        alpha_star = _multimodal_optimize_alpha(adatas = adata, group_size = group_size, tfidf = tfidf, alpha_array = alpha_array, metric = metric)
-        return alpha_star
-
-    y = adata.obs['labels'].iloc[adata.uns['train_indices']].to_numpy()
-    
-    # Splits the labels evenly between folds
-    positive_indices = np.where(y == np.unique(y)[0])[0]
-    negative_indices = np.setdiff1d(np.arange(len(y)), positive_indices)
-
-    positive_annotations = np.arange(len(positive_indices)) % k
-    negative_annotations = np.arange(len(negative_indices)) % k
-
-    metric_array = np.zeros((len(alpha_array), k))
-
-    gc.collect()
-
-    for fold in np.arange(k):
-
-        cv_adata = adata[adata.uns['train_indices'],:]
-
-        # Create CV train/test indices
-        fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], 
-                                     negative_indices[np.where(negative_annotations != fold)[0]]))
-        fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], 
-                                    negative_indices[np.where(negative_annotations == fold)[0]]))
-
-        cv_adata.uns['train_indices'] = fold_train
-        cv_adata.uns['test_indices'] = fold_test
-
-        if tfidf:
-            cv_adata = tfidf_normalize(cv_adata, binarize= True)
-
-        cv_adata = estimate_sigma(cv_adata, n_features = 200)
-        cv_adata.uns['Z_train'] = adata.uns['Z_train'].copy()[fold_train, :]
-        cv_adata.uns['Z_test'] = adata.uns['Z_train'].copy()[fold_test, :]
-
-        new_sigma = cv_adata.uns['sigma'].copy()
-        cv_adata.uns['sigma'] = adata.uns['sigma'].copy()
-
-        cv_adata = transform_z(cv_adata, new_sigma)
         gc.collect()
 
         for i, alpha in enumerate(alpha_array):
