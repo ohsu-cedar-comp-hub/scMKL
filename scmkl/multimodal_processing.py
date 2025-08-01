@@ -7,31 +7,35 @@ from scmkl.data_processing import sparse_var
 from scmkl.calculate_z import calculate_z
 
 
-def _combine_modalities(adatas : list, names : list, 
-                        combination = 'concatenate'):
+def _combine_modalities(adatas: list, names: list, 
+                        combination: str = 'concatenate'):
     '''
     Combines data sets for multimodal classification. Combined group 
     names are assay+group_name.
 
     Parameters
     ----------
-    adatas : a list of AnnData objects where each object is a different 
-             modality
+    adatas : list
+        > a list of AnnData objects where each object is a different 
+        modality. Annotations must match between objects.
 
-    names : a list of strings names for each modality repective to each 
-            object in adatas
+    names : list
+        > a list of strings names for each modality repective to each 
+        object in adatas.
             
-    combination: How to combine the matrices, either sum or concatenate
+    combination: str
+        > How to combine the matrices, either sum or concatenate.
     
     Returns
     -------
-    combined_adata : Adata object with the combined Z matrices and 
-                     annotations. Annotations must match.
+    combined_adata : ad.Anndata
+        >Adata object with the combined Z matrices and 
+        annotations. 
     '''
     assert len({adata.shape[0] for adata in adatas}) == 1, ("All adatas must "
                                                             "have the same "
                                                             "number of rows")
-    assert len(np.unique(names)) == len(names), 'Assay names must be distinct'
+    assert len(np.unique(names)) == len(names), "Assay names must be distinct"
     assert combination.lower() in ['sum', 'concatenate']
 
     z_train = all(['Z_train' in adata.uns.keys() for adata in adatas])
@@ -69,7 +73,7 @@ def _combine_modalities(adatas : list, names : list,
         #Check that the dimensions of all Z's are the same
         dims = [adata.uns['Z_train'].shape for adata in adatas]
         dims = all([dim == dims[0] for dim in dims])
-        assert dims, 'Cannot sum Z matrices with different dimensions'
+        assert dims, "Cannot sum Z matrices with different dimensions"
         
         combined_adata.uns['Z_train'] = np.sum([adata.uns['Z_train'] 
                                                 for adata in adatas], 
@@ -111,6 +115,19 @@ def multimodal_processing(adatas : list, names : list, tfidf: list,
     **tfidf** : *bool* 
         > List where if element i is `True`, adata[i] will be TFIDF 
         normalized.
+
+    **batches**: *int*
+        > The number of batches to use for the distance calculation.
+        This will average the result of `batches` distance calculations
+        of `batch_size` randomly sampled cells. More batches will converge
+        to population distance values at the cost of scalability.
+
+    **batch_size**: *int*
+        > The number of cells to include per batch for distance
+        calculations. Higher batch size will converge to population
+        distance values at the cost of scalability.
+        If `batches` * `batch_size` > # training cells,
+        `batch_size` will be reduced to `int(# training cells / batches)`
 
     Returns
     -------
@@ -162,8 +179,8 @@ def multimodal_processing(adatas : list, names : list, tfidf: list,
                                        adatas[i].uns['test_indices']) 
                         for i in range(1, len(adatas))])
 
-    assert same_train, 'Different train indices'
-    assert same_test, 'Different test indices'
+    assert same_train, "Different train indices"
+    assert same_test, "Different test indices"
 
     # Creates a boolean array for each modality of cells with non-empty rows
     non_empty_rows = [np.array(sparse_var(adata.X, axis = 1) != 0).ravel() 
@@ -192,7 +209,7 @@ def multimodal_processing(adatas : list, names : list, tfidf: list,
         if tfidf[i]:
             adatas[i] = tfidf_normalize(adata)
 
-        print(f'Estimating sigma and calculating Z for {names[i]}', flush = True)
+        print(f"Estimating sigma and calculating Z for {names[i]}", flush = True)
         adatas[i] = calculate_z(adata, n_features = 5000, batches=batches, 
                                 batch_size=batch_size)
 

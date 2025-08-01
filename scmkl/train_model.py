@@ -1,8 +1,8 @@
 import numpy as np
 import celer
+import anndata as ad
 
-
-def train_model(adata, group_size = 1, alpha = 0.9):
+def train_model(adata: ad.AnnData, group_size: int | None=None, alpha:float=0.9):
     '''
     Fit a grouplasso model to the provided data.
 
@@ -11,7 +11,7 @@ def train_model(adata, group_size = 1, alpha = 0.9):
     **adata** : *AnnData* 
         > Has `'Z_train'` and `'Z_test'` keys in `adata.uns`.
 
-    **group_size** : *int* 
+    **group_size** : *int* | *None*
         > Argument describing how the features are grouped. Should be
         `2 * D`. For more information see celer documentation. 
             
@@ -45,6 +45,9 @@ def train_model(adata, group_size = 1, alpha = 0.9):
     https://mathurinm.github.io/celer/generated/celer.GroupLasso.html
     '''
     assert alpha > 0, 'Alpha must be positive'
+
+    if group_size is None:
+        group_size = 2*adata.uns['D']
 
     y_train = adata.obs['labels'].iloc[adata.uns['train_indices']]
     X_train = adata.uns['Z_train'][adata.uns['train_indices']]

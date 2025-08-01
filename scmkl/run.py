@@ -7,8 +7,9 @@ from scmkl.train_model import train_model
 from scmkl.test import predict, find_selected_groups
 
 
-def run(adata : ad.AnnData, alpha_list : np.ndarray, 
-        metrics : list | None = None, return_probs = False) -> dict:
+def run(adata: ad.AnnData, alpha_list: np.ndarray, 
+        metrics: list | None = None, 
+        return_probs: bool=False) -> dict:
     '''
     Wrapper function for training and test with multiple alpha values.
     Returns metrics, predictions, group weights, and resource usage.
@@ -81,7 +82,7 @@ def run(adata : ad.AnnData, alpha_list : np.ndarray,
     'Precision': 0.9405940594059405,
     'Recall': 0.95}
     '''
-    if metrics == None:
+    if metrics is None:
         metrics = ['AUROC', 'F1-Score','Accuracy', 'Precision', 'Recall']
 
     # Initializing variables to capture metrics
@@ -141,7 +142,7 @@ def run(adata : ad.AnnData, alpha_list : np.ndarray,
     results['Group_names']= group_names
     results['Models'] = models
     results['Train_time'] = train_time
-    results['RAM_usage'] = f'{tracemalloc.get_traced_memory()[1] / 1e9} GB'
+    results['RAM_usage'] = f'{tracemalloc.get_traced_memory()[1]/1e9} GB'
     results['Probabilities'] = probs
 
     return results

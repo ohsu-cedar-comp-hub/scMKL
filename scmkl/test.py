@@ -1,14 +1,15 @@
 import numpy as np
 import sklearn.metrics as skm
+import anndata as ad
 
-
-def predict(adata, metrics = None, return_probs = False):
+def predict(adata: ad.AnnData, metrics: list | None=None,
+            return_probs: bool=False):
     '''
     Function to return predicted labels and calculate any of AUROC, 
     Accuracy, F1 Score, Precision, Recall for a classification. 
 
-    ** If labeled_test flag is set to False, metrics cannot be 
-    computed.**
+    ** If labeled_test flag in `adata` is set to False,
+    metrics cannot be computed.**
     
     Parameters
     ----------  
@@ -65,7 +66,7 @@ def predict(adata, metrics = None, return_probs = False):
     classes = np.unique(adata.obs['labels'].iloc[train_idx].to_numpy())
 
     # Sigmoid function to force probabilities into [0,1]
-    probabilities = 1 / (1 + np.exp(-adata.uns['model'].predict(X_test)))
+    probabilities = 1/(1 + np.exp(-adata.uns['model'].predict(X_test)))
 
     #Convert numerical probabilities into binary phenotype
     y_pred = np.array(np.repeat(classes[1], X_test.shape[0]), 
@@ -124,7 +125,7 @@ def predict(adata, metrics = None, return_probs = False):
             return y_pred
 
 
-def find_selected_groups(adata) -> np.ndarray:
+def find_selected_groups(adata: ad.AnnData) -> np.ndarray:
     '''
     Find feature groups selected by the model during training. If 
     feature weight assigned by the model is non-0, then the group 

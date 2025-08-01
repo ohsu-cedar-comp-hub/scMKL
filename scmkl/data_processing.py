@@ -1,24 +1,29 @@
 import numpy as np
 import scipy
 from sklearn.decomposition import TruncatedSVD, PCA
+import anndata as ad
 
 
-def sparse_var(X, axis=None):
+def sparse_var(X: scipy.sparse._csc.csc_matrix | np.ndarray, axis: int | None=None):
     '''
     Function to calculate variance on a scipy sparse matrix.
     
     Parameters
     ----------
-    X : A scipy sparse or numpy array
-    axis : Determines which axis variance is calculated on. Same usage 
-    as Numpy.
+    X : scipy.sparse._csc.csc_matrix | np.ndarray
+        > A scipy sparse or numpy array
+        
+    axis : int | None
+        > Determines which axis variance is calculated on. Same usage 
+        as Numpy.
         axis = 0 => column variances
         axis = 1 => row variances
         axis = None => total variance (calculated on all data)
     
     Returns
     -------
-    var : Variance values calculated over the given axis
+    var : np.ndarray | float
+        > Variance values calculated over the given axis
     '''
     # E[X^2] - E[X]^2
     if scipy.sparse.issparse(X):
@@ -31,8 +36,10 @@ def sparse_var(X, axis=None):
     return var.ravel()
 
 
-def process_data(X_train, X_test=None, scale_data=True, 
-                  return_dense=True):
+def process_data(X_train: np.ndarray | scipy.sparse._csc.csc_matrix,
+                 X_test: np.ndarray | scipy.sparse._csc.csc_matrix | None=None,
+                 scale_data: bool=True, 
+                 return_dense: bool=True):
     '''
     Function to preprocess data matrix according to type of data 
     (counts- e.g. rna, or binary- atac). Will process test data 
@@ -40,11 +47,11 @@ def process_data(X_train, X_test=None, scale_data=True,
     
     Parameters
     ----------
-    X_train : np.ndarray | scipy.sparse.matrix
+    X_train : np.ndarray | scipy.sparse._csc.csc_matrix
         > A scipy sparse or numpy array of cells x features in the 
         training data.
 
-    X_test : np.ndarray | scipy.sparse.matrix
+    X_test : np.ndarray | scipy.sparse._csc.csc_matrix
         > A scipy sparse or numpy array of cells x features in the 
         testing data.
 
@@ -108,7 +115,8 @@ def process_data(X_train, X_test=None, scale_data=True,
         return X_train, X_test
     
 
-def svd_transformation(X_train, X_test=None):
+def svd_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
+                       X_test: scipy.sparse._csc.csc_matrix | np.ndarray | None=None):
     '''
     Returns matrices with SVD reduction. If `X_test is None`, only 
     X_train is returned.
@@ -119,7 +127,7 @@ def svd_transformation(X_train, X_test=None):
         > A 2D array of cells x features filtered to desired features 
         for training data.
 
-    X_test : np.ndarray
+    X_test : np.ndarray | None
         > A 2D array of cells x features filtered to desired features 
         for testing data.
     
@@ -133,6 +141,8 @@ def svd_transformation(X_train, X_test=None):
     SVD_func = TruncatedSVD(n_components = n_components, random_state = 1)
     
     # Remove first component as it corresponds with sequencing depth
+    # We convert to a csr_array because the SVD function is faster on this
+    # matrix type
     X_train = SVD_func.fit_transform(scipy.sparse.csr_array(X_train))[:, 1:]
 
     if X_test is not None:
@@ -141,7 +151,9 @@ def svd_transformation(X_train, X_test=None):
     return X_train, X_test
 
 
-def sample_cells(train_indices, sample_size, seed_obj):
+def sample_cells(train_indices: np.ndarray,
+                 sample_size: int,
+                 seed_obj: np.random._generator.Generator):
     '''
     
     '''
@@ -151,7 +163,8 @@ def sample_cells(train_indices, sample_size, seed_obj):
     return indices
 
 
-def pca_transformation(X_train, X_test=None):
+def pca_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
+                       X_test: scipy.sparse._csc.csc_matrix | np.ndarray | None=None):
     '''
     Returns matrices with PCA reduction. If `X_test is None`, only 
     X_train is returned.
@@ -162,7 +175,7 @@ def pca_transformation(X_train, X_test=None):
         > A 2D array of cells x features filtered to desired features 
         for training data.
 
-    X_test : np.ndarray
+    X_test : np.ndarray | None
         > A 2D array of cells x features filtered to desired features 
         for testing data.
     
@@ -183,7 +196,8 @@ def pca_transformation(X_train, X_test=None):
     return X_train, X_test
 
 
-def no_transformation(X_train, X_test=None):
+def no_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
+                      X_test: scipy.sparse._csc.csc_matrix | np.ndarray | None=None):
     '''
     Dummy function used to return mat inputs.
     '''
@@ -206,8 +220,10 @@ def get_reduction(reduction: str):
     return red_func
 
 
-def get_group_mat(adata, n_features, group_features, n_group_features, 
-                  process_test=False) -> np.ndarray:
+def get_group_mat(adata: ad.AnnData, n_features: int,
+                  group_features: np.ndarray,
+                  n_group_features: int, 
+                  process_test: bool=False) -> np.ndarray:
     '''
     Filters to only features in group. Will sample features if 
     `n_features < n_group_features`.

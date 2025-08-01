@@ -26,7 +26,7 @@ def get_z_indices(m, D):
     cos_idx, sin_idx : np.ndarray
         > The indices for cos and sin projections in overall Z matrix.
     '''
-    x_idx = np.arange(m * 2 * D ,(m + 1) * 2 * D)
+    x_idx = np.arange(m*2*D ,(m + 1)*2*D)
     cos_idx = x_idx[:len(x_idx)//2]
     sin_idx = x_idx[len(x_idx)//2:]
 
@@ -42,8 +42,8 @@ def calc_groupz(X_train, X_test, adata, D, sigma, proj_func):
     X_train : np.ndarray
         > The filtered data matrix to calculate train Z mat for.
     
-    X_train : np.ndarray
-        > The filtered data matrix to calculate train Z mat for.
+    X_test : np.ndarray
+        > The filtered data matrix to calculate test Z mat for.
 
     adata : anndata.AnnData 
         > anndata object containing `seed_obj` in `.uns` attribute.
@@ -66,16 +66,16 @@ def calc_groupz(X_train, X_test, adata, D, sigma, proj_func):
         X_train = X_train.toarray().astype(np.float16)
         X_test = X_test.toarray().astype(np.float16)
 
-    w = proj_func(X_train, sigma, adata.uns['seed_obj'], D)
+    W = proj_func(X_train, sigma, adata.uns['seed_obj'], D)
     
-    train_projection = np.matmul(X_train, w)
-    test_projection = np.matmul(X_test, w)
+    train_projection = np.matmul(X_train, W)
+    test_projection = np.matmul(X_test, W)
 
     return train_projection, test_projection
 
 
-def calculate_z(adata, n_features = 5000, batches = 10, 
-                batch_size = 100) -> ad.AnnData:
+def calculate_z(adata, n_features=5000, batches=10, 
+                batch_size=100) -> ad.AnnData:
     '''
     Function to calculate Z matrices for all groups in both training 
     and testing data.
@@ -91,6 +91,19 @@ def calculate_z(adata, n_features = 5000, batches = 10,
     **n_features** : *int* 
         > Number of random feature to use when calculating Z- used for 
         scalability.
+
+    **batches**: *int*
+        > The number of batches to use for the distance calculation.
+        This will average the result of `batches` distance calculations
+        of `batch_size` randomly sampled cells. More batches will converge
+        to population distance values at the cost of scalability.
+
+    **batch_size**: *int*
+        > The number of cells to include per batch for distance
+        calculations. Higher batch size will converge to population
+        distance values at the cost of scalability.
+        If `batches` * `batch_size` > # training cells,
+        `batch_size` will be reduced to `int(# training cells / batches)`
 
     Returns
     -------
@@ -118,7 +131,7 @@ def calculate_z(adata, n_features = 5000, batches = 10,
 
     if batch_size * batches > len(adata.uns['train_indices']):
         old_batch_size = batch_size
-        batch_size = int(len(adata.uns['train_indices']) / batches)
+        batch_size = int(len(adata.uns['train_indices'])/batches)
         print("Specified batch size required too many cells for "
                 "independent batches. Reduced batch size from "
                 f"{old_batch_size} to {batch_size}")
@@ -132,7 +145,7 @@ def calculate_z(adata, n_features = 5000, batches = 10,
 
     # Create Arrays to store concatenated group Zs
     # Each group of features will have a corresponding entry in each array
-    n_cols = 2 * adata.uns['D'] * n_pathway
+    n_cols = 2*adata.uns['D']*n_pathway
     Z_train = np.zeros((train_len, n_cols))
     Z_test = np.zeros((test_len, n_cols))
 
@@ -164,7 +177,7 @@ def calculate_z(adata, n_features = 5000, batches = 10,
         # If scale_data will log scale and z-score the data
         X_train, X_test = process_data(X_train=X_train, X_test=X_test, 
                                        scale_data=adata.uns['scale_data'], 
-                                       return_dense = True)    
+                                       return_dense=True)    
 
         # Getting sigma
         if 'sigma' in adata.uns.keys():
@@ -189,66 +202,10 @@ def calculate_z(adata, n_features = 5000, batches = 10,
         Z_test[0:, cos_idx] = np.cos(test_projection)
         Z_test[0:, sin_idx] = np.sin(test_projection)
 
-    adata.uns['Z_train'] = Z_train * sq_i_d
-    adata.uns['Z_test'] = Z_test * sq_i_d
+    adata.uns['Z_train'] = Z_train*sq_i_d
+    adata.uns['Z_test'] = Z_test*sq_i_d
 
     if 'sigma' not in adata.uns.keys():
         adata.uns['sigma'] = np.array(sigma_list)
-
-    return adata
-
-
-def transform_z(adata, new_sigmas)-> ad.AnnData:
-
-    '''
-    This functions takes an adata object with Z_train and Z_test already 
-    calculated and transforms it as if calculated with a different distribution.
-
-    This is primarily used during optimize_alpha to remove dependence on fold
-    train data without need to recalculate Z_train and Z_test.
-
-    i.e. (X @ W_old) * old_sigma / new_sigma == (X @ W_new) (the inverse relationship
-    between the distribution and the sigma parameter is because the standard deviation
-    of the distribution is proportional to 1/sigma).
-    '''
-
-    assert 'Z_train' in adata.uns.keys() and 'Z_test' in adata.uns.keys(), 'Z_train and Z_test must be present in adata'
-    assert all(new_sigmas > 0) and all(adata.uns['sigma'] > 0), 'Sigma must be positive'
-    assert len(new_sigmas) == len(adata.uns['sigma']), 'Length of new sigmas must be equal to length of old sigmas'
-
-    Z_train = adata.uns['Z_train']
-    Z_test = adata.uns['Z_test']
-
-
-    for i, (sigma, new_sigma) in enumerate(zip(adata.uns['sigma'], new_sigmas)):
-        if sigma == new_sigma:
-            continue
-
-        group_idx = np.arange(i * 2 * adata.uns['D'], (i + 1) * 2 * adata.uns['D'])
-        cos_idx = group_idx[:len(group_idx)//2]
-        sin_idx = group_idx[len(group_idx)//2:]
-
-        # Undo the cos/sin and transform the recovered X @ W and transforms the distribution
-        cos_train = Z_train[:, cos_idx]
-        cos_test = Z_test[:, cos_idx]
-        sin_train = Z_train[:, sin_idx]
-        sin_test = Z_test[:, sin_idx]
-
-        orig_train_projection = np.arctan2(sin_train, cos_train)
-        orig_test_projection = np.arctan2(sin_test, cos_test)
-
-        
-        transformed_train_projection = orig_train_projection * (sigma / new_sigma)
-        transformed_test_projection = orig_test_projection * (sigma / new_sigma)
-
-
-        Z_train[:, cos_idx] = np.cos(transformed_train_projection)
-        Z_test[:, cos_idx] = np.cos(transformed_test_projection)
-
-        Z_train[:, sin_idx] = np.sin(transformed_train_projection)
-        Z_test[:, sin_idx] = np.sin(transformed_test_projection)
-
-    adata.uns['Z_train'] = Z_train
-    adata.uns['Z_test'] = Z_test
 
     return adata

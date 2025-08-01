@@ -1,8 +1,8 @@
 import numpy as np
 import scipy
+import anndata as ad
 
-
-def _tfidf(X, mode = 'filter'):
+def _tfidf(X: np.ndarray | scipy.sparse._csc.csc_matrix, mode: str='filter'):
     '''
     Function to use Term Frequency Inverse Document Frequency 
     filtering for atac data to find meaningful features. If input is 
@@ -11,10 +11,12 @@ def _tfidf(X, mode = 'filter'):
     
     Parameters
     ----------
-    x : Data matrix of cell x feature.  Must be a Numpy array or Scipy 
+    **X** : *np.ndarray* | *scipy.sparse._csc.csc_matrix*
+        > Data matrix of cell x feature.  Must be a Numpy array or Scipy 
         sparse array.
-    mode : Argument to determine what to return.  Must be filter or 
-           normalize
+    **mode** : *str*
+        > Argument to determine what to return.  Must be filter or 
+        normalize
     
     Returns
     -------
@@ -35,8 +37,8 @@ def _tfidf(X, mode = 'filter'):
         tf = np.asarray(X)
         doc_freq = np.sum(X > 0, axis=0)
 
-    idf = np.log1p((1 + X.shape[0]) / (1 + doc_freq))
-    tfidf = tf * idf
+    idf = np.log1p((1 + X.shape[0])/(1 + doc_freq))
+    tfidf = tf*idf
 
     if mode == 'normalize':
         if scipy.sparse.issparse(tfidf):
@@ -56,10 +58,10 @@ def _tfidf_train_test(X_train, X_test):
         tf_test = X_test
         doc_freq = np.sum(X_train > 0, axis=0)
 
-    idf = np.log1p((1 + X_train.shape[0]) / (1 + doc_freq))
+    idf = np.log1p((1 + X_train.shape[0])/(1 + doc_freq))
 
-    tfidf_train = tf_train * idf
-    tfidf_test = tf_test * idf
+    tfidf_train = tf_train*idf
+    tfidf_test = tf_test*idf
 
     if scipy.sparse.issparse(tfidf_train):
         tfidf_train = scipy.sparse.csc_matrix(tfidf_train)
@@ -68,7 +70,7 @@ def _tfidf_train_test(X_train, X_test):
     return tfidf_train, tfidf_test
 
 
-def tfidf_normalize(adata, binarize = False):
+def tfidf_normalize(adata: ad.AnnData, binarize: bool=False):
     '''
     Function to TFIDF normalize the data in an adata object. If any 
     rows are entirely 0, that row and its metadata will be removed from
@@ -76,7 +78,7 @@ def tfidf_normalize(adata, binarize = False):
 
     Parameters
     ----------
-    **adata** : *AnnData* 
+    **adata** : *ad.AnnData* 
         > `adata.X` to be normalized. If `'train_indices'` and 
         `'test_indices'` in `'adata.uns.keys()'`, normalization will be
         done separately for the training and testing data. Otherwise, 
@@ -88,7 +90,7 @@ def tfidf_normalize(adata, binarize = False):
 
     Returns
     -------
-    **adata** : *AnnData* 
+    **adata** : *ad.AnnData* 
         > adata with adata.X TFIDF normalized. Will now have the train 
         data stacked on test data, and the indices will be adjusted 
         accordingly.

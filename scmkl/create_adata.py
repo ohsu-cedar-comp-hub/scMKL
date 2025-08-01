@@ -1,10 +1,12 @@
 import numpy as np
 import anndata as ad
+import scipy
+import pandas as pd
 import gc
 import warnings 
 
 
-def _filter_features(feature_names, group_dict):
+def _filter_features(feature_names: np.ndarray, group_dict: dict):
     '''
     Function to remove features only in feature names or group_dict.
     Any features not included in group_dict will be removed from the
@@ -13,15 +15,19 @@ def _filter_features(feature_names, group_dict):
     
     Parameters
     ----------
-    feature_names : Numpy array of corresponding feature names
-    group_dict : Dictionary containing feature grouping information.
+    feature_names : np.ndarray
+        > Numpy array of corresponding feature names
+    group_dict : dict
+        > Dictionary containing feature grouping information.
                  Example: {geneset: np.array(gene_1, gene_2, ..., 
                  gene_n)}
     Returns
     -------
-    feature_names : Numpy array of corresponding feature names from 
+    feature_names : np.ndarray
+        > Numpy array of corresponding feature names from 
                     group_dict.
-    group_dict : Dictionary containing features overlapping input
+    group_dict : dict
+        > Dictionary containing features overlapping input
                     grouping information and full feature names.
     ''' 
 
@@ -46,8 +52,8 @@ def _filter_features(feature_names, group_dict):
     return group_features, group_dict
 
 
-def _multi_class_split(y, train_ratio = 0.8, class_threshold = 'median', 
-                       seed_obj = np.random.default_rng(100)):
+def _multi_class_split(y: np.ndarray, train_ratio: float=0.8, class_threshold: str | int='median', 
+                       seed_obj: np.random._generator.Generator=np.random.default_rng(100)):
     '''
     Function for calculating the training and testing cell positions 
     for multiclass data sets.
@@ -58,7 +64,7 @@ def _multi_class_split(y, train_ratio = 0.8, class_threshold = 'median',
         > Should be an iterable object cooresponding to samples in 
         `ad.AnnData` object.
 
-    **seed_obj** : *numpy.random._generator.Generator*
+    **seed_obj** : *np.random._generator.Generator*
         > Seed used to randomly sample and split data.
 
     **train_ratio** : *float*
@@ -102,7 +108,9 @@ def _multi_class_split(y, train_ratio = 0.8, class_threshold = 'median',
     # Applying threshold for samples per class
     if class_threshold == 'median':
         # I believe this does the same as the commented code below
-        class_threshold = int(np.median([len(values) for values in train_samples.values()]))
+
+        cells_per_class = [len(values) for values in train_samples.values()]
+        class_threshold = int(np.median(cells_per_class))
         # all_train = [idx for class_ in train_samples.keys()
         #                  for idx in train_samples[class_]]
         # _, class_threshold = np.unique(y[all_train], return_counts = True)
@@ -123,8 +131,9 @@ def _multi_class_split(y, train_ratio = 0.8, class_threshold = 'median',
     return train_indices, test_indices
 
 
-def _binary_split(y, train_indices = None, train_ratio = 0.8,
-                  seed_obj = np.random.default_rng(100)):
+def _binary_split(y: np.ndarray, train_indices: np.ndarray | None=None, 
+                  train_ratio: float=0.8,
+                  seed_obj: np.random._generator.Generator=np.random.default_rng(100)):
     '''
     Function to calculate training and testing indices for given 
     dataset. If train indices are given, it will calculate the test 
@@ -133,18 +142,27 @@ def _binary_split(y, train_indices = None, train_ratio = 0.8,
 
     Parameters
     ----------
-    y : Numpy array of cell labels. Can have any number of classes for 
-        this function.
-    train_indices : Optional array of pre-determined training indices
-    seed_obj : Numpy random state used for random processes. Can be 
-    specified for reproducubility or set by default.
-    train_ratio : decimal value ratio of features in training/testing 
-                  sets
+    y : np.ndarray
+        > Numpy array of cell labels. Can have any number of classes 
+        for this function.
+
+    train_indices : np.ndarray | None
+        > Optional array of pre-determined training indices
+
+    train_ratio : float
+        > decimal value ratio of features in training/testing sets
+
+    seed_obj : np.random._generator.Generator
+        > Numpy random state used for random processes. Can be 
+        specified for reproducubility or set by default.
+    
     
     Returns
     -------
-    train_indices : Array of indices of training cells
-    test_indices : Array of indices of testing cells
+    train_indices : np.ndarray
+        > Array of indices of training cells
+    test_indices : np.ndarray:
+        > Array of indices of testing cells
     '''
 
     # If train indices aren't provided
@@ -201,7 +219,7 @@ def calculate_d(num_samples : int):
     >>> d
     161
     '''
-    d = int(np.sqrt(num_samples) * np.log(np.log(num_samples)))
+    d = int(np.sqrt(num_samples)*np.log(np.log(num_samples)))
     return d
 
 
@@ -218,13 +236,14 @@ def sort_samples(train_indices, test_indices):
     return sort_idx, train_indices, test_indices
 
 
-def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray, 
-                 group_dict: dict, scale_data: bool = True, 
-                 split_data : np.ndarray | None = None, D : int | None = None, 
-                 remove_features = True, train_ratio = 0.8,
-                 distance_metric = 'euclidean', kernel_type = 'Gaussian', 
-                 random_state : int = 1, allow_multiclass : bool = False, 
-                 class_threshold : str | int = 'median',
+def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame, 
+                 feature_names: np.ndarray, cell_labels: np.ndarray, 
+                 group_dict: dict, scale_data: bool=True, 
+                 split_data: np.ndarray | None=None, D: int | None=None, 
+                 remove_features: bool=True, train_ratio: float=0.8,
+                 distance_metric: str='euclidean', kernel_type: str='Gaussian', 
+                 random_state: int=1, allow_multiclass: bool = False, 
+                 class_threshold: str | int = 'median',
                  reduction: str | None = None, tfidf: bool = False):
     '''
     Function to create an AnnData object to carry all relevant 
@@ -393,7 +412,7 @@ def create_adata(X, feature_names: np.ndarray, cell_labels: np.ndarray,
 
     # Add metadata to adata object
     adata.uns['group_dict'] = group_dict
-    adata.uns['seed_obj'] = np.random.default_rng(100 * random_state)
+    adata.uns['seed_obj'] = np.random.default_rng(100*random_state)
     adata.uns['scale_data'] = scale_data
     adata.uns['D'] = D if D is not None else calculate_d(adata.shape[0])
     adata.uns['kernel_type'] = kernel_type

@@ -1,37 +1,61 @@
 import numpy as np
+import anndata as ad
 import gc
 import tracemalloc
 
 from scmkl.tfidf_normalize import tfidf_normalize
 from scmkl.estimate_sigma import estimate_sigma
-from scmkl.calculate_z import calculate_z, transform_z
+from scmkl.calculate_z import calculate_z
 from scmkl.train_model import train_model
 from scmkl.multimodal_processing import multimodal_processing
 from scmkl.test import predict
 
 
-def multimodal_optimize_alpha(adatas : list, group_size = 1, tfidf = [False, False],
-                               alpha_array = np.round(np.linspace(1.9,0.1, 10),2), k = 4,
-                               metric = 'AUROC',
-                               batches = 10, batch_size = 100):
+def multimodal_optimize_alpha(adatas: list, group_size: int, tfidf_list: list | None = None,
+                              alpha_array: np.ndarray=np.round(np.linspace(1.9,0.1, 10),2), 
+                              k: int=4, metric: str='AUROC',
+                              batches: int=10, batch_size: int=100):
     '''
     Iteratively train a grouplasso model and update alpha to find the parameter yielding the desired sparsity.
     This function is meant to find a good starting point for your model, and the alpha may need further fine tuning.
+    
     Input:
-        adatas- a list of AnnData objects where each object is one modality and Z_train and Z_test are calculated
-        group_size- Argument describing how the features are grouped. 
-            From Celer documentation:
-            "groupsint | list of ints | list of lists of ints.
-                Partition of features used in the penalty on w. 
-                    If an int is passed, groups are contiguous blocks of features, of size groups. 
-                    If a list of ints is passed, groups are assumed to be contiguous, group number g being of size groups[g]. 
-                    If a list of lists of ints is passed, groups[g] contains the feature indices of the group number g."
-            If 1, model will behave identically to Lasso Regression.
-        tifidf_list- a boolean mask where tfidf_list[0] and tfidf_list[1] are respective to adata1 and adata2
+        **adatas**: *list*
+            > A list of AnnData objects where each object is one modality and Z_train and Z_test are calculated
+
+        **group_size** : *None* | *int*
+            > Argument describing how the features are grouped. If *None*, 
+            `2 * adata.uns['D'] will be used. 
+            For more information see 
+            [celer documentation](https://mathurinm.github.io/celer/generated/celer.GroupLasso.html).
+
+        **tifidf_list**: *list* | *None*
+            > A boolean mask where tfidf_list[i] are respective to adatas[i]
             If True, tfidf normalization will be applied to the respective adata during cross validation
-        starting_alpha- The alpha value to start the search at.
-        alpha_array- Numpy array of all alpha values to be tested
-        k- number of folds to perform cross validation over
+        
+        **alpha_array** : *np.ndarray*
+            > Array of all alpha values to be tested.
+
+        **k** : *int*
+            > Number of folds to perform cross validation over.
+
+        **metric**: *str*
+            > Which metric to use to optimize alpha. Options
+            are `'AUROC'`, `'Accuracy'`, `'F1-Score'`, `'Precision'`, and 
+            `'Recall'`
+
+        **batches**: *int*
+            > The number of batches to use for the distance calculation.
+            This will average the result of `batches` distance calculations
+            of `batch_size` randomly sampled cells. More batches will converge
+            to population distance values at the cost of scalability.
+
+        **batch_size**: *int*
+            > The number of cells to include per batch for distance
+            calculations. Higher batch size will converge to population
+            distance values at the cost of scalability.
+            If `batches` * `batch_size` > # training cells,
+            `batch_size` will be reduced to `int(# training cells / batches)`
             
     Output:
         sparsity_dict- Dictionary with tested alpha as keys and the number of selected pathways as the values
@@ -42,6 +66,9 @@ def multimodal_optimize_alpha(adatas : list, group_size = 1, tfidf = [False, Fal
 
     import warnings 
     warnings.filterwarnings('ignore')
+
+    if tfidf_list is None:
+        tfidf_list = [None]*len(adatas)
 
     y = adatas[0].obs['labels'].iloc[adatas[0].uns['train_indices']].to_numpy()
     
@@ -78,7 +105,7 @@ def multimodal_optimize_alpha(adatas : list, group_size = 1, tfidf = [False, Fal
         dummy_names = [f'adata {i}' for i in range(len(cv_adatas))]
 
         # Calculate the Z's for each modality independently
-        fold_cv_adata = multimodal_processing(adatas = cv_adatas, names = dummy_names, tfidf = tfidf, 
+        fold_cv_adata = multimodal_processing(adatas = cv_adatas, names = dummy_names, tfidf = tfidf_list, 
                                               batch_size= batch_size, batches = batches)
 
         fold_cv_adata.uns['seed_obj'] = cv_adatas[0].uns['seed_obj']
@@ -86,7 +113,7 @@ def multimodal_optimize_alpha(adatas : list, group_size = 1, tfidf = [False, Fal
         if 'sigma' in fold_cv_adata.uns_keys():
             del fold_cv_adata.uns['sigma']
 
-        # In train_model we index Z_train for use with multiclass labels. We just recreate
+        # In train_model we index Z_train for balancing multiclass labels. We just recreate
         # dummy indices here that are unused for use in the binary case
         fold_cv_adata.uns['train_indices'] = np.arange(0, len(fold_train))
 
@@ -110,10 +137,11 @@ def multimodal_optimize_alpha(adatas : list, group_size = 1, tfidf = [False, Fal
     return alpha_star
 
 
-def optimize_alpha(adata, group_size = None, tfidf = False, 
-                   alpha_array = np.round(np.linspace(1.9,0.1, 10),2), 
-                   k = 4, metric = 'AUROC', 
-                   batches = 10, batch_size = 100):
+def optimize_alpha(adata: ad.AnnData, group_size: int | None=None, 
+                   tfidf: bool=False, 
+                   alpha_array: np.ndarray=np.round(np.linspace(1.9,0.1, 10),2), 
+                   k: int=4, metric: str='AUROC', 
+                   batches: int=10, batch_size: int=100):
     '''
     Iteratively train a grouplasso model and update alpha to find the 
     parameter yielding best performing sparsity. This function 
@@ -145,9 +173,22 @@ def optimize_alpha(adata, group_size = None, tfidf = False,
         are `'AUROC'`, `'Accuracy'`, `'F1-Score'`, `'Precision'`, and 
         `'Recall'`
 
+    **batches**: *int*
+        > The number of batches to use for the distance calculation.
+        This will average the result of `batches` distance calculations
+        of `batch_size` randomly sampled cells. More batches will converge
+        to population distance values at the cost of scalability.
+
+    **batch_size**: *int*
+        > The number of cells to include per batch for distance
+        calculations. Higher batch size will converge to population
+        distance values at the cost of scalability.
+        If `batches` * `batch_size` > # training cells,
+        `batch_size` will be reduced to `int(# training cells / batches)`
+
     Returns
     -------
-    **alpha_star** : *int*
+    **alpha_star** : *float*
         > The best performing alpha value from cross validation on 
         training data.
 
@@ -164,11 +205,16 @@ def optimize_alpha(adata, group_size = None, tfidf = False,
     warnings.filterwarnings('ignore')
 
     if group_size == None:
-        group_size = adata.uns['D'] * 2
+        group_size = adata.uns['D']*2
 
     if type(adata) == list:
-        alpha_star = multimodal_optimize_alpha(adatas = adata, group_size = group_size, tfidf = tfidf, alpha_array = alpha_array, metric = metric,
-                                                batch_size = batch_size, batches = batches)
+        alpha_star = multimodal_optimize_alpha(adatas = adata, 
+                                               group_size = group_size,
+                                               tfidf_list = tfidf, 
+                                               alpha_array = alpha_array, 
+                                               metric = metric,
+                                               batch_size = batch_size,
+                                               batches = batches)
         return alpha_star
 
     y = adata.obs['labels'].iloc[adata.uns['train_indices']].to_numpy()
@@ -204,9 +250,10 @@ def optimize_alpha(adata, group_size = None, tfidf = False,
             cv_adata = tfidf_normalize(cv_adata, binarize= True)
 
         # Estimating kernel widths and calculating Zs
-        cv_adata = calculate_z(cv_adata, n_features= 5000, batches = batches, batch_size = batch_size)
+        cv_adata = calculate_z(cv_adata, n_features= 5000, 
+                               batches = batches, batch_size = batch_size)
 
-        # In train_model we index Z_train for use with multiclass labels. We just recreate
+        # In train_model we index Z_train for balancing multiclass labels. We just recreate
         # dummy indices here that are unused for use in the binary case
         cv_adata.uns['train_indices'] = np.arange(0, len(fold_train))
 

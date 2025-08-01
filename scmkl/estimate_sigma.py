@@ -1,12 +1,15 @@
 import scipy
-import anndata
+import anndata as ad
 import numpy as np
 
 from scmkl.data_processing import process_data, get_group_mat, sample_cells
 from scmkl.tfidf_normalize import _tfidf
 
 
-def get_batches(sample_range, seed_obj, batches, batch_size) -> np.ndarray:
+def get_batches(sample_range: list | np.ndarray, 
+                seed_obj: np.random._generator.Generator, 
+                batches: int,
+                batch_size: int) -> np.ndarray:
     '''
     Gets batch indices for estimating sigma.
 
@@ -31,7 +34,7 @@ def get_batches(sample_range, seed_obj, batches, batch_size) -> np.ndarray:
         > A 2D array with each row cooresponding to the sample indices 
         for each batch.
     '''
-    required_n = batches * batch_size
+    required_n = batches*batch_size
     train_n = len(sample_range)
     assert required_n <= train_n, (f"{required_n} cells required for "
                                    f"{batches} batches of {batch_size} cells; "
@@ -52,7 +55,9 @@ def get_batches(sample_range, seed_obj, batches, batch_size) -> np.ndarray:
     return batches_idx
 
 
-def batch_sigma(X_train, distance_metric, batch_idx) -> float:
+def batch_sigma(X_train: np.ndarray,
+                distance_metric: str,
+                batch_idx: np.ndarray) -> float:
     '''
     Calculates the kernel width (sigma) for a feature grouping through 
     sample batching.
@@ -63,15 +68,13 @@ def batch_sigma(X_train, distance_metric, batch_idx) -> float:
         > A 2D numpy array with cells x features with features filtered 
         to features in grouping and sampled cells.
 
-    adata : anndata.AnnData
-        > adata used to derive X_train containing 'seed_obj' in uns 
-        attribute.
+    distance_metric: str
+        > The pairwise distance metric used to estimate sigma. Must
+        be one of the options used in scipy.spatial.distance.cdist.
 
-    batches : int
-        > Number of minibatches to calculate sigma for.
-
-    batch_size : int
-        > Number of cells in each batch.
+    batch_idx: np.ndarray
+        > A 2D array with each row cooresponding to the sample indices 
+        for each batch.    
 
     Returns 
     -------
@@ -94,7 +97,11 @@ def batch_sigma(X_train, distance_metric, batch_idx) -> float:
     return sigma
 
 
-def est_group_sigma(adata, X_train, n_group_features, n_features, batch_idx) -> float:
+def est_group_sigma(adata: ad.AnnData,
+                    X_train: np.array,
+                    n_group_features: int,
+                    n_features: int, 
+                    batch_idx: np.ndarray) -> float:
     '''
     Processes data and calculates the kernel width (sigma) for a 
     feature grouping through sample batching.
@@ -115,11 +122,9 @@ def est_group_sigma(adata, X_train, n_group_features, n_features, batch_idx) -> 
     n_features : int
         > Maximum number of features to be used in sigma estimation.
 
-    batches : int
-        > Number of minibatches to calculate sigma for.
-
-    batch_size : int
-        > Number of cells in each batch.
+    batch_idx
+        > A 2D array with each row cooresponding to the sample indices 
+        for each batch.
 
     Returns 
     -------
@@ -154,8 +159,10 @@ def est_group_sigma(adata, X_train, n_group_features, n_features, batch_idx) -> 
     return sigma
 
 
-def estimate_sigma(adata, n_features = 5000, batches = 10, 
-                   batch_size = 100) -> anndata.AnnData:
+def estimate_sigma(adata: ad.AnnData,
+                   n_features: int = 5000,
+                   batches: int = 10, 
+                   batch_size: int = 100) -> ad.AnnData:
     '''
     Calculate kernel widths to inform distribution for projection of 
     Fourier Features. Calculates one sigma per group of features.
@@ -202,7 +209,7 @@ def estimate_sigma(adata, n_features = 5000, batches = 10,
 
     if batch_size * batches > len(adata.uns['train_indices']):
         old_batch_size = batch_size
-        batch_size = int(len(adata.uns['train_indices']) / batches)
+        batch_size = int(len(adata.uns['train_indices'])/batches)
         print("Specified batch size required too many cells for "
                 "independent batches. Reduced batch size from "
                 f"{old_batch_size} to {batch_size}")
@@ -222,7 +229,8 @@ def estimate_sigma(adata, n_features = 5000, batches = 10,
                             batches, batch_size)
 
     # Loop over every group in group_dict
-    for group_features in adata.uns['group_dict'].values():
+    sigma_array = np.zeros((len(adata.uns['group_dict'])))
+    for m, group_features in enumerate(adata.uns['group_dict'].values()):
 
         n_group_features = len(group_features)
 
@@ -245,8 +253,8 @@ def estimate_sigma(adata, n_features = 5000, batches = 10,
         sigma = est_group_sigma(adata, X_train, n_group_features, 
                                 n_features, batch_idx=batch_idx)
 
-        sigma_list.append(sigma)
+        sigma_array[m] = sigma
     
-    adata.uns['sigma'] = np.array(sigma_list)
+    adata.uns['sigma'] = sigma_array
         
     return adata

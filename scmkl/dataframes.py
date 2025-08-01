@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 
-def _parse_result_type(results : dict | None, rfiles : dict | None) -> bool:
+def _parse_result_type(results: dict | None, rfiles: dict | None) -> bool:
     '''
     This function simply returns a bool for whether or not there are 
     multiple runs present while checking that There is one dict and 
@@ -26,8 +26,8 @@ def _parse_result_type(results : dict | None, rfiles : dict | None) -> bool:
     return mult_files
 
 
-def _parse_metrics(results, key : str | None = None, 
-                   include_as = False) -> pd.DataFrame:
+def _parse_metrics(results: dict, key: str | None=None, 
+                   include_as: bool=False) -> pd.DataFrame:
     '''
     This function returns a pd.DataFrame for a single scMKL result.
     '''
@@ -61,8 +61,8 @@ def _parse_metrics(results, key : str | None = None,
     return df        
 
 
-def _parse_weights(results : dict, include_as : bool = False, 
-                   key : None | str = None) -> pd.DataFrame:
+def _parse_weights(results: dict, include_as: bool=False, 
+                   key: None | str=None) -> pd.DataFrame:
     '''
     '''
     alpha_vals = []
@@ -87,7 +87,7 @@ def _parse_weights(results : dict, include_as : bool = False,
     return df
 
 
-def get_summary(results : dict, metric = 'AUROC'):
+def get_summary(results: dict, metric: str='AUROC'):
     '''
     Takes the results from either `scmkl.run()` and generates a 
     dataframe for each model containing columns for alpha, area under 
@@ -155,7 +155,7 @@ def get_summary(results : dict, metric = 'AUROC'):
     return summary
 
 
-def read_files(dir : str, pattern : str | None = None) -> dict:
+def read_files(dir: str, pattern: str | None=None) -> dict:
     '''
     This function takes a directory of scMKL results as pickle files 
     and returns a dictionary with the file names as keys and the data 
@@ -199,8 +199,8 @@ def read_files(dir : str, pattern : str | None = None) -> dict:
     return data
 
 
-def get_metrics(results : dict | None = None, rfiles : dict | None = None, 
-                include_as : bool = False) -> pd.DataFrame:
+def get_metrics(results: dict | None=None, rfiles: dict | None=None, 
+                include_as: bool=False) -> pd.DataFrame:
     '''
     Takes either a single scMKL result or a dictionary where each 
     entry cooresponds to one result. Returns a dataframe with cols 
@@ -334,7 +334,7 @@ def get_weights(results : dict | None = None, rfiles : dict | None = None,
     return df
 
 
-def get_selection(weights_df, order_groups : bool) -> pd.DataFrame:
+def get_selection(weights_df: pd.DataFrame, order_groups: bool) -> pd.DataFrame:
     '''
     This function takes a pd.DataFrame created by 
     `scmkl.get_weights()` and returns a selection table. Selection 
@@ -393,7 +393,7 @@ def get_selection(weights_df, order_groups : bool) -> pd.DataFrame:
     return df
 
 
-def mean_groups_per_alpha(selection_df) -> dict:
+def mean_groups_per_alpha(selection_df: pd.DataFrame) -> dict:
     '''
     This function takes a pd.DataFrame from `scmkl.get_selection()` 
     generated from multiple scMKL results and returns a dictionary 

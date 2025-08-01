@@ -1,10 +1,11 @@
 import numpy as np
+import anndata as ad
 
 from scmkl.train_model import train_model
 from scmkl.test import find_selected_groups
 
 
-def optimize_sparsity(adata, group_size, starting_alpha = 1.9, 
+def optimize_sparsity(adata: ad.AnnData, group_size: int | None=None, starting_alpha = 1.9, 
                       increment = 0.2, target = 1, n_iter = 10):
     '''
     Iteratively train a grouplasso model and update alpha to find the 
@@ -16,9 +17,11 @@ def optimize_sparsity(adata, group_size, starting_alpha = 1.9,
         > `AnnData` with `'Z_train'` and `'Z_test'` in 
         `adata.uns.keys()`.
 
-    **group_size** : *int* 
-        > Argument describing how the features are grouped. Should be
-        `2 * D`. For more information see celer documentation.
+    **group_size** : *None* | *int*
+        > Argument describing how the features are grouped. If *None*, 
+        `2 * adata.uns['D'] will be used. 
+        For more information see 
+        [celer documentation](https://mathurinm.github.io/celer/generated/celer.GroupLasso.html).
 
     **starting_alpha** : *float*
         > The alpha value to start the search at.
@@ -65,6 +68,9 @@ def optimize_sparsity(adata, group_size, starting_alpha = 1.9,
                                                     "number of iterations "
                                                     "that is greater than 0")
 
+    if group_size == None:
+        group_size = adata.uns['D']*2
+
     sparsity_dict = {}
     alpha = starting_alpha
 
@@ -79,13 +85,13 @@ def optimize_sparsity(adata, group_size, starting_alpha = 1.9,
             if alpha - increment in sparsity_dict.keys():
                 # Make increment smaller so the model can't go back and forth 
                 # between alpha values
-                increment /= 2
+                increment/=2
             # Ensures that alpha will never be negative
             alpha = np.max([alpha - increment, 1e-3]) 
 
         elif num_selected > target:
             if alpha + increment in sparsity_dict.keys():
-                increment /= 2
+                increment/=2
 
             alpha += increment
         elif num_selected == target:

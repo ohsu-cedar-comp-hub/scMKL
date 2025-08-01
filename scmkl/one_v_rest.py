@@ -9,8 +9,8 @@ from scmkl.multimodal_processing import multimodal_processing
 from scmkl._checks import _check_adatas
 
 
-def _eval_labels(cell_labels : np.ndarray, train_indices : np.ndarray, 
-                  test_indices : np.ndarray) -> np.ndarray:
+def _eval_labels(cell_labels: np.ndarray, train_indices: np.ndarray, 
+                  test_indices: np.ndarray) -> np.ndarray:
     '''
     Takes an array of multiclass cell labels and returns a unique array 
     of cell labels to test for.
@@ -52,7 +52,7 @@ def _eval_labels(cell_labels : np.ndarray, train_indices : np.ndarray,
     return uniq_labels
 
 
-def _prob_table(results : dict, alpha):
+def _prob_table(results : dict, alpha: float):
     '''
     Takes a results dictionary with class and probabilities keys and 
     returns a table of probabilities for each class and the most 
@@ -143,7 +143,10 @@ def per_model_summary(results: dict, uniq_labels: np.ndarray | list | tuple,
     return pd.DataFrame(summary_df)
 
 
-def get_class_train(train_indices, cell_labels, seed_obj, other_factor = 1.5):
+def get_class_train(train_indices: np.ndarray,
+                    cell_labels: np.ndarray | list | pd.Series,
+                    seed_obj: np.random._generator.Generator,
+                    other_factor = 1.5):
     '''
     This function returns a dict with each entry being a set of 
     training indices for each cell class to be used in 
@@ -159,6 +162,9 @@ def get_class_train(train_indices, cell_labels, seed_obj, other_factor = 1.5):
 
     seed_obj : np.random._generator.Generator
         > The seed object used to randomly sample non-target samples.
+
+    other_factor:
+        >
 
     Returns
     -------
@@ -191,8 +197,8 @@ def get_class_train(train_indices, cell_labels, seed_obj, other_factor = 1.5):
 
 
 def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray, 
-              tfidf : list, batches=10, batch_size=100, 
-              force_balance: bool=False, other_factor: float = 1.0) -> dict:
+              tfidf : list, batches: int=10, batch_size: int=100, 
+              force_balance: bool=False, other_factor: float=1.0) -> dict:
     '''
     For each cell class, creates model(s) comparing that class to all 
     others. Then, predicts on the training data using `scmkl.run()`.
@@ -216,6 +222,26 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
     **tfidf** : *list[bool]* 
         > List where if element i is `True`, adata[i] will be TFIDF 
         normalized.
+
+    **batches**: *int*
+        > The number of batches to use for the distance calculation.
+        This will average the result of `batches` distance calculations
+        of `batch_size` randomly sampled cells. More batches will converge
+        to population distance values at the cost of scalability.
+
+    **batch_size**: *int*
+        > The number of cells to include per batch for distance
+        calculations. Higher batch size will converge to population
+        distance values at the cost of scalability.
+        If `batches` * `batch_size` > # training cells,
+        `batch_size` will be reduced to `int(# training cells / batches)`.
+
+    **force_balance**: *bool*
+        > Boolean value determining if training sets should be balanced
+        to reduce class label imbalance. Defaults to no balancing.
+
+    **other_factor**: *float*
+        > 
 
     Returns
     -------
@@ -245,9 +271,9 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
     test_indices = adatas[0].uns['test_indices']
 
     # Checking and capturing cell labels
-    uniq_labels = _eval_labels(  cell_labels = adatas[0].obs['labels'], 
-                                train_indices = train_indices,
-                                 test_indices = test_indices)
+    uniq_labels = _eval_labels(cell_labels = adatas[0].obs['labels'], 
+                               train_indices = train_indices,
+                               test_indices = test_indices)
 
 
     # Calculating Z matrices, method depends on whether there are multiple 
