@@ -10,20 +10,28 @@ def _find_overlap(start1 : int, end1 : int, start2 : int, end2 : int) -> bool:
     
     Parameters
     ----------
-    start1 : the start position for region 1
-    end1 : the end position for region 1
-    start2 : the start position for region 2
-    end2: the end postion for region 2
+    start1 : int
+        The start position for region 1
     
-    Output
-    ------
-    True if the regions overlap by 1bp
-    False if the regions do not overlap
+    end1 : int
+        The end position for region 1
+    
+    start2 : int
+        The start position for region 2
+    
+    end2: int
+        The end postion for region 2
+    
+    Returns
+    -------
+    is_overlapping : bool
+        `True` if the regions overlap by 1bp. `False` if the regions 
+        do not overlap
     '''
-    return max(start1,start2) <= min(end1, end2)
+    return max(start1, start2) <= min(end1, end2)
 
 
-def _get_tss(row : pd.DataFrame) -> int:
+def get_tss(row : pd.DataFrame) -> int:
     '''
     Takes a row from a DataFrame as a DataFrame with columns 
     ['start', 'end', 'strand'] and returns the transcription start site
@@ -31,8 +39,9 @@ def _get_tss(row : pd.DataFrame) -> int:
     
     Parameters
     ----------
-    row : a pd.DataFrame from a gtf as a pd.DataFrame containing
-          only one row and columns ['start', 'end', 'strand'].
+    row : pd.DataFrame 
+        A gtf dataframe containing only one row and columns 
+        `['start', 'end', 'strand']`.
     
     Returns
     -------
@@ -45,30 +54,35 @@ def _get_tss(row : pd.DataFrame) -> int:
         return row.iloc[1]
     
     else:
-        raise ValueError('Strand symbol must be "+" or "-"')
+        raise ValueError("Strand symbol must be '+' or '-'")
     
 
-def _calc_range(row : pd.DataFrame, len_up : int, len_down : int) -> list:
+def calc_range(row : pd.DataFrame, len_up : int, len_down : int) -> list:
     '''
     Returns an infered promotor region for given annotation range 
-    depending on transcription start site and user-defined upstream and
-    downstream adjustments.
+    depending on transcription start site and user-defined upstream 
+    and downstream adjustments.
 
     Parameters
     ----------
-    row : a pd.DataFrame from a gtf as a pd.DataFrame containing
-          only one row and columns ['tss', 'strand'] where 'tss' is
-          the transcription start site.
-    len_up : how many base pairs upstream from the transcription 
-             start site the promotor range should be adjusted for.
-    len_down : how many base pairs downstream from the 
-               transcription start site the promotor range should be 
-               adjusted for.
+    row : pd.DataFrame 
+        A gtf as a dataframe containing only one row and columns 
+        `['tss', 'strand']` where `'tss'` is the transcription start 
+        site.
+    
+    len_up : int 
+        Number of base pairs upstream from the transcription 
+        start site the promotor range should be adjusted for.
+
+    len_down : int
+        Number of base pairs downstream from the transcription start 
+        site the promotor range should be adjusted for.
     
     Returns
     -------
-    A 2 element list where the first element is the adjusted start
-    position and the second the the adjusted end position.
+    start_end : list
+        A 2 element list where the first element is the adjusted start
+        position and the second the the adjusted end position.
     '''
     if row.iloc[1] == '+':
         start = row.iloc[0] - len_up
@@ -84,7 +98,7 @@ def _calc_range(row : pd.DataFrame, len_up : int, len_down : int) -> list:
     return [start, end]
 
 
-def _adjust_regions(gene_anno : pd.DataFrame, len_up : int, len_down : int
+def adjust_regions(gene_anno : pd.DataFrame, len_up : int, len_down : int
                     ) -> pd.DataFrame:
     '''
     Takes a GTF file as a pd.DataFrame and adjusts start and end 
@@ -94,32 +108,36 @@ def _adjust_regions(gene_anno : pd.DataFrame, len_up : int, len_down : int
 
     Parameters
     ----------
-    gene_anno : a pd.DataFrame with columns ['chr', 'start', 'end', 
-                'strand', 'gene_name'] created from a GTF file.
-    len_up : an int for how many base pairs upstream of the 
-             transcription start site the promotor region should be 
-             adjusted for.
-    len_down : an int for how many base pairs downstream of the 
-               transcription start site the promotor region should be 
-               adjusted for.
+    gene_anno : pd.DataFrame 
+        A dataframe with columns ['chr', 'start', 'end', 'strand', 
+        'gene_name'] created from a GTF file.
+    
+    len_up : int
+        Number of base pairs upstream of the transcription start site 
+        the promotor region should be adjusted for.
+    
+    len_down : int
+        Number base pairs downstream of the transcription start site 
+        the promotor region should be adjusted for.
     
     Returns
     -------
-    gene_anno as a pd.DataFrame where ['start', 'end'] columns 
-    represent the start and end positions of inferred promotor
-    regions for each annotation.
+    gene_anno : pd.DataFrame
+        A dataframe where ['start', 'end'] columns represent the start 
+        and end positions of inferred promotor regions for each 
+        annotation.
     '''
     # Subsetting DataFrame to only required data
     required_cols = ['chr', 'start', 'end', 'strand', 'gene_name']
     gene_anno = gene_anno[required_cols]
 
     # Adding a column that annotates transcription start site based on strand
-    tss = gene_anno[['start', 'end', 'strand']].apply(_get_tss, axis = 1)
+    tss = gene_anno[['start', 'end', 'strand']].apply(get_tss, axis = 1)
     gene_anno.insert(1, column = 'tss', value = tss)
 
     # Calculating start and end positions based on the tss
     adj_regions = gene_anno[['tss', 'strand']].apply(lambda row:
-                                                    _calc_range(
+                                                     calc_range(
                                                         row = row,
                                                         len_up = len_up,
                                                         len_down = len_down), 
@@ -132,20 +150,22 @@ def _adjust_regions(gene_anno : pd.DataFrame, len_up : int, len_down : int
     return gene_anno
 
 
-def _create_region_dicts(gene_anno : pd.DataFrame) -> dict:
+def create_region_dicts(gene_anno : pd.DataFrame) -> dict:
     '''
     Takes a GTF as a pd.DataFrame and returns dictionaries required for
     region comparisons between gene_annotations and assay features.
 
     Parameters
     ----------
-    gene_anno : a pd.DataFrame with columns ['chr', 'start', 'end', 
-                'strand', 'gene_name'] created from a GTF file.
+    gene_anno : pd.DataFrame 
+        A dataframe with columns `['chr', 'start', 'end', 'strand', 
+        'gene_name']` created from a GTF file.
     
     Returns
     -------
-    peak_gene_dict : dictionary where keys are regions and
-                     values are genes.
+    peak_gene_dict : dict
+        Keys are regions and values are genes.
+        
     ga_regions : dictionary where chromosomes are keys and regions are 
                  values.
     '''
@@ -323,7 +343,7 @@ def get_atac_groupings(gene_anno : pd.DataFrame, gene_sets : dict,
     gene_anno = gene_anno[np.isin(gene_anno['gene_name'], all_genes)]
 
     # Adjusting start and end columns to represent promotor regions
-    gene_anno = _adjust_regions(gene_anno = gene_anno, 
+    gene_anno = adjust_regions(gene_anno = gene_anno, 
                                 len_up = len_up, len_down = len_down)
 
     # Creating a dictionary from assay features where [chr] : (start, end)

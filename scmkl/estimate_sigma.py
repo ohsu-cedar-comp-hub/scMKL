@@ -16,22 +16,22 @@ def get_batches(sample_range: list | np.ndarray,
     Parameters
     ----------
     sample_range : list | np.ndarray
-        > A 1D array with first element being 0 and last element being 
+        A 1D array with first element being 0 and last element being 
         (1 - number of samples from X_train).
 
     seed_obj : np.random._generator.Generator
-        > Numpy random generator object from `adata.uns['seed_obj']`.
+        Numpy random generator object from `adata.uns['seed_obj']`.
 
     batches : int
-        > Number of batches to calculate indices for.
+        Number of batches to calculate indices for.
 
     batch_size : int
-        > Number of samples in each batch.
+        Number of samples in each batch.
 
     Returns
     -------
     batches_idx : np.ndarray
-        > A 2D array with each row cooresponding to the sample indices 
+        A 2D array with each row cooresponding to the sample indices 
         for each batch.
     '''
     required_n = batches*batch_size
@@ -65,21 +65,21 @@ def batch_sigma(X_train: np.ndarray,
     Parameters
     ----------
     X_train : np.ndarray
-        > A 2D numpy array with cells x features with features filtered 
+        A 2D numpy array with cells x features with features filtered 
         to features in grouping and sampled cells.
 
     distance_metric: str
-        > The pairwise distance metric used to estimate sigma. Must
+        The pairwise distance metric used to estimate sigma. Must
         be one of the options used in scipy.spatial.distance.cdist.
 
     batch_idx: np.ndarray
-        > A 2D array with each row cooresponding to the sample indices 
+        A 2D array with each row cooresponding to the sample indices 
         for each batch.    
 
     Returns 
     -------
     sigma : float
-        > The estimated group kernel with for Z projection before 
+        The estimated group kernel with for Z projection before 
         adjustments for small kernel width or large groupings.
     '''
     # Calculate Distance Matrix with specified metric
@@ -109,27 +109,27 @@ def est_group_sigma(adata: ad.AnnData,
     Parameters
     ----------
     X_train : np.ndarray
-        > A 2D numpy array with cells x features with features filtered 
+        A 2D numpy array with cells x features with features filtered 
         to features in grouping and sampled cells.
 
     adata : anndata.AnnData
-        > adata used to derive X_train containing 'seed_obj' in uns 
+        adata used to derive X_train containing 'seed_obj' in uns 
         attribute.
 
     n_group_features : int
-        > Number of features in feature grouping.
+        Number of features in feature grouping.
 
     n_features : int
-        > Maximum number of features to be used in sigma estimation.
+        Maximum number of features to be used in sigma estimation.
 
     batch_idx
-        > A 2D array with each row cooresponding to the sample indices 
+        A 2D array with each row cooresponding to the sample indices 
         for each batch.
 
     Returns 
     -------
     sigma : float
-        > The estimated group kernel with for Z projection.
+        The estimated group kernel with for Z projection.
     '''    
     if adata.uns['tfidf']:
         X_train = _tfidf(X_train, mode = 'normalize')
@@ -169,31 +169,32 @@ def estimate_sigma(adata: ad.AnnData,
 
     Parameters
     ----------
-    **adata** : *AnnData* 
-        > Created by `create_adata`.
+    adata : ad.AnnData
+        Created by `create_adata`.
     
-    **n_features** : *int*  
-        > Number of random features to include when estimating sigma. 
+    n_features : int
+        Number of random features to include when estimating sigma. 
         Will be scaled for the whole pathway set according to a 
         heuristic. Used for scalability.
 
-    **batches**: *int*
-        > The number of batches to use for the distance calculation.
+    batches : int
+        The number of batches to use for the distance calculation.
         This will average the result of `batches` distance calculations
         of `batch_size` randomly sampled cells. More batches will converge
         to population distance values at the cost of scalability.
 
-    **batch_size**: *int*
-        > The number of cells to include per batch for distance
+    batch_size : int
+        The number of cells to include per batch for distance
         calculations. Higher batch size will converge to population
         distance values at the cost of scalability.
         If `batches` * `batch_size` > # training cells,
-        `batch_size` will be reduced to `int(# training cells / batches)`
+        `batch_size` will be reduced to `int(num training cells / 
+        batches)`.
         
     Returns
     -------
-    **adata** : *AnnData*
-        > Key added `adata.uns['sigma']` with grouping kernel widths.
+    adata : ad.AnnData
+        Key added `adata.uns['sigma']` with grouping kernel widths.
 
     Examples
     --------
@@ -201,8 +202,6 @@ def estimate_sigma(adata: ad.AnnData,
     >>> adata.uns['sigma']
     array([10.4640895 , 10.82011454,  6.16769438,  9.86156855, ...])
     '''
-    sigma_list = []
-
     assert batch_size <= len(adata.uns['train_indices']), ("Batch size much be "
                                                           "smaller than the "
                                                           "training set.")

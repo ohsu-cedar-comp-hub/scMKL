@@ -16,15 +16,15 @@ def get_z_indices(m, D):
     Parameters
     ----------
     m : int
-        > The chronological number of the group being processed.
+        The chronological number of the group being processed.
 
     D : int
-        > The number of dimensions per group.
+        The number of dimensions per group.
 
     Returns
     -------
-    cos_idx, sin_idx : np.ndarray
-        > The indices for cos and sin projections in overall Z matrix.
+    cos_idx, sin_idx : np.ndarray, np.ndarray
+        The indices for cos and sin projections in overall Z matrix.
     '''
     x_idx = np.arange(m*2*D ,(m + 1)*2*D)
     cos_idx = x_idx[:len(x_idx)//2]
@@ -40,27 +40,27 @@ def calc_groupz(X_train, X_test, adata, D, sigma, proj_func):
     Parameters
     ----------
     X_train : np.ndarray
-        > The filtered data matrix to calculate train Z mat for.
+        The filtered data matrix to calculate train Z mat for.
     
     X_test : np.ndarray
-        > The filtered data matrix to calculate test Z mat for.
+        The filtered data matrix to calculate test Z mat for.
 
     adata : anndata.AnnData 
-        > anndata object containing `seed_obj` in `.uns` attribute.
+        AnnData object containing `seed_obj` in `.uns` attribute.
 
     D : int
-        > Number of dimensions per grouping.
+        Number of dimensions per grouping.
 
     sigma : float
-        > Kernel width for grouping.
+        Kernel width for grouping.
 
     proj_func : function
-        > The projection direction function to be applied to data.
+        The projection direction function to be applied to data.
 
     Returns
     -------
-    train_projections, test_projections : np.ndarray
-        > Training and testing Z matrices for group.
+    train_projections, test_projections : np.ndarray, np.ndarray
+        Training and testing Z matrices for group.
     '''   
     if scipy.sparse.issparse(X_train):
         X_train = X_train.toarray().astype(np.float16)
@@ -76,30 +76,30 @@ def calc_groupz(X_train, X_test, adata, D, sigma, proj_func):
 
 def calculate_z(adata, n_features=5000, batches=10, 
                 batch_size=100) -> ad.AnnData:
-    '''
+    """
     Function to calculate Z matrices for all groups in both training 
     and testing data.
 
     Parameters
     ----------
-    **adata** : *AnnData*
-        > created by `create_adata()` with `adata.uns.keys()` 
+    adata : ad.AnnData
+        created by `create_adata()` with `adata.uns.keys()` 
         `'sigma'`, `'train_indices'`, and `'test_indices'`. 
         `'sigma'` key can be added by running `estimate_sigma()` on 
         adata. 
 
-    **n_features** : *int* 
-        > Number of random feature to use when calculating Z- used for 
+    n_features : int
+        Number of random feature to use when calculating Z- used for 
         scalability.
 
-    **batches**: *int*
-        > The number of batches to use for the distance calculation.
+    batches : int
+        The number of batches to use for the distance calculation.
         This will average the result of `batches` distance calculations
         of `batch_size` randomly sampled cells. More batches will converge
         to population distance values at the cost of scalability.
 
-    **batch_size**: *int*
-        > The number of cells to include per batch for distance
+    batch_size : int
+        The number of cells to include per batch for distance
         calculations. Higher batch size will converge to population
         distance values at the cost of scalability.
         If `batches` * `batch_size` > # training cells,
@@ -107,7 +107,7 @@ def calculate_z(adata, n_features=5000, batches=10,
 
     Returns
     -------
-    **adata** : *AnnData*
+    adata : ad.AnnData
         > adata with Z matrices accessible with `adata.uns['Z_train']` 
         and `adata.uns['Z_test']`.
 
@@ -118,7 +118,7 @@ def calculate_z(adata, n_features=5000, batches=10,
     >>> adata.uns.keys()
     dict_keys(['Z_train', 'Z_test', 'sigmas', 'train_indices', 
     'test_indices'])
-    '''
+    """
     # Number of groupings taking from group_dict
     n_pathway = len(adata.uns['group_dict'].keys())
     D = adata.uns['D']

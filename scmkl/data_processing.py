@@ -11,19 +11,19 @@ def sparse_var(X: scipy.sparse._csc.csc_matrix | np.ndarray, axis: int | None=No
     Parameters
     ----------
     X : scipy.sparse._csc.csc_matrix | np.ndarray
-        > A scipy sparse or numpy array
+        A scipy sparse or numpy array
         
     axis : int | None
-        > Determines which axis variance is calculated on. Same usage 
+        Determines which axis variance is calculated on. Same usage 
         as Numpy.
-        axis = 0 => column variances
-        axis = 1 => row variances
-        axis = None => total variance (calculated on all data)
+            axis = 0 => column variances
+            axis = 1 => row variances
+            axis = None => total variance (calculated on all data)
     
     Returns
     -------
     var : np.ndarray | float
-        > Variance values calculated over the given axis
+        Variance values calculated over the given axis.
     '''
     # E[X^2] - E[X]^2
     if scipy.sparse.issparse(X):
@@ -42,31 +42,32 @@ def process_data(X_train: np.ndarray | scipy.sparse._csc.csc_matrix,
                  return_dense: bool=True):
     '''
     Function to preprocess data matrix according to type of data 
-    (counts- e.g. rna, or binary- atac). Will process test data 
-    according to parameters calculated from test data
+    (e.g. counts/rna, or binary/atac). Will process test data 
+    according to parameters calculated from test data.
     
     Parameters
     ----------
     X_train : np.ndarray | scipy.sparse._csc.csc_matrix
-        > A scipy sparse or numpy array of cells x features in the 
+        A scipy sparse or numpy array of cells x features in the 
         training data.
 
     X_test : np.ndarray | scipy.sparse._csc.csc_matrix
-        > A scipy sparse or numpy array of cells x features in the 
+        A scipy sparse or numpy array of cells x features in the 
         testing data.
 
     scale_data : bool
-        > If `True`, data will be logarithmized then z-score 
+        If `True`, data will be logarithmized then z-score 
         transformed.
 
     return_dense: bool
-        > If `True`, a np.ndarray will be returned as opposed to a 
+        If `True`, a np.ndarray will be returned as opposed to a 
         scipy.sparse object.
     
     Returns
     -------
-    X_train, X_test : Numpy arrays with the process train/test data 
-    respectively. If X_test is `None`, only X_train is returned.
+    X_train, X_test : np.ndarray, np.ndarray
+        Numpy arrays with the process train/test data 
+        respectively. If X_test is `None`, only X_train is returned.
     '''
     if X_test is None:
         # Creates dummy matrix to for the sake of calculation without 
@@ -124,17 +125,17 @@ def svd_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
     Parameters
     ----------
     X_train : np.ndarray
-        > A 2D array of cells x features filtered to desired features 
+        A 2D array of cells x features filtered to desired features 
         for training data.
 
     X_test : np.ndarray | None
-        > A 2D array of cells x features filtered to desired features 
+        A 2D array of cells x features filtered to desired features 
         for testing data.
     
     Returns
     -------
-    X_train, X_test : np.ndarray
-        > Transformed matrices. Only X_train is returned if 
+    X_train, X_test : np.ndarray, np.ndarray
+        Transformed matrices. Only X_train is returned if 
         `X_test is None`.
     '''
     n_components = np.min([50, X_train.shape[1]])
@@ -155,7 +156,21 @@ def sample_cells(train_indices: np.ndarray,
                  sample_size: int,
                  seed_obj: np.random._generator.Generator):
     '''
-    
+    Samples cells indices from training indices for calculations.
+
+    Parameters
+    ----------
+    train_indices : np.ndarray
+        An array of indices to sample from.
+
+    sample_size : int
+        Number of samples to take from `train_indices`. Must be 
+        smaller than length of `train_indices`.
+
+    Returns
+    -------
+    indices : np.ndarray
+        The sampled indices from `train_indices`.
     '''
     n_samples = np.min((train_indices.shape[0], sample_size))
     indices = seed_obj.choice(train_indices, n_samples, replace = False)
@@ -171,18 +186,18 @@ def pca_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
 
     Parameters
     ----------
-    X_train : np.ndarray
-        > A 2D array of cells x features filtered to desired features 
+    X_train : scipy.sparse._csc.csc_matrix | np.ndarray
+        A 2D array of cells x features filtered to desired features 
         for training data.
 
-    X_test : np.ndarray | None
-        > A 2D array of cells x features filtered to desired features 
+    X_test : scipy.sparse._csc.csc_matrix | np.ndarray | None
+        A 2D array of cells x features filtered to desired features 
         for testing data.
     
     Returns
     -------
-    X_train, X_test : np.ndarray
-        > Transformed matrices. Only X_train is returned if 
+    X_train, X_test : np.ndarray, np.ndarray
+        Transformed matrices. Only X_train is returned if 
         `X_test is None`.
     '''
     n_components = np.min([50, X_train.shape[1]])
@@ -208,6 +223,17 @@ def get_reduction(reduction: str):
     '''
     Function used to identify reduction type and return function to 
     apply to data matrices.
+
+    Parameters
+    ----------
+    reduction : str
+        The reduction for data transformation. Options are `['pca', 
+        'svd', 'None']`.
+
+    Returns
+    -------
+    red_func : function
+        The function to reduce the data.
     '''
     match reduction:
         case 'pca':
@@ -231,28 +257,28 @@ def get_group_mat(adata: ad.AnnData, n_features: int,
     Parameters
     ----------
     adata : anndata.AnnData
-        > anndata object with `'seed_obj'`, `'train_indices'`, and 
+        anndata object with `'seed_obj'`, `'train_indices'`, and 
         `'test_indices'` in `.uns`.
 
     n_features : int
-        > Maximum number of features to keep in matrix. Only 
+        Maximum number of features to keep in matrix. Only 
         impacts mat if `n_features < n_group_features`.
     
     group_features : list | tuple | np.ndarray
-        > Feature names in group to filter matrices to.
+        Feature names in group to filter matrices to.
 
     n_group_features : int
-        > Number of features in group.
+        Number of features in group.
 
     n_samples : int
-        > Number of samples to filter X_train to.
+        Number of samples to filter X_train to.
 
     Returns
     -------
-    X_train, X_test : np.ndarray
-        > Filtered matrices. If `n_samples` is provided, only X_train 
-        is returned. If `adata.uns['reduction']` is `'pca'` or `'svd'` 
-        the matrices are transformed before being returned.
+    X_train, X_test : np.ndarray, np.ndarray
+        Filtered matrices. If `n_samples` is provided, only X_train 
+        is returned. If `adata.uns['reduction']` is `'pca'` or 
+        `'svd'` the matrices are transformed before being returned.
     '''
     # Getting reduction function
     reduction_func = get_reduction(adata.uns['reduction'])

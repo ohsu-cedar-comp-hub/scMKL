@@ -26,10 +26,30 @@ def _parse_result_type(results: dict | None, rfiles: dict | None) -> bool:
     return mult_files
 
 
-def _parse_metrics(results: dict, key: str | None=None, 
+def parse_metrics(results: dict, key: str | None=None, 
                    include_as: bool=False) -> pd.DataFrame:
     '''
-    This function returns a pd.DataFrame for a single scMKL result.
+    This function returns a pd.DataFrame for a single scMKL result 
+    with performance results.
+
+    Parameters
+    ----------
+    results : dict
+        A result dictionary from `scmkl.run()`.
+    
+    key : str
+        If specified, will add a key column to the output dataframe 
+        where each element is `key`.
+
+    include_as : bool
+        If `True`, will add a column indicating which models' used 
+        the optimal alphas.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        A dataframe with columns `['Alpha', 'Metric', 'Value']`. 
+        `'Key'` col only added if `key` is not `None`.
     '''
     alpha_vals = []
     met_names = []
@@ -64,6 +84,28 @@ def _parse_metrics(results: dict, key: str | None=None,
 def _parse_weights(results: dict, include_as: bool=False, 
                    key: None | str=None) -> pd.DataFrame:
     '''
+    This function returns a pd.DataFrame for a single scMKL result 
+    with group weights.
+
+    Parameters
+    ----------
+    results : dict
+        A result dictionary from `scmkl.run()`.
+    
+    key : str
+        If specified, will add a key column to the output dataframe 
+        where each element is `key`.
+
+    include_as : bool
+        If `True`, will add a column indicating which models' used 
+        the optimal alphas.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        A dataframe with columns `['Alpha', 'Group', 
+        'Kernel Weight']`. `'Key'` col only added if `key` is not 
+        `None`.
     '''
     alpha_vals = []
     group_names = []
@@ -89,27 +131,27 @@ def _parse_weights(results: dict, include_as: bool=False,
 
 def get_summary(results: dict, metric: str='AUROC'):
     '''
-    Takes the results from either `scmkl.run()` and generates a 
-    dataframe for each model containing columns for alpha, area under 
-    the ROC, number of groups with nonzero weights, and highest 
-    weighted group.
+    Takes the results from `scmkl.run()` and generates a dataframe 
+    for each model containing columns for alpha, area under the ROC, 
+    number of groups with nonzero weights, and highest weighted 
+    group.
 
     Parameters
     ----------
-    **results** : *dict*
-        > A dictionary of results from scMKL generated from either 
+    results : dict
+        A dictionary of results from scMKL generated from 
         `scmkl.run()`.
 
-    **metric** : *str*
-        > Which metric to include in the summary. Default is AUROC. 
+    metric : str
+        Which metric to include in the summary. Default is AUROC. 
         Options include `'AUROC'`, `'Recall'`, `'Precision'`, 
         `'Accuracy'`, and `'F1-Score'`.
 
     Returns
     -------
-    **summary_df** : *pd.DataFrame*
-        > A table with columns:
-        `['Alpha', 'AUROC', 'Number of Selected Groups', 'Top Group']`.
+    summary_df : pd.DataFrame
+        A table with columns: `['Alpha', 'AUROC', 
+        'Number of Selected Groups', 'Top Group']`.
     
     Examples
     --------
@@ -163,18 +205,18 @@ def read_files(dir: str, pattern: str | None=None) -> dict:
 
     Parameters
     ----------
-    **dir** : *str*
-        > A string specifying the file path for the output scMKL runs.
+    dir : str
+        A string specifying the file path for the output scMKL runs.
 
-    **pattern** : *str*
-        > A regex string for filtering down to desired files. If 
+    pattern : str
+        A regex string for filtering down to desired files. If 
         `None`, all files in the directory with the pickle file 
         extension will be added to the dictionary.
 
     Returns
     -------
-    **results** : *dict*
-        > a dictionary with the file names as keys and data as values.
+    results : dict
+        A dictionary with the file names as keys and data as values.
 
     Examples
     --------
@@ -213,25 +255,23 @@ def get_metrics(results: dict | None=None, rfiles: dict | None=None,
 
     Parameters
     ----------
-    **results** : *None* | *dict*
-        > A dictionary with the results of a single run from 
+    results : dict | None
+        A dictionary with the results of a single run from 
         `scmkl.run()`. Must be `None` if `rfiles is not None`.
 
-    **rfiles** : *None* | *dict*
-        > A dictionary of results dictionaries containing multiple 
-        results from `scmkl.run()`. If `include_keys == True`, a col 
-        will be added to the output pd.DataFrame with the keys as 
-        values cooresponding to each row.
+    rfiles : dict | None
+        A dictionary of results dictionaries containing multiple 
+        results from `scmkl.run()`. 
 
-    **include_as** : *bool*
-        > When `True`, will add a bool col to output pd.DataFrame 
+    include_as : bool
+        When `True`, will add a bool col to output pd.DataFrame 
         where rows with alphas cooresponding to alpha_star will be 
         `True`.
 
     Returns
     -------
-    **df** : *pd.DataFrame*
-        > A pd.DataFrame containing all of the metrics present from 
+    df : pd.DataFrame
+        A pd.DataFrame containing all of the metrics present from 
         the runs input.
 
     Examples
@@ -258,12 +298,12 @@ def get_metrics(results: dict | None=None, rfiles: dict | None=None,
         cols.append('Key')
         df = pd.DataFrame(columns = cols)
         for key, result in rfiles.items():
-            cur_df = _parse_metrics(results = result, key = key, 
+            cur_df = parse_metrics(results = result, key = key, 
                                      include_as = include_as)
             df = pd.concat([df, cur_df.copy()])
             
     else:
-        df = _parse_metrics(results = results, include_as = include_as)
+        df = parse_metrics(results = results, include_as = include_as)
 
     return df
 
@@ -279,25 +319,23 @@ def get_weights(results : dict | None = None, rfiles : dict | None = None,
 
     Parameters
     ----------
-    **results** : *None* | *dict*
-        > A dictionary with the results of a single run from 
+    results : dict | None
+        A dictionary with the results of a single run from 
         `scmkl.run()`. Must be `None` if `rfiles is not None`.
 
-    **rfiles** : *None* | *dict*
-        > A dictionary of results dictionaries containing multiple 
-        results from `scmkl.run()`. If `include_keys == True`, a col 
-        will be added to the output pd.DataFrame with the keys as 
-        values cooresponding to each row.
+    rfiles : dict | None
+        A dictionary of results dictionaries containing multiple 
+        results from `scmkl.run()`. 
 
-    **include_as** : *bool*
-        > When `True`, will add a bool col to output pd.DataFrame 
+    include_as : bool
+        When `True`, will add a bool col to output pd.DataFrame 
         where rows with alphas cooresponding to alpha_star will be 
         `True`.
 
     Returns
     -------
-    **df** : *pd.DataFrame*
-        > A pd.DataFrame containing all of the groups from each alpha 
+    df : pd.DataFrame
+        A pd.DataFrame containing all of the groups from each alpha 
         and their cooresponding kernel weights.
 
     Examples
@@ -305,7 +343,7 @@ def get_weights(results : dict | None = None, rfiles : dict | None = None,
     >>> # For a single file
     >>> results = scmkl.run(adata)
     >>> weights = scmkl.get_weights(results = results)
-    >>>
+    
     >>> # For multiple runs saved in a dict
     >>> output_dir = 'scMKL_outputs/'
     >>> rfiles = scmkl.read_files(output_dir)
@@ -329,7 +367,7 @@ def get_weights(results : dict | None = None, rfiles : dict | None = None,
             df = pd.concat([df, cur_df.copy()])
             
     else:
-        df = _parse_metrics(results = results, include_as = include_as)
+        df = parse_metrics(results = results, include_as = include_as)
 
     return df
 
@@ -346,19 +384,19 @@ def get_selection(weights_df: pd.DataFrame, order_groups: bool) -> pd.DataFrame:
 
     Parameters
     ----------
-    **weights_df** : *pd.DataFrame*
-        > A dataframe output by `scmkl.get_weights()` with cols
+    weights_df : pd.DataFrame
+        A dataframe output by `scmkl.get_weights()` with cols
         `['Alpha', 'Group', 'Kernel Weight']`.
 
-    **order_groups** : *bool*
-        > If `True`, the `'Group'` col of the output dataframe will be 
+    order_groups : bool
+        If `True`, the `'Group'` col of the output dataframe will be 
         made into a `pd.Categorical` col ordered by number of times 
         each group was selected in decending order.
 
     Returns
     -------
-    **df** : *pd.DataFrame*
-        > A dataframe with cols `['Alpha', 'Group', Selection]`.
+    df : pd.DataFrame
+        A dataframe with cols `['Alpha', 'Group', Selection]`.
 
     Example
     -------
@@ -366,7 +404,7 @@ def get_selection(weights_df: pd.DataFrame, order_groups: bool) -> pd.DataFrame:
     >>> results = scmkl.run(adata)
     >>> weights = scmkl.get_weights(results = results)
     >>> selection = scmkl.get_selection(weights)
-    >>>
+    
     >>> # For multiple runs saved in a dict
     >>> output_dir = 'scMKL_outputs/'
     >>> rfiles = scmkl.read_files(output_dir)
@@ -403,14 +441,14 @@ def mean_groups_per_alpha(selection_df: pd.DataFrame) -> dict:
 
     Parameters
     ----------
-    **selection_df** : *pd.DataFrame*
-        > A dataframe output by `scmkl.get_selection()` with cols 
+    selection_df : pd.DataFrame
+        A dataframe output by `scmkl.get_selection()` with cols 
         `['Alpha', 'Group', Selection].
     
     Returns
     -------
-    **mean_groups** : *dict*
-        > A dictionary with alphas as keys and the mean number of 
+    mean_groups : dict
+        A dictionary with alphas as keys and the mean number of 
         selected groups for that alpha as keys.
 
     Examples
@@ -436,7 +474,7 @@ def mean_groups_per_alpha(selection_df: pd.DataFrame) -> dict:
     return mean_groups
 
 
-def read_gtf(path: str, filter_to_coding: bool=False, add_gname: bool=False):
+def read_gtf(path: str, filter_to_coding: bool=False):
     """
     Reads and formats a gtf file. Adds colnames: `['chr', 'source', 
     'feature', 'start', 'end', 'score', 'strand', 'frame', 
@@ -445,18 +483,18 @@ def read_gtf(path: str, filter_to_coding: bool=False, add_gname: bool=False):
     Parameters
     ----------
     path : str
-        > The file path to the gtf file to be read in. If the file is 
-        gzipped, file name must end with .gz
+        The file path to the gtf file to be read in. If the file is 
+        gzipped, file name must end with .gz.
 
     filter_to_coding : bool
-        > If `True`, will filter rows in gtf data frame to only 
+        If `True`, will filter rows in gtf data frame to only 
         protein coding genes. Will add column `'gene_name'` containing 
         the gene name for each row.
 
     Returns
     -------
     df : pd.DataFrame
-        > A pandas dataframe of the input gtf file.
+        A pandas dataframe of the input gtf file.
 
     Examples
     --------
