@@ -2,7 +2,7 @@ import numpy as np
 import scipy
 import anndata as ad
 
-from scmkl.tfidf_normalize import _tfidf_train_test
+from scmkl.tfidf_normalize import tfidf_train_test
 from scmkl.estimate_sigma import est_group_sigma, get_batches
 from scmkl.data_processing import process_data, get_group_mat, sample_cells
 from scmkl.projections import gaussian_trans, laplacian_trans, cauchy_trans
@@ -83,13 +83,11 @@ def calculate_z(adata, n_features=5000, batches=10,
     Parameters
     ----------
     adata : ad.AnnData
-        created by `create_adata()` with `adata.uns.keys()` 
-        `'sigma'`, `'train_indices'`, and `'test_indices'`. 
-        `'sigma'` key can be added by running `estimate_sigma()` on 
-        adata. 
+        created by `scmkl.create_adata()` with `adata.uns.keys()`: 
+        `'train_indices'`, and `'test_indices'`. 
 
     n_features : int
-        Number of random feature to use when calculating Z- used for 
+        Number of random feature to use when calculating Z; used for 
         scalability.
 
     batches : int
@@ -102,13 +100,14 @@ def calculate_z(adata, n_features=5000, batches=10,
         The number of cells to include per batch for distance
         calculations. Higher batch size will converge to population
         distance values at the cost of scalability.
-        If `batches` * `batch_size` > # training cells,
-        `batch_size` will be reduced to `int(# training cells / batches)`
+        If `batches*batch_size > num_training_cells`,
+        `batch_size` will be reduced to 
+        `int(num_training_cells / batches)`.
 
     Returns
     -------
     adata : ad.AnnData
-        > adata with Z matrices accessible with `adata.uns['Z_train']` 
+        `adata` with Z matrices accessible with `adata.uns['Z_train']` 
         and `adata.uns['Z_test']`.
 
     Examples

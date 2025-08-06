@@ -2,29 +2,32 @@ import numpy as np
 import celer
 import anndata as ad
 
+
 def train_model(adata: ad.AnnData, group_size: int | None=None, alpha:float=0.9):
     '''
     Fit a grouplasso model to the provided data.
 
     Parameters
     ----------
-    **adata** : *AnnData* 
-        > Has `'Z_train'` and `'Z_test'` keys in `adata.uns`.
+    adata : ad.AnnData 
+        Has `'Z_train'` and `'Z_test'` keys in `.uns.keys()`.
 
-    **group_size** : *int* | *None*
-        > Argument describing how the features are grouped. Should be
-        `2 * D`. For more information see celer documentation. 
+    group_size : None | int
+        Argument describing how the features are grouped. If `None`, 
+        `2 * adata.uns['D']` will be used. For more information see 
+        [celer documentation](https://mathurinm.github.io/celer/
+        generated/celer.GroupLasso.html).
             
-    **alpha** : *float*
-        > Group Lasso regularization coefficient. alpha is a floating 
-        point value controlling model solution sparsity. Must be a 
-        positive float. The smaller the value, the more feature groups 
-        will be selected in the trained model.
+    alpha : float
+        Group Lasso regularization coefficient, is a floating point 
+        value controlling model solution sparsity. Must be a positive 
+        float. The smaller the value, the more feature groups will be 
+        selected in the trained model.
     
     Returns
     -------
-    **adata** : *AnnData* 
-        > Trained model accessible with `adata.uns['model']`.
+    adata : ad.AnnData 
+        Trained model accessible with `adata.uns['model']`.
 
     Examples
     --------
@@ -41,8 +44,8 @@ def train_model(adata: ad.AnnData, group_size: int | None=None, alpha:float=0.9)
 
     See Also
     --------
-    celer documentation :
-    https://mathurinm.github.io/celer/generated/celer.GroupLasso.html
+    celer :
+        https://mathurinm.github.io/celer/generated/celer.GroupLasso.html
     '''
     assert alpha > 0, 'Alpha must be positive'
 

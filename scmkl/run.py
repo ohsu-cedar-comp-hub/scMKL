@@ -16,51 +16,60 @@ def run(adata: ad.AnnData, alpha_list: np.ndarray,
 
     Parameters
     ----------
-    **adata** : *AnnData* 
-        > A processed *AnnData* with `'Z_train'`, `'Z_test'`, and 
+    adata : ad.AnnData 
+        A processed `ad.AnnData` with `'Z_train'`, `'Z_test'`, and 
         `'group_dict'` keys in `adata.uns`.
     
-    **alpha_list** : *np.ndarray* 
-        > `alpha` values to create models using. Alpha refers to the 
+    alpha_list : np.ndarray 
+        Sparsity values to create models with. Alpha refers to the 
         penalty parameter in Group Lasso. Larger alphas force group 
-        weights to shrink towards 0 while smaller alphas apply a lesser 
-        penalty to kernal weights.
+        weights to shrink towards zero while smaller alphas apply a 
+        lesser penalty to kernal weights. Values too large will results 
+        in models that weight all groups as zero.
 
-    **metrics** : *list[str]*
-        > What metrics should be calculated on predictions. Options are 
-        ['AUROC', 'F1-Score', 'Accuracy', 'Precision', 'Recall']. When 
-        set to `None`, all metrics are calculated.
+    metrics : list[str]
+        Metrics that should be calculated on predictions. Options are 
+        `['AUROC', 'F1-Score', 'Accuracy', 'Precision', 'Recall']`. 
+        When set to `None`, all metrics are calculated.
     
     Returns
     -------
-    **results** : *dict*
-    > With keys and values: 
+    results : dict
+        Results with keys and values: 
 
-    > `'Metrics'` : a nested dictionary as `[alpha][metric]` = value.
+        `'Metrics'` (dict): 
+        A nested dictionary as `[alpha][metric] = value`.
+
+        `'Group_names'` (np.ndarray): 
+        Array of group names used in model(s).
     
-    > `'Selected_groups'` : a dictionary as `[alpha]` = array of 
-        groups with nonzero weights.
+        `'Selected_groups'` (dict): 
+        A nested dictionary as `[alpha] = np.array([nonzero_groups])`.
+        Nonzero groups are groups that had a kernel weight above zero.
 
-    > `'Norms'` : a dictionary as `[alpha]` = array of kernel weights
-        for each group, order respective to 'Group_names'.
+        `'Norms'` (dict): 
+        A nested dictionary as `[alpha] = np.array([kernel_weights])`
+        Order of `kernel_weights` is respective to `'Group_names'` 
+        values.
 
-    > `'Predictions'` : a dictionary as `[alpha]` = predicted class
-        respective to 'Observations' for that `alpha`.
+        `'Observed'` (np.nparray): 
+        An array of ground truth cell labels from the test set.
 
-    > `'Observed'` : an array of ground truth cell labels from the
-        test set.
+        `'Predictions'` (dict): 
+        A nested dictionary as `[alpha] = predicted_class` respective 
+        to `'Observations'` for `alpha`.
 
-    > `'Test_indices'` : indices of samples respective to adata 
-        used in the training set.
+        `'Test_indices'` (np.array: 
+        Indices of samples respective to adata used in the training 
+        set.
 
-    > `'Group_names'` : an array of group names respective to each
-        array in 'Norms'.
+        `'Model'` (dict): 
+        A nested dictionary where `[alpha] = celer.GroupLasso` object 
+        for `alpha`.
 
-    > `'Model'` : a dictionary where `[alpha]` = Celer Group Lasso
-        object for that `alpha`.
-
-    > `'RAM_usage'` : memory usage after training models for each 
-        `alpha`.
+        `'RAM_usage'` (dict): 
+        A nested dictionary with memory usage in GB after 
+        training models for each `alpha`.
 
     Examples
     --------
@@ -71,7 +80,7 @@ def run(adata: ad.AnnData, alpha_list: np.ndarray,
     ...        'Observed', 'Test_indices', 'Group_names', 'Models', 
     ...        'Train_time', 'RAM_usage'])
     >>>
-    >>> # List of alpha values
+    >>> alpha values
     >>> results['Metrics'].keys()
     dict_keys([0.05, 0.1, 0.5])
     >>>

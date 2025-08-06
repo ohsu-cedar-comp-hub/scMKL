@@ -61,9 +61,11 @@ Anaconda: [https://anaconda.org/ivango17/scmkl](https://anaconda.org/ivango17/sc
 API: [https://ohsu-cedar-comp-hub.github.io/scMKL/](https://ohsu-cedar-comp-hub.github.io/scMKL/)
 
 
-## Citation
+## Publication
 If you use scMKL in your research, please cite using:
-```
-To be determined
-```
+
+> Kupp, S., VanGordon, I., Gönen, M., Esener, S.,  Eksi, S., Ak, C. 
+Interpretable and integrative analysis of single-cell multiomics with scMKL. *Commun Biol* **8**, 1160 (2025). 
+https://doi.org/10.1038/s42003-025-08533-7
+
 Our Shiny for Python application for viewing data produced from this work can be found here: [scMKL_analysis](https://huggingface.co/spaces/scMKL-team/scMKL_analysis)

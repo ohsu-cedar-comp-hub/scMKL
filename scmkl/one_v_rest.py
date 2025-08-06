@@ -18,23 +18,23 @@ def _eval_labels(cell_labels: np.ndarray, train_indices: np.ndarray,
     Parameters
     ----------
     cell_labels : np.ndarray
-        > Cell labels that coorespond to an AnnData object.
+        Cell labels that coorespond to an AnnData object.
 
     train_indices : np.ndarray
-        > Indices for the training samples in an AnnData object.
+        Indices for the training samples in an AnnData object.
     
-    test_indices - np.ndarray
-        > Indices for the testing samples in an AnnData object.
+    test_indices : np.ndarray
+        Indices for the testing samples in an AnnData object.
 
     remove_labels : bool
-        > If True, models will only be created for cell labels in both
-        the training and test data, if False, models will be generated
+        If `True`, models will only be created for cell labels in both 
+        the training and test data, if `False`, models will be generated
         for all cell labels in the training data.
 
     Returns
     -------
     uniq_labels : np.ndarray
-        > Returns a numpy array of unique cell labels to be iterated 
+        Returns a numpy array of unique cell labels to be iterated 
         through during one versus all setups.
     '''
     train_uniq_labels = np.unique(cell_labels[train_indices])
@@ -52,7 +52,7 @@ def _eval_labels(cell_labels: np.ndarray, train_indices: np.ndarray,
     return uniq_labels
 
 
-def _prob_table(results : dict, alpha: float):
+def prob_table(results : dict, alpha: float):
     '''
     Takes a results dictionary with class and probabilities keys and 
     returns a table of probabilities for each class and the most 
@@ -61,22 +61,26 @@ def _prob_table(results : dict, alpha: float):
     Parameters
     ----------
     results : dict
-        > A nested dictionary that contains a dictionary for each class 
+        A nested dictionary that contains a dictionary for each class 
         containing probabilities for each cell class.
 
     alpha : float
-        > A float for which model probabilities should be evaluated 
+        A float for which model probabilities should be evaluated 
         for.
 
     Returns
     -------
     prob_table : pd.DataFrame
-        > Each column is a cell class and the elements are the
+        Each column is a cell class and the elements are the
         class probability outputs from the model.
 
-    pred_class : list
-        > The most probable cell classes respective to the training set 
+    pred_class : list[str]
+        The most probable cell classes respective to the training set 
         cells. 
+
+    low_conf : list[bool]
+        A bool list where `True`, sample max probability is less than 
+        0.5.
     '''
     prob_table = {class_ : results[class_]['Probabilities'][alpha][class_]
                   for class_ in results.keys()}
@@ -107,26 +111,25 @@ def _prob_table(results : dict, alpha: float):
 def per_model_summary(results: dict, uniq_labels: np.ndarray | list | tuple, 
                       alpha: float) -> pd.DataFrame:
     '''
-    Takes the results dictionary from scmkl.one_v_rest() and adds a 
+    Takes the results dictionary from `scmkl.one_v_rest()` and adds a 
     summary dataframe show metrics for each model generated from the 
     runs.
 
     Parameters
     ----------
     results : dict
-        > A results dictionary from scmkl.one_v_rest().
+        Results from `scmkl.one_v_rest()`.
 
-    uniq_labels : np.ndarray | list | tuple
-        > A list of unique cell classes from the runs.
+    uniq_labels : array_like
+        Unique cell classes from the runs.
 
     alpha : float
-        > The alpha for the model desired for creating the summary 
-        dataframe.
+        The alpha for creating the summary from.
 
     Returns
     -------
     summary_df : pd.DataFrame
-        > A data frame with classes on rows and metrics as cols.
+        Dataframe with classes on rows and metrics as cols.
     '''
     # Getting metrics availible in results
     avail_mets = list(results[uniq_labels[0]]['Metrics'][alpha])
@@ -150,28 +153,31 @@ def get_class_train(train_indices: np.ndarray,
     '''
     This function returns a dict with each entry being a set of 
     training indices for each cell class to be used in 
-    scmkl.one_v_rest().
+    `scmkl.one_v_rest()`.
 
     Parameters
     ----------
     train_indices : np.ndarray
-        > The indices in the anndata of samples availible to train on.
+        The indices in the `ad.AnnData` object of samples availible to 
+        train on.
 
-    cell_labels : np.ndarray | list | pd.Series
-        > The identity of all cells in the anndata object.
+    cell_labels : array_like
+        The identity of all cells in the anndata object.
 
     seed_obj : np.random._generator.Generator
-        > The seed object used to randomly sample non-target samples.
+        The seed object used to randomly sample non-target samples.
 
-    other_factor:
-        >
+    other_factor : float
+        The ratio of cells to sample for the other class for each 
+        model. For example, if classifying B cells with 100 B cells in 
+        training, if `other_factor=1`, 100 cells that are not B cells 
+        will be trained on with the B cells.
 
     Returns
     -------
     train_idx : dict
-        > A dictionary with keys being cell classes and values being 
-        the train indices to train scmkl that include both target and 
-        non-target samples.
+        Keys are cell classes and values are the train indices to 
+        train scmkl that include both target and non-target samples.
     '''
     uniq_labels = set(cell_labels)
     train_idx = dict()
@@ -206,48 +212,56 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
 
     Parameters
     ----------
-    **adatas** : *list[AnnData]* 
-        > List of AnnData objects created by create_adata()
-        where each AnnData is one modality and composed of both 
+    adatas : list[AnnData]
+        List of `ad.AnnData` objects created by `create_adata()` 
+        where each `ad.AnnData` is one modality and composed of both 
         training and testing samples. Requires that `'train_indices'`
-        and `'test_indices'` are the same across all AnnDatas.
+        and `'test_indices'` are the same between all `ad.AnnData`s.
 
-    **names** : *list[str]* 
-        > List of string variables that describe each modality
-        respective to adatas for labeling.
+    names : list[str]
+        String variables that describe each modality respective to 
+        `adatas` for labeling.
         
-    **alpha_list** : *np.ndarray* | *float*
-        > An array of alpha values to create each model with.
+    alpha_list : np.ndarray | float
+        An array of alpha values to create each model with or a float 
+        to run with a single alpha.
 
-    **tfidf** : *list[bool]* 
-        > List where if element i is `True`, adata[i] will be TFIDF 
+    tfidf : list[bool]
+        If element `i` is `True`, `adatas[i]` will be TF-IDF 
         normalized.
 
-    **batches**: *int*
-        > The number of batches to use for the distance calculation.
-        This will average the result of `batches` distance calculations
-        of `batch_size` randomly sampled cells. More batches will converge
-        to population distance values at the cost of scalability.
+    batches : int
+        The number of batches to use for the distance calculation. 
+        This will average the result of `batches` distance calculations 
+        of `batch_size` randomly sampled cells. More batches will 
+        converge to population distance values at the cost of 
+        scalability.
 
-    **batch_size**: *int*
-        > The number of cells to include per batch for distance
+    batch_size : int
+        The number of cells to include per batch for distance
         calculations. Higher batch size will converge to population
         distance values at the cost of scalability.
-        If `batches` * `batch_size` > # training cells,
-        `batch_size` will be reduced to `int(# training cells / batches)`.
+        If `batches*batch_size > num_training_cells`,
+        `batch_size` will be reduced to 
+        `int(num_training_cells / batches)`.
 
-    **force_balance**: *bool*
-        > Boolean value determining if training sets should be balanced
-        to reduce class label imbalance. Defaults to no balancing.
+    force_balance : bool
+        If `True`, training sets will be balanced to reduce class label 
+        imbalance. Defaults to `False`.
 
-    **other_factor**: *float*
-        > 
+    other_factor : float
+        The ratio of cells to sample for the other class for each 
+        model. For example, if classifying B cells with 100 B cells in 
+        training, if `other_factor=1`, 100 cells that are not B cells 
+        will be trained on with the B cells.
 
     Returns
     -------
-    **results** : *dict*
-    > Contains keys for each cell class with results from cell class
-    versus all other samples. See `scmkl.run()` for futher details.
+    results : dict
+        Contains keys for each cell class with results from cell class
+        versus all other samples. See `scmkl.run()` for futher details. 
+        Will also include a probablilities table with the predictions 
+        from each model.
 
     Examples
     --------
@@ -322,7 +336,7 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
 
     # Getting final predictions
     alpha = np.min(alpha_list)
-    prob_table, pred_class, low_conf = _prob_table(results, alpha)
+    prob_table, pred_class, low_conf = prob_table(results, alpha)
     macro_f1 = f1_score(cell_labels[adata.uns['test_indices']], 
                         pred_class, average='macro')
 

@@ -11,55 +11,62 @@ from scmkl.multimodal_processing import multimodal_processing
 from scmkl.test import predict
 
 
-def multimodal_optimize_alpha(adatas: list, group_size: int, tfidf_list: list | None = None,
+def multimodal_optimize_alpha(adatas: list[ad.AnnData], group_size: int, 
+                              tfidf_list: list | bool=False,
                               alpha_array: np.ndarray=np.round(np.linspace(1.9,0.1, 10),2), 
                               k: int=4, metric: str='AUROC',
                               batches: int=10, batch_size: int=100):
     '''
-    Iteratively train a grouplasso model and update alpha to find the parameter yielding the desired sparsity.
-    This function is meant to find a good starting point for your model, and the alpha may need further fine tuning.
+    Iteratively train a grouplasso model and update alpha to find the 
+    parameter yielding the desired sparsity. Meant to find a good 
+    starting point for your model, and the alpha may need further fine 
+    tuning.
     
-    Input:
-        **adatas**: *list*
-            > A list of AnnData objects where each object is one modality and Z_train and Z_test are calculated
+    Parameters
+    ----------
+    adatas : list[ad.AnnData]
+        Objects of type `ad.AnnData` where each object is one modality 
+        and Z_train and Z_test are calculated
 
-        **group_size** : *None* | *int*
-            > Argument describing how the features are grouped. If *None*, 
-            `2 * adata.uns['D'] will be used. 
-            For more information see 
-            [celer documentation](https://mathurinm.github.io/celer/generated/celer.GroupLasso.html).
+    group_size : None | int
+        Argument describing how the features are grouped. If `None`, 
+        `2 * adata.uns['D']` will be used. For more information see 
+        [celer documentation](https://mathurinm.github.io/celer/
+        generated/celer.GroupLasso.html).
 
-        **tifidf_list**: *list* | *None*
-            > A boolean mask where tfidf_list[i] are respective to adatas[i]
-            If True, tfidf normalization will be applied to the respective adata during cross validation
-        
-        **alpha_array** : *np.ndarray*
-            > Array of all alpha values to be tested.
+    tfidf_list : list | None
+        A boolean mask where `tfidf_list[i]` is respective to 
+        `adatas[i]`. If `True`, TF-IDF normalization will be applied to 
+        the respective `ad.AnnData` during cross validation
+    
+    alpha_array : np.ndarray
+        All alpha values to be tested.
 
-        **k** : *int*
-            > Number of folds to perform cross validation over.
+    k : int
+        Number of folds to perform cross validation over.
 
-        **metric**: *str*
-            > Which metric to use to optimize alpha. Options
-            are `'AUROC'`, `'Accuracy'`, `'F1-Score'`, `'Precision'`, and 
-            `'Recall'`
+    metric : str
+        Which metric to use to optimize alpha. Options are `'AUROC'`, 
+        `'Accuracy'`, `'F1-Score'`, `'Precision'`, and `'Recall'`.
 
-        **batches**: *int*
-            > The number of batches to use for the distance calculation.
-            This will average the result of `batches` distance calculations
-            of `batch_size` randomly sampled cells. More batches will converge
-            to population distance values at the cost of scalability.
+    batches : int
+        The number of batches to use for the distance calculation.
+        This will average the result of `batches` distance calculations
+        of `batch_size` randomly sampled cells. More batches will converge
+        to population distance values at the cost of scalability.
 
-        **batch_size**: *int*
-            > The number of cells to include per batch for distance
-            calculations. Higher batch size will converge to population
-            distance values at the cost of scalability.
-            If `batches` * `batch_size` > # training cells,
-            `batch_size` will be reduced to `int(# training cells / batches)`
+    batch_size : int
+        The number of cells to include per batch for distance
+        calculations. Higher batch size will converge to population
+        distance values at the cost of scalability. If 
+        `batches*batch_size > num_training_cells`, `batch_size` will be 
+        reduced to `int(num_training_cells/batches)`.
             
-    Output:
-        sparsity_dict- Dictionary with tested alpha as keys and the number of selected pathways as the values
-        alpha- The alpha value yielding the number of selected groups closest to the target.
+    Returns
+    -------
+    alpha_star : float
+        The alpha value yielding the best performing model from cross 
+        validation.
     '''
 
     assert isinstance(k, int) and k > 0, 'Must be a positive integer number of folds'
@@ -67,8 +74,8 @@ def multimodal_optimize_alpha(adatas: list, group_size: int, tfidf_list: list | 
     import warnings 
     warnings.filterwarnings('ignore')
 
-    if tfidf_list is None:
-        tfidf_list = [None]*len(adatas)
+    if not tfidf_list:
+        tfidf_list = [False]*len(adatas)
 
     y = adatas[0].obs['labels'].iloc[adatas[0].uns['train_indices']].to_numpy()
     
@@ -101,7 +108,7 @@ def multimodal_optimize_alpha(adatas: list, group_size: int, tfidf_list: list | 
             cv_adatas[i].uns['test_indices'] = fold_test
 
         # Creating dummy names for cv. 
-        # #Necessary for interpretability but not for AUROC cv
+        # Necessary for interpretability but not for AUROC cv
         dummy_names = [f'adata {i}' for i in range(len(cv_adatas))]
 
         # Calculate the Z's for each modality independently
@@ -137,8 +144,9 @@ def multimodal_optimize_alpha(adatas: list, group_size: int, tfidf_list: list | 
     return alpha_star
 
 
-def optimize_alpha(adata: ad.AnnData, group_size: int | None=None, 
-                   tfidf: bool=False, 
+def optimize_alpha(adata: ad.AnnData | list[ad.AnnData], 
+                   group_size: int | None=None, 
+                   tfidf: bool | list[bool]=False, 
                    alpha_array: np.ndarray=np.round(np.linspace(1.9,0.1, 10),2), 
                    k: int=4, metric: str='AUROC', 
                    batches: int=10, batch_size: int=100):
@@ -149,47 +157,50 @@ def optimize_alpha(adata: ad.AnnData, group_size: int | None=None,
 
     Parameters
     ----------
-    **adata** : *AnnData* | *list[AnnData]*
-        > `AnnData`(s) with `'Z_train'` and `'Z_test'` in 
+    adata : ad.AnnData | list[ad.AnnData]
+        `ad.AnnData`(s) with `'Z_train'` and `'Z_test'` in 
         `adata.uns.keys()`.
 
-    **group_size** : *None* | *int*
-        > Argument describing how the features are grouped. If *None*, 
-        `2 * adata.uns['D'] will be used. 
-        For more information see 
-        [celer documentation](https://mathurinm.github.io/celer/generated/celer.GroupLasso.html).
+    group_size : None | int
+        Argument describing how the features are grouped. If `None`, 
+        `2 * adata.uns['D']` will be used. For more information see 
+        [celer documentation](https://mathurinm.github.io/celer/
+        generated/celer.GroupLasso.html).
 
-    **tfidf** : *bool* 
-        > If `True`, TFIDF normalization will be run at each fold.
+    tfidf : list | bool
+        If `False`, no data will be TF-IDF transformed. If 
+        `type(adata) is list` and TF-IDF transformation is desired for 
+        all or some of the data, a bool list corresponding to `adata` 
+        must be provided. To simply TF-IDF transform `adata` when 
+        `type(adata) is ad.AnnData`, use `True`.
     
-    **alpha_array** : *np.ndarray*
-        > Array of all alpha values to be tested.
+    alpha_array : np.ndarray
+        Array of all alpha values to be tested.
 
-    **k** : *int*
-        > Number of folds to perform cross validation over.
+    k : int
+        Number of folds to perform cross validation over.
             
-    **metric**: *str*
-        > Which metric to use to optimize alpha. Options
-        are `'AUROC'`, `'Accuracy'`, `'F1-Score'`, `'Precision'`, and 
-        `'Recall'`
+    metric : str
+        Which metric to use to optimize alpha. Options are `'AUROC'`, 
+        `'Accuracy'`, `'F1-Score'`, `'Precision'`, and `'Recall'`.
 
-    **batches**: *int*
-        > The number of batches to use for the distance calculation.
+    batches : int
+        The number of batches to use for the distance calculation.
         This will average the result of `batches` distance calculations
         of `batch_size` randomly sampled cells. More batches will converge
         to population distance values at the cost of scalability.
 
-    **batch_size**: *int*
-        > The number of cells to include per batch for distance
+    batch_size : int
+        The number of cells to include per batch for distance
         calculations. Higher batch size will converge to population
-        distance values at the cost of scalability.
-        If `batches` * `batch_size` > # training cells,
-        `batch_size` will be reduced to `int(# training cells / batches)`
+        distance values at the cost of scalability. If 
+        `batches*batch_size > num_training_cells`, `batch_size` will be 
+        reduced to `int(num_training_cells/batches)`.
 
     Returns
     -------
-    **alpha_star** : *float*
-        > The best performing alpha value from cross validation on 
+    alpha_star : float
+        The best performing alpha value from cross validation on 
         training data.
 
     Examples
@@ -198,8 +209,8 @@ def optimize_alpha(adata: ad.AnnData, group_size: int | None=None,
     >>> alpha_star
     0.1
     '''
-
-    assert isinstance(k, int) and k > 0, 'Must be a positive integer number of folds'
+    
+    assert isinstance(k, int) and k > 0, "'k' must be positive"
 
     import warnings 
     warnings.filterwarnings('ignore')

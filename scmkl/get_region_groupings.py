@@ -45,7 +45,8 @@ def get_tss(row : pd.DataFrame) -> int:
     
     Returns
     -------
-    The transcription start site for row's respective annotation.
+    tss : int
+        The transcription start site for row's respective annotation.
     '''
     if row.iloc[2] == '+':
         return row.iloc[0]
@@ -109,8 +110,8 @@ def adjust_regions(gene_anno : pd.DataFrame, len_up : int, len_down : int
     Parameters
     ----------
     gene_anno : pd.DataFrame 
-        A dataframe with columns ['chr', 'start', 'end', 'strand', 
-        'gene_name'] created from a GTF file.
+        A dataframe with columns `['chr', 'start', 'end', 'strand', 
+        'gene_name']` created from a GTF file.
     
     len_up : int
         Number of base pairs upstream of the transcription start site 
@@ -123,8 +124,8 @@ def adjust_regions(gene_anno : pd.DataFrame, len_up : int, len_down : int
     Returns
     -------
     gene_anno : pd.DataFrame
-        A dataframe where ['start', 'end'] columns represent the start 
-        and end positions of inferred promotor regions for each 
+        A dataframe where `['start', 'end']` columns represent the 
+        start and end positions of inferred promotor regions for each 
         annotation.
     '''
     # Subsetting DataFrame to only required data
@@ -166,13 +167,13 @@ def create_region_dicts(gene_anno : pd.DataFrame) -> dict:
     peak_gene_dict : dict
         Keys are regions and values are genes.
         
-    ga_regions : dictionary where chromosomes are keys and regions are 
-                 values.
+    ga_regions : dict
+        Chromosomes are keys and regions are values.
     '''
     peak_gene_dict = {}
     ga_regions = {}
 
-    for i, anno in gene_anno.iterrows():
+    for _, anno in gene_anno.iterrows():
 
         cur_chr = anno['chr']
         cur_start = int(anno['start'])
@@ -192,7 +193,7 @@ def create_region_dicts(gene_anno : pd.DataFrame) -> dict:
     return peak_gene_dict, ga_regions
 
 
-def _create_feature_dict(feature_names : list | set | np.ndarray | pd.Series
+def create_feature_dict(feature_names : list | set | np.ndarray | pd.Series
                          ) -> dict:
     '''
     Takes an array of feature names and returns data formatted for
@@ -200,12 +201,13 @@ def _create_feature_dict(feature_names : list | set | np.ndarray | pd.Series
     
     Returns
     -------
-    feature_names : an iterable object of region names from single-cell 
-                    ATAC data matrix.
+    feature_names : array_like
+        Array of region names from single-cell epigenetic data matrix.
     
     Returns
     -------
-        A dictionary where keys are chromosomes and values are regions.
+    feature_dict : dict
+        Keys are chromosomes and values are regions.
     '''
     feature_dict = {}
     feature_names = [re.split(":|-", peak) for peak in feature_names]
@@ -225,41 +227,47 @@ def _create_feature_dict(feature_names : list | set | np.ndarray | pd.Series
     return feature_dict
 
 
-def _compare_regions(feature_dict : dict, ga_regions : dict,
+def compare_regions(feature_dict : dict, ga_regions : dict,
                      peak_gene_dict : dict, gene_sets : dict, chr_sep : str
                      ) -> dict:
     '''
-    Takes features from a single-cell ATAC data matrix and regions from
-    a gene annotation file to return an ATAC grouping where regions 
+    Takes features from a single-cell data matrix and regions from
+    a gene annotation file to return an region grouping where regions 
     from feature_dict and regions from gene annotations overlap.
 
     Parameters
     ----------
-    feature_dict : a dictionary where keys are chromosomes and 
-                   values are regions. This data should come from a 
-                   single-cell atac experiment.
-    ga_regions : a dictionary where keys are chromosomes and values
-                 are regions. This data should come from a gene 
-                 annotations file.
-    peak_gene_dict : a dictionary where keys are peaks from gene 
-                     annotation file and values are the gene they are 
-                     associated with.
-    gene_sets : a dictionary where keys are gene set names and values 
-                are an iterable object of gene names.
-    chr_sep : The character that separates the chromosome from the 
-                rest of the region in the original feature array.
+    feature_dict : dict
+        Keys are chromosomes and values are regions. This data should 
+        come from a single-cell experiment.
+
+    ga_regions : dict
+        Keys are chromosomes and values are regions. This data should 
+        come from a gene annotations (gtf) file.
+
+    peak_gene_dict : dict
+        Keys are peaks from gene annotation file and values are the 
+        gene they are associated with.
+
+    gene_sets : dict
+        Keys are gene set names and values are an iterable object of 
+        gene names.
+
+    chr_sep : str
+        The character that separates the chromosome from the rest of 
+        the region in the original feature array.
     
     Returns
     -------
-    A dictionary where keys are the names from gene_sets and values
-    are a list of regions from feature_names that overlap with 
-    promotor regions respective to genes in gene sets (i.e., if 
-    ATAC feature in feature_names overlaps with promotor region 
-    from a gene in a gene set from gene_sets, that region will be
-    added to the new dictionary under the respective gene set 
-    name).
+    epi_grouping : dict
+        Keys are the names from gene_sets and values are a list of 
+        regions from `feature_names` that overlap with promotor regions 
+        respective to genes in `gene_sets` (i.e., if region in 
+        `feature_names` overlaps with promotor region from a gene in a 
+        gene set from `gene_sets`, that region will be added to the new 
+        dictionary under the respective gene set name).
     '''
-    atac_grouping = {group : [] for group in gene_sets.keys()}
+    epi_grouping = {group : [] for group in gene_sets.keys()}
 
     for chrom in feature_dict.keys():
         if chrom not in ga_regions.keys():
@@ -273,12 +281,12 @@ def _compare_regions(feature_dict : dict, ga_regions : dict,
                             feat_region = ''.join((chrom, chr_sep, 
                                                   str(region[0]), "-", 
                                                   str(region[1])))
-                            atac_grouping[group].append(feat_region)
+                            epi_grouping[group].append(feat_region)
 
-    return atac_grouping
+    return epi_grouping
 
 
-def get_atac_groupings(gene_anno : pd.DataFrame, gene_sets : dict, 
+def get_region_groupings(gene_anno : pd.DataFrame, gene_sets : dict, 
                        feature_names : np.ndarray | pd.Series | list | set,
                        len_up : int = 5000, len_down : int = 5000) -> dict:
     '''
@@ -290,46 +298,45 @@ def get_atac_groupings(gene_anno : pd.DataFrame, gene_sets : dict,
 
     Parameters
     ----------
-    **gene_anno** : *pd.DataFrame*
-        > Gene annotations in GTF format as a pd.DataFrame with columns
-        ['chr', 'start', 'end', 'strand', 'gene_name'].
+    gene_anno : pd.DataFrame
+        Gene annotations in GTF format as a pd.DataFrame with columns
+        `['chr', 'start', 'end', 'strand', 'gene_name']`.
 
-    **gene_sets** : *dict*
-        > Gene set names as keys and an iterable object of gene names
+    gene_sets : dict
+        Gene set names as keys and an iterable object of gene names
         as values.
 
-    **feature_names** : *np.ndarray* | *pd.Series* | *list* | *set*
-        > Feature names corresponding to a single_cell ATAC data 
+    feature_names : array_like | set
+        Feature names corresponding to a single_cell epigenetic data 
         matrix.
 
     Returns
     -------
-    **atac_grouping** : *dict*
-        > Keys are the names from `gene_sets` and values
+    epi_grouping : dict
+        Keys are the names from `gene_sets` and values
         are a list of regions from `feature_names` that overlap with 
         promotor regions respective to genes in `gene_sets` (i.e., if 
-        ATAC feature in `feature_names` overlaps with promotor region 
-        from a gene in a gene set from `gene_sets`, that region will be
-        added to the new dictionary under the respective gene set 
-        name).
+        region in `feature_names` overlaps with promotor region from a 
+        gene in a gene set from `gene_sets`, that region will be added 
+        to the new dictionary under the respective gene set name).
 
     Examples
     --------
-    >>> # Reading in a gene set and the peak names from scATAC dataset
+    >>> # Reading in a gene set and the peak names from dataset
     >>> gene_sets = np.load("data/RNA_hallmark_groupings.pkl", 
     ...                     allow_pickle = True)
-    >>> peaks = np.load("data/MCF7_ATAC_feature_names.npy", 
+    >>> peaks = np.load("data/MCF7_region_names.npy", 
     ...                 allow_pickle = True)
     >>> 
     >>> # Reading in GTF file
     >>> gtf_path = "data/hg38_subset_protein_coding.annotation.gtf"
     >>> gtf = scmkl.read_gtf(gtf_path, filter_to_coding=True)
     >>>
-    >>> atac_grouping = scmkl.get_atac_groupings(gene_anno = gtf,
+    >>> region_grouping = scmkl.get_region_groupings(gene_anno = gtf,
     ...                                         gene_sets = gene_sets,
     ...                                         feature_names = peaks)
     >>>
-    >>> atac_grouping.keys()
+    >>> region_grouping.keys()
     dict_keys(['HALLMARK_TNFA_SIGNALING_VIA_NFKB', ...])
     '''
     # Getting a unique set of gene names from gene_sets
@@ -347,18 +354,18 @@ def get_atac_groupings(gene_anno : pd.DataFrame, gene_sets : dict,
                                 len_up = len_up, len_down = len_down)
 
     # Creating a dictionary from assay features where [chr] : (start, end)
-    feature_dict = _create_feature_dict(feature_names)
+    feature_dict = create_feature_dict(feature_names)
 
     # Creating data structures from gene_anno for comparing regions
-    peak_gene_dict, ga_regions = _create_region_dicts(gene_anno)
+    peak_gene_dict, ga_regions = create_region_dicts(gene_anno)
 
     # Capturing the separator type used in assay
     chr_sep = ':' if ':' in feature_names[0] else '-'
 
-    atac_groupings = _compare_regions(feature_dict = feature_dict,
+    epi_groupings = compare_regions(feature_dict = feature_dict,
                                      ga_regions = ga_regions,
                                      peak_gene_dict = peak_gene_dict,
                                      gene_sets = gene_sets,
                                      chr_sep = chr_sep)
     
-    return atac_groupings
+    return epi_groupings

@@ -7,30 +7,30 @@ from scmkl.data_processing import sparse_var
 from scmkl.calculate_z import calculate_z
 
 
-def _combine_modalities(adatas: list, names: list, 
+def combine_modalities(adatas: list[ad.AnnData], names: list[str], 
                         combination: str = 'concatenate'):
     '''
     Combines data sets for multimodal classification. Combined group 
-    names are assay+group_name.
+    names are `f'{assay}+{group_name}'`.
 
     Parameters
     ----------
-    adatas : list
-        > a list of AnnData objects where each object is a different 
-        modality. Annotations must match between objects.
+    adatas : list[ad.AnnData]
+        List of AnnData objects where each object is a different 
+        modality. Annotations must match between objects (i.e. same 
+        sample order).
 
-    names : list
-        > a list of strings names for each modality repective to each 
+    names : list[str]
+        List of strings names for each modality repective to each 
         object in adatas.
             
     combination: str
-        > How to combine the matrices, either sum or concatenate.
+        How to combine the matrices, either `'sum'` or `'concatenate'`.
     
     Returns
     -------
     combined_adata : ad.Anndata
-        >Adata object with the combined Z matrices and 
-        annotations. 
+        Adata object with the combined Z matrices and annotations. 
     '''
     assert len({adata.shape[0] for adata in adatas}) == 1, ("All adatas must "
                                                             "have the same "
@@ -97,42 +97,46 @@ def _combine_modalities(adatas: list, names: list,
     return combined_adata
 
 
-def multimodal_processing(adatas : list, names : list, tfidf: list, 
-                          batches: int=10, batch_size: int=100):
+def multimodal_processing(adatas : list[ad.AnnData], names : list[str], 
+                          tfidf: list[bool], combination: str='concatenate', 
+                          batches: int=10, batch_size: int=100) -> ad.AnnData:
     '''
-    Combines and processes a list of adata objects.
+    Combines and processes a list of `ad.AnnData` objects.
 
     Parameters
     ----------
-    **adatas** : *list[AnnData]* 
-        > List of AnnData objects where each object is a different 
-        modality for the same cells.
+    adatas : list[ad.AnnData]
+        List of `ad.AnnData` objects where each object is a different 
+        modality. Annotations must match between objects (i.e. same 
+        sample order).
 
-    **names** : *list[str]*
-        > List of string names for each modality repective to each 
-        object in `adatas`.
+    names : list[str]
+        List of strings names for each modality repective to each 
+        object in adatas.
+            
+    combination: str
+        How to combine the matrices, either `'sum'` or `'concatenate'`.
     
-    **tfidf** : *bool* 
-        > List where if element i is `True`, adata[i] will be TFIDF 
-        normalized.
+    tfidf : list[bool]
+        If element `i` is `True`, `adata[i]` will be TF-IDF normalized.
 
-    **batches**: *int*
-        > The number of batches to use for the distance calculation.
+    batches : int
+        The number of batches to use for the distance calculation.
         This will average the result of `batches` distance calculations
         of `batch_size` randomly sampled cells. More batches will converge
         to population distance values at the cost of scalability.
 
-    **batch_size**: *int*
-        > The number of cells to include per batch for distance
+    batch_size : int
+        The number of cells to include per batch for distance
         calculations. Higher batch size will converge to population
         distance values at the cost of scalability.
-        If `batches` * `batch_size` > # training cells,
-        `batch_size` will be reduced to `int(# training cells / batches)`
+        If `batches*batch_size > num_training_cells`, `batch_size` 
+        will be reduced to `int(num_training_cells / batches)`.
 
     Returns
     -------
-    **adata** : *AnnData* 
-        > Concatenated from objects from `adatas` with Z matrices 
+    adata : ad.AnnData
+        Concatenated from objects from `adatas` with Z matrices 
         calculated.
 
     Examples
@@ -165,9 +169,8 @@ def multimodal_processing(adatas : list, names : list, tfidf: list,
     import warnings 
     warnings.filterwarnings('ignore')
 
-    assert all([adata.shape[0] for adata in adatas]), ("Different number of "
-                                                       "cells present in "
-                                                       "each object")
+    diff_num_warn = "Different number of cells present in each object."
+    assert all([adata.shape[0] for adata in adatas]), diff_num_warn
     
     # True if all train indices match
     same_train = np.all([np.array_equal(adatas[0].uns['train_indices'], 
@@ -216,15 +219,15 @@ def multimodal_processing(adatas : list, names : list, tfidf: list,
     if 'labels' in adatas[0].obs:
         all_labels = [adata.obs['labels'] for adata in adatas]
         # Ensuring cell labels for each AnnData object are the same
+        uneq_labs_warn = ("Cell labels between AnnData object in position 0 "
+                          "and position {} in adatas do not match")
         for i in range(1, len(all_labels)):
             same_labels = np.all(all_labels[0] == all_labels[i])
-            assert same_labels, (f"Cell labels between AnnData object in "
-                                 f"position 0 and position {i} in adatas do "
-                                 "not match")
+            assert same_labels, uneq_labs_warn.format(i)
 
-    adata = _combine_modalities(adatas = adatas,
-                                names = names,
-                                combination = 'concatenate')
+    adata = combine_modalities(adatas=adatas,
+                                names=names,
+                                combination=combination)
 
     del adatas
     gc.collect()

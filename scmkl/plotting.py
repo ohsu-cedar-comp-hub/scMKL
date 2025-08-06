@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
-from sklearn.metrics import confusion_matrix
+from sklearn import metrics
 from plotnine import (ggplot, aes, theme_classic, ylim, 
                       geom_point, scale_x_reverse, annotate)
 
@@ -14,33 +14,33 @@ def plot_conf_mat(results, title = '', cmap = None, normalize = True,
 
     Parameters
     ----------
-    **results** : *dict*
-        > The output from either scmkl.run() or scmkl.one_v_rest()
+    results : dict
+        The output from either scmkl.run() or scmkl.one_v_rest()
         containing results from scMKL.
 
-    **title** : *str*
-        > The text to display at the top of the matrix.
+    title : str
+        The text to display at the top of the matrix.
 
-    **cmap** : *matplotlib.colors.LinearSegmentedColormap*
-        > The gradient of the values displayed from matplotlib.pyplot.
-        If *None*, `'Purples'` is used see matplotlib color map 
+    cmap : matplotlib.colors.LinearSegmentedColormap
+        The gradient of the values displayed from `matplotlib.pyplot`.
+        If `None`, `'Purples'` is used see matplotlib color map 
         reference for more information. 
 
-    **normalize** : *bool*
-        > If False, plot the raw numbers. If True, plot the 
+    normalize : bool
+        If `False`, plot the raw numbers. If `True`, plot the 
         proportions.
 
-    **alpha** : *None* | *float*
-        > Alpha that matrix should be created for. If `results` is from
-        `scmkl.one_v_all()`, this is ignored. If *None*, smallest alpha
+    alpha : None | float
+        Alpha that matrix should be created for. If `results` is from
+        `scmkl.one_v_all()`, this is ignored. If `None`, smallest alpha
         will be used.
 
-    **save** : *None* | *str*
-        > File path to save plot. If *None*, plot is not saved.
+    save : None | str
+        File path to save plot. If `None`, plot is not saved.
 
     Returns
     -------
-    *None*
+    None
     
     Examples
     --------
@@ -53,7 +53,8 @@ def plot_conf_mat(results, title = '', cmap = None, normalize = True,
 
     Citiation
     ---------
-    http://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
+    http://scikit-learn.org/stable/auto_examples/model_selection/
+    plot_confusion_matrix.html
     '''
     # Determining type of results
     if ('Observed' in results.keys()) and ('Metrics' in results.keys()):
@@ -64,13 +65,13 @@ def plot_conf_mat(results, title = '', cmap = None, normalize = True,
         names = np.unique(results['Truth_labels'])
 
     if multi_class:
-        cm = confusion_matrix(y_true = results['Truth_labels'], 
+        cm = metrics.confusion_matrix(y_true = results['Truth_labels'], 
                               y_pred = results['Predicted_class'], 
                               labels = names)
     else:
         min_alpha = np.min(list(results['Metrics'].keys()))
         alpha = alpha if alpha != None else min_alpha
-        cm = confusion_matrix(y_true = results['Observed'],
+        cm = metrics.confusion_matrix(y_true = results['Observed'],
                               y_pred = results['Predictions'][alpha],
                               labels = names)
 
@@ -115,30 +116,32 @@ def plot_conf_mat(results, title = '', cmap = None, normalize = True,
     if save != None:
         plt.savefig(save)
 
+    return None
+
 
 def plot_metric(summary_df : pd.DataFrame, alpha_star = None, color = 'red'):
     '''
     Takes a data frame of model metrics and optionally alpha star and
-    creates a scatter plot given metric against alpha values.
+    creates a scatter plot given metrics against alpha values.
     
     Parameters
     ----------
-    **summary_df** : *pd.DataFrame*
-        > A data frame created by `scmkl.get_summary()`.
+    summary_df : pd.DataFrame
+        Dataframe created by `scmkl.get_summary()`.
 
-    **alpha_star** : *None* | *float*
-        > If not *None*, a label will be added for tuned alpha_star 
+    alpha_star : None | float
+        > If `not None`, a label will be added for tuned `alpha_star` 
         being optimal model parameter for performance from cross 
         validation on the training data. Can be calculated with 
         `scmkl.optimize_alpha()`. 
 
-    **color** : *str*
-        > Color to make points on plot.
+    color : str
+        Color to make points on plot.
 
     Returns
     -------
-    **metric_plot** : *plotnine.ggplot*
-        > A plot with alpha values on x-axis and metric on y-axis.
+    metric_plot : plotnine.ggplot
+        A plot with alpha values on x-axis and metric on y-axis.
 
     Examples
     --------

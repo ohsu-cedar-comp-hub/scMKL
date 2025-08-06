@@ -64,144 +64,154 @@
 </span><span id="L-7"><a href="#L-7"><span class="linenos">  7</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">scmkl.test</span><span class="w"> </span><span class="kn">import</span> <span class="n">predict</span><span class="p">,</span> <span class="n">find_selected_groups</span>
 </span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a>
 </span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a>
-</span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">adata</span> <span class="p">:</span> <span class="n">ad</span><span class="o">.</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">alpha_list</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a>        <span class="n">metrics</span> <span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">return_probs</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="sd">    Wrapper function for training and test with multiple alpha values.</span>
-</span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="sd">    Returns metrics, predictions, group weights, and resource usage.</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a>
-</span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a><span class="sd">    Parameters</span>
-</span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a><span class="sd">    ----------</span>
-</span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a><span class="sd">    **adata** : *AnnData* </span>
-</span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a><span class="sd">        &gt; A processed *AnnData* with `&#39;Z_train&#39;`, `&#39;Z_test&#39;`, and </span>
-</span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a><span class="sd">        `&#39;group_dict&#39;` keys in `adata.uns`.</span>
-</span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a><span class="sd">    </span>
-</span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a><span class="sd">    **alpha_list** : *np.ndarray* </span>
-</span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a><span class="sd">        &gt; `alpha` values to create models using. Alpha refers to the </span>
-</span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a><span class="sd">        penalty parameter in Group Lasso. Larger alphas force group </span>
-</span><span id="L-25"><a href="#L-25"><span class="linenos"> 25</span></a><span class="sd">        weights to shrink towards 0 while smaller alphas apply a lesser </span>
-</span><span id="L-26"><a href="#L-26"><span class="linenos"> 26</span></a><span class="sd">        penalty to kernal weights.</span>
-</span><span id="L-27"><a href="#L-27"><span class="linenos"> 27</span></a>
-</span><span id="L-28"><a href="#L-28"><span class="linenos"> 28</span></a><span class="sd">    **metrics** : *list[str]*</span>
-</span><span id="L-29"><a href="#L-29"><span class="linenos"> 29</span></a><span class="sd">        &gt; What metrics should be calculated on predictions. Options are </span>
-</span><span id="L-30"><a href="#L-30"><span class="linenos"> 30</span></a><span class="sd">        [&#39;AUROC&#39;, &#39;F1-Score&#39;, &#39;Accuracy&#39;, &#39;Precision&#39;, &#39;Recall&#39;]. When </span>
-</span><span id="L-31"><a href="#L-31"><span class="linenos"> 31</span></a><span class="sd">        set to `None`, all metrics are calculated.</span>
-</span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a><span class="sd">    </span>
-</span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a><span class="sd">    Returns</span>
-</span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a><span class="sd">    -------</span>
-</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a><span class="sd">    **results** : *dict*</span>
-</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a><span class="sd">    &gt; With keys and values: </span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a>
-</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a><span class="sd">    &gt; `&#39;Metrics&#39;` : a nested dictionary as `[alpha][metric]` = value.</span>
-</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a><span class="sd">    </span>
-</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a><span class="sd">    &gt; `&#39;Selected_groups&#39;` : a dictionary as `[alpha]` = array of </span>
-</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="sd">        groups with nonzero weights.</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">ad</span><span class="o">.</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">alpha_list</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a>        <span class="n">metrics</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+</span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a>        <span class="n">return_probs</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="sd">    Wrapper function for training and test with multiple alpha values.</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a><span class="sd">    Returns metrics, predictions, group weights, and resource usage.</span>
+</span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a>
+</span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a><span class="sd">    Parameters</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a><span class="sd">    ----------</span>
+</span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a><span class="sd">    adata : ad.AnnData </span>
+</span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a><span class="sd">        A processed `ad.AnnData` with `&#39;Z_train&#39;`, `&#39;Z_test&#39;`, and </span>
+</span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a><span class="sd">        `&#39;group_dict&#39;` keys in `adata.uns`.</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a><span class="sd">    </span>
+</span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a><span class="sd">    alpha_list : np.ndarray </span>
+</span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a><span class="sd">        Sparsity values to create models with. Alpha refers to the </span>
+</span><span id="L-25"><a href="#L-25"><span class="linenos"> 25</span></a><span class="sd">        penalty parameter in Group Lasso. Larger alphas force group </span>
+</span><span id="L-26"><a href="#L-26"><span class="linenos"> 26</span></a><span class="sd">        weights to shrink towards zero while smaller alphas apply a </span>
+</span><span id="L-27"><a href="#L-27"><span class="linenos"> 27</span></a><span class="sd">        lesser penalty to kernal weights. Values too large will results </span>
+</span><span id="L-28"><a href="#L-28"><span class="linenos"> 28</span></a><span class="sd">        in models that weight all groups as zero.</span>
+</span><span id="L-29"><a href="#L-29"><span class="linenos"> 29</span></a>
+</span><span id="L-30"><a href="#L-30"><span class="linenos"> 30</span></a><span class="sd">    metrics : list[str]</span>
+</span><span id="L-31"><a href="#L-31"><span class="linenos"> 31</span></a><span class="sd">        Metrics that should be calculated on predictions. Options are </span>
+</span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a><span class="sd">        `[&#39;AUROC&#39;, &#39;F1-Score&#39;, &#39;Accuracy&#39;, &#39;Precision&#39;, &#39;Recall&#39;]`. </span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a><span class="sd">        When set to `None`, all metrics are calculated.</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a><span class="sd">    </span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a><span class="sd">    Returns</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a><span class="sd">    -------</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a><span class="sd">    results : dict</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a><span class="sd">        Results with keys and values: </span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a>
+</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a><span class="sd">        `&#39;Metrics&#39;` (dict): </span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="sd">        A nested dictionary as `[alpha][metric] = value`.</span>
 </span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a>
-</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a><span class="sd">    &gt; `&#39;Norms&#39;` : a dictionary as `[alpha]` = array of kernel weights</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="sd">        for each group, order respective to &#39;Group_names&#39;.</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a>
-</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="sd">    &gt; `&#39;Predictions&#39;` : a dictionary as `[alpha]` = predicted class</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a><span class="sd">        respective to &#39;Observations&#39; for that `alpha`.</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a>
-</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a><span class="sd">    &gt; `&#39;Observed&#39;` : an array of ground truth cell labels from the</span>
-</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a><span class="sd">        test set.</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a>
-</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a><span class="sd">    &gt; `&#39;Test_indices&#39;` : indices of samples respective to adata </span>
-</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a><span class="sd">        used in the training set.</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a><span class="sd">        `&#39;Group_names&#39;` (np.ndarray): </span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="sd">        Array of group names used in model(s).</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a><span class="sd">    </span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="sd">        `&#39;Selected_groups&#39;` (dict): </span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a><span class="sd">        A nested dictionary as `[alpha] = np.array([nonzero_groups])`.</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a><span class="sd">        Nonzero groups are groups that had a kernel weight above zero.</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a>
+</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a><span class="sd">        `&#39;Norms&#39;` (dict): </span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a><span class="sd">        A nested dictionary as `[alpha] = np.array([kernel_weights])`</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a><span class="sd">        Order of `kernel_weights` is respective to `&#39;Group_names&#39;` </span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a><span class="sd">        values.</span>
 </span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>
-</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a><span class="sd">    &gt; `&#39;Group_names&#39;` : an array of group names respective to each</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a><span class="sd">        array in &#39;Norms&#39;.</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a><span class="sd">        `&#39;Observed&#39;` (np.nparray): </span>
+</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a><span class="sd">        An array of ground truth cell labels from the test set.</span>
 </span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a>
-</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a><span class="sd">    &gt; `&#39;Model&#39;` : a dictionary where `[alpha]` = Celer Group Lasso</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a><span class="sd">        object for that `alpha`.</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a>
-</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a><span class="sd">    &gt; `&#39;RAM_usage&#39;` : memory usage after training models for each </span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a><span class="sd">        `alpha`.</span>
-</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>
-</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a><span class="sd">    Examples</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a><span class="sd">    --------</span>
-</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a><span class="sd">    &gt;&gt;&gt; results = scmkl.run(adata = adata, </span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a><span class="sd">    ...                     alpha_list = np.array([0.05, 0.1, 0.5]))</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a><span class="sd">    &gt;&gt;&gt; results</span>
-</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a><span class="sd">    dict_keys([&#39;Metrics&#39;, &#39;Selected_groups&#39;, &#39;Norms&#39;, &#39;Predictions&#39;, </span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a><span class="sd">    ...        &#39;Observed&#39;, &#39;Test_indices&#39;, &#39;Group_names&#39;, &#39;Models&#39;, </span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="sd">    ...        &#39;Train_time&#39;, &#39;RAM_usage&#39;])</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a><span class="sd">    &gt;&gt;&gt; # List of alpha values</span>
-</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a><span class="sd">    &gt;&gt;&gt; results[&#39;Metrics&#39;].keys()</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a><span class="sd">    dict_keys([0.05, 0.1, 0.5])</span>
-</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a><span class="sd">    &gt;&gt;&gt; results[&#39;Metrics&#39;][0.05]</span>
-</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a><span class="sd">    {&#39;AUROC&#39;: 0.9859,</span>
-</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a><span class="sd">    &#39;Accuracy&#39;: 0.945,</span>
-</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a><span class="sd">    &#39;F1-Score&#39;: 0.9452736318407959,</span>
-</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="sd">    &#39;Precision&#39;: 0.9405940594059405,</span>
-</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a><span class="sd">    &#39;Recall&#39;: 0.95}</span>
-</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a><span class="sd">    &#39;&#39;&#39;</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>    <span class="k">if</span> <span class="n">metrics</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>        <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AUROC&#39;</span><span class="p">,</span> <span class="s1">&#39;F1-Score&#39;</span><span class="p">,</span><span class="s1">&#39;Accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;Precision&#39;</span><span class="p">,</span> <span class="s1">&#39;Recall&#39;</span><span class="p">]</span>
-</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>
-</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>    <span class="c1"># Initializing variables to capture metrics</span>
-</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>    <span class="n">group_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;group_dict&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>    <span class="n">preds</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>    <span class="n">group_norms</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>    <span class="n">mets_dict</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>    <span class="n">selected_groups</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>    <span class="n">train_time</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>    <span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>    <span class="n">probs</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a><span class="sd">        `&#39;Predictions&#39;` (dict): </span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a><span class="sd">        A nested dictionary as `[alpha] = predicted_class` respective </span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a><span class="sd">        to `&#39;Observations&#39;` for `alpha`.</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a>
+</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a><span class="sd">        `&#39;Test_indices&#39;` (np.array: </span>
+</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a><span class="sd">        Indices of samples respective to adata used in the training </span>
+</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a><span class="sd">        set.</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>
+</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a><span class="sd">        `&#39;Model&#39;` (dict): </span>
+</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a><span class="sd">        A nested dictionary where `[alpha] = celer.GroupLasso` object </span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a><span class="sd">        for `alpha`.</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>
+</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a><span class="sd">        `&#39;RAM_usage&#39;` (dict): </span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="sd">        A nested dictionary with memory usage in GB after </span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="sd">        training models for each `alpha`.</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a>
+</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a><span class="sd">    Examples</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a><span class="sd">    --------</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a><span class="sd">    &gt;&gt;&gt; results = scmkl.run(adata = adata, </span>
+</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a><span class="sd">    ...                     alpha_list = np.array([0.05, 0.1, 0.5]))</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a><span class="sd">    &gt;&gt;&gt; results</span>
+</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a><span class="sd">    dict_keys([&#39;Metrics&#39;, &#39;Selected_groups&#39;, &#39;Norms&#39;, &#39;Predictions&#39;, </span>
+</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a><span class="sd">    ...        &#39;Observed&#39;, &#39;Test_indices&#39;, &#39;Group_names&#39;, &#39;Models&#39;, </span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="sd">    ...        &#39;Train_time&#39;, &#39;RAM_usage&#39;])</span>
+</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a><span class="sd">    &gt;&gt;&gt; alpha values</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a><span class="sd">    &gt;&gt;&gt; results[&#39;Metrics&#39;].keys()</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a><span class="sd">    dict_keys([0.05, 0.1, 0.5])</span>
+</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a><span class="sd">    &gt;&gt;&gt; results[&#39;Metrics&#39;][0.05]</span>
+</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a><span class="sd">    {&#39;AUROC&#39;: 0.9859,</span>
+</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a><span class="sd">    &#39;Accuracy&#39;: 0.945,</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a><span class="sd">    &#39;F1-Score&#39;: 0.9452736318407959,</span>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a><span class="sd">    &#39;Precision&#39;: 0.9405940594059405,</span>
+</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a><span class="sd">    &#39;Recall&#39;: 0.95}</span>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>    <span class="k">if</span> <span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>        <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AUROC&#39;</span><span class="p">,</span> <span class="s1">&#39;F1-Score&#39;</span><span class="p">,</span><span class="s1">&#39;Accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;Precision&#39;</span><span class="p">,</span> <span class="s1">&#39;Recall&#39;</span><span class="p">]</span>
 </span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>
-</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>    <span class="n">D</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">]</span>
-</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>
-</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>    <span class="c1"># Generating models for each alpha and outputs</span>
-</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>    <span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="n">alpha_list</span><span class="p">:</span>
-</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>        
-</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  Evaluating model. Alpha: </span><span class="si">{</span><span class="n">alpha</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">flush</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>
-</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>        <span class="n">train_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>
-</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">train_model</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">group_size</span><span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">D</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">)</span>
-</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>
-</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>        <span class="k">if</span> <span class="n">return_probs</span><span class="p">:</span>
-</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>            <span class="n">alpha_res</span> <span class="o">=</span> <span class="n">predict</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> 
-</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>                                <span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">,</span>
-</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>                                <span class="n">return_probs</span> <span class="o">=</span> <span class="n">return_probs</span><span class="p">)</span>
-</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>            <span class="n">preds</span><span class="p">[</span><span class="n">alpha</span><span class="p">],</span> <span class="n">mets_dict</span><span class="p">[</span><span class="n">alpha</span><span class="p">],</span> <span class="n">probs</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha_res</span>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>    <span class="c1"># Initializing variables to capture metrics</span>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>    <span class="n">group_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;group_dict&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>    <span class="n">preds</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>    <span class="n">group_norms</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>    <span class="n">mets_dict</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>    <span class="n">selected_groups</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>    <span class="n">train_time</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>    <span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>    <span class="n">probs</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>    <span class="n">D</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">]</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>    <span class="c1"># Generating models for each alpha and outputs</span>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>    <span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="n">alpha_list</span><span class="p">:</span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>        
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  Evaluating model. Alpha: </span><span class="si">{</span><span class="n">alpha</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">flush</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 </span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>
-</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>            <span class="n">alpha_res</span> <span class="o">=</span> <span class="n">predict</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> 
-</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>                                <span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">,</span>
-</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>                                <span class="n">return_probs</span> <span class="o">=</span> <span class="n">return_probs</span><span class="p">)</span>
-</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>            <span class="n">preds</span><span class="p">[</span><span class="n">alpha</span><span class="p">],</span> <span class="n">mets_dict</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha_res</span>
-</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>
-</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>        <span class="n">selected_groups</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">find_selected_groups</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
-</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>
-</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>        <span class="n">kernel_weights</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">coef_</span>
-</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>        <span class="n">group_norms</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>            <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">kernel_weights</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">D</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">D</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
-</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">group_names</span><span class="p">))</span>
-</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>            <span class="p">]</span>
-</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>        
-</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>        <span class="n">models</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span>
-</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>        
-</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>        <span class="n">train_end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>        <span class="n">train_time</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_end</span> <span class="o">-</span> <span class="n">train_start</span>
-</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>
-</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>    <span class="c1"># Combining results into one object</span>
-</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mets_dict</span>
-</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Selected_groups&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">selected_groups</span>
-</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Norms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_norms</span>
-</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Predictions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">preds</span>
-</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Observed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]]</span>
-</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Test_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]</span>
-</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Group_names&#39;</span><span class="p">]</span><span class="o">=</span> <span class="n">group_names</span>
-</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Models&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span>
-</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Train_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_time</span>
-</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;RAM_usage&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">tracemalloc</span><span class="o">.</span><span class="n">get_traced_memory</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="si">}</span><span class="s1"> GB&#39;</span>
-</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Probabilities&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">probs</span>
-</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>
-</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>    <span class="k">return</span> <span class="n">results</span>
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>        <span class="n">train_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">train_model</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">group_size</span><span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">D</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">)</span>
+</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>        <span class="k">if</span> <span class="n">return_probs</span><span class="p">:</span>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>            <span class="n">alpha_res</span> <span class="o">=</span> <span class="n">predict</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> 
+</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>                                <span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">,</span>
+</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>                                <span class="n">return_probs</span> <span class="o">=</span> <span class="n">return_probs</span><span class="p">)</span>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>            <span class="n">preds</span><span class="p">[</span><span class="n">alpha</span><span class="p">],</span> <span class="n">mets_dict</span><span class="p">[</span><span class="n">alpha</span><span class="p">],</span> <span class="n">probs</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha_res</span>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>            <span class="n">alpha_res</span> <span class="o">=</span> <span class="n">predict</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> 
+</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>                                <span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">,</span>
+</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>                                <span class="n">return_probs</span> <span class="o">=</span> <span class="n">return_probs</span><span class="p">)</span>
+</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>            <span class="n">preds</span><span class="p">[</span><span class="n">alpha</span><span class="p">],</span> <span class="n">mets_dict</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha_res</span>
+</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>
+</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>        <span class="n">selected_groups</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">find_selected_groups</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>
+</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>        <span class="n">kernel_weights</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">coef_</span>
+</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>        <span class="n">group_norms</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>            <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">kernel_weights</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">D</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">D</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">group_names</span><span class="p">))</span>
+</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>            <span class="p">]</span>
+</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>        
+</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>        <span class="n">models</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span>
+</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>        
+</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>        <span class="n">train_end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>        <span class="n">train_time</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_end</span> <span class="o">-</span> <span class="n">train_start</span>
+</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>
+</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>    <span class="c1"># Combining results into one object</span>
+</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mets_dict</span>
+</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Selected_groups&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">selected_groups</span>
+</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Norms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_norms</span>
+</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Predictions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">preds</span>
+</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Observed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]]</span>
+</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Test_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]</span>
+</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Group_names&#39;</span><span class="p">]</span><span class="o">=</span> <span class="n">group_names</span>
+</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Models&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span>
+</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Train_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_time</span>
+</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;RAM_usage&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">tracemalloc</span><span class="o">.</span><span class="n">get_traced_memory</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mf">1e9</span><span class="si">}</span><span class="s1"> GB&#39;</span>
+</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Probabilities&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">probs</span>
+</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a>
+</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a>    <span class="k">return</span> <span class="n">results</span>
 </span></pre></div>
 
 
@@ -211,235 +221,226 @@
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">run</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">adata</span><span class="p">:</span> <span class="n">anndata</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span>,</span><span class="param">	<span class="n">alpha_list</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>,</span><span class="param">	<span class="n">metrics</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">return_probs</span><span class="o">=</span><span class="kc">False</span></span><span class="return-annotation">) -> <span class="nb">dict</span>:</span></span>
+        <span class="name">run</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">adata</span><span class="p">:</span> <span class="n">anndata</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span>,</span><span class="param">	<span class="n">alpha_list</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>,</span><span class="param">	<span class="n">metrics</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">return_probs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></span><span class="return-annotation">) -> <span class="nb">dict</span>:</span></span>
 
                 <label class="view-source-button" for="run-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#run"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="run-11"><a href="#run-11"><span class="linenos"> 11</span></a><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">adata</span> <span class="p">:</span> <span class="n">ad</span><span class="o">.</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">alpha_list</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
-</span><span id="run-12"><a href="#run-12"><span class="linenos"> 12</span></a>        <span class="n">metrics</span> <span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">return_probs</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span id="run-13"><a href="#run-13"><span class="linenos"> 13</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-</span><span id="run-14"><a href="#run-14"><span class="linenos"> 14</span></a><span class="sd">    Wrapper function for training and test with multiple alpha values.</span>
-</span><span id="run-15"><a href="#run-15"><span class="linenos"> 15</span></a><span class="sd">    Returns metrics, predictions, group weights, and resource usage.</span>
-</span><span id="run-16"><a href="#run-16"><span class="linenos"> 16</span></a>
-</span><span id="run-17"><a href="#run-17"><span class="linenos"> 17</span></a><span class="sd">    Parameters</span>
-</span><span id="run-18"><a href="#run-18"><span class="linenos"> 18</span></a><span class="sd">    ----------</span>
-</span><span id="run-19"><a href="#run-19"><span class="linenos"> 19</span></a><span class="sd">    **adata** : *AnnData* </span>
-</span><span id="run-20"><a href="#run-20"><span class="linenos"> 20</span></a><span class="sd">        &gt; A processed *AnnData* with `&#39;Z_train&#39;`, `&#39;Z_test&#39;`, and </span>
-</span><span id="run-21"><a href="#run-21"><span class="linenos"> 21</span></a><span class="sd">        `&#39;group_dict&#39;` keys in `adata.uns`.</span>
-</span><span id="run-22"><a href="#run-22"><span class="linenos"> 22</span></a><span class="sd">    </span>
-</span><span id="run-23"><a href="#run-23"><span class="linenos"> 23</span></a><span class="sd">    **alpha_list** : *np.ndarray* </span>
-</span><span id="run-24"><a href="#run-24"><span class="linenos"> 24</span></a><span class="sd">        &gt; `alpha` values to create models using. Alpha refers to the </span>
-</span><span id="run-25"><a href="#run-25"><span class="linenos"> 25</span></a><span class="sd">        penalty parameter in Group Lasso. Larger alphas force group </span>
-</span><span id="run-26"><a href="#run-26"><span class="linenos"> 26</span></a><span class="sd">        weights to shrink towards 0 while smaller alphas apply a lesser </span>
-</span><span id="run-27"><a href="#run-27"><span class="linenos"> 27</span></a><span class="sd">        penalty to kernal weights.</span>
-</span><span id="run-28"><a href="#run-28"><span class="linenos"> 28</span></a>
-</span><span id="run-29"><a href="#run-29"><span class="linenos"> 29</span></a><span class="sd">    **metrics** : *list[str]*</span>
-</span><span id="run-30"><a href="#run-30"><span class="linenos"> 30</span></a><span class="sd">        &gt; What metrics should be calculated on predictions. Options are </span>
-</span><span id="run-31"><a href="#run-31"><span class="linenos"> 31</span></a><span class="sd">        [&#39;AUROC&#39;, &#39;F1-Score&#39;, &#39;Accuracy&#39;, &#39;Precision&#39;, &#39;Recall&#39;]. When </span>
-</span><span id="run-32"><a href="#run-32"><span class="linenos"> 32</span></a><span class="sd">        set to `None`, all metrics are calculated.</span>
-</span><span id="run-33"><a href="#run-33"><span class="linenos"> 33</span></a><span class="sd">    </span>
-</span><span id="run-34"><a href="#run-34"><span class="linenos"> 34</span></a><span class="sd">    Returns</span>
-</span><span id="run-35"><a href="#run-35"><span class="linenos"> 35</span></a><span class="sd">    -------</span>
-</span><span id="run-36"><a href="#run-36"><span class="linenos"> 36</span></a><span class="sd">    **results** : *dict*</span>
-</span><span id="run-37"><a href="#run-37"><span class="linenos"> 37</span></a><span class="sd">    &gt; With keys and values: </span>
-</span><span id="run-38"><a href="#run-38"><span class="linenos"> 38</span></a>
-</span><span id="run-39"><a href="#run-39"><span class="linenos"> 39</span></a><span class="sd">    &gt; `&#39;Metrics&#39;` : a nested dictionary as `[alpha][metric]` = value.</span>
-</span><span id="run-40"><a href="#run-40"><span class="linenos"> 40</span></a><span class="sd">    </span>
-</span><span id="run-41"><a href="#run-41"><span class="linenos"> 41</span></a><span class="sd">    &gt; `&#39;Selected_groups&#39;` : a dictionary as `[alpha]` = array of </span>
-</span><span id="run-42"><a href="#run-42"><span class="linenos"> 42</span></a><span class="sd">        groups with nonzero weights.</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="run-11"><a href="#run-11"><span class="linenos"> 11</span></a><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">ad</span><span class="o">.</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">alpha_list</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+</span><span id="run-12"><a href="#run-12"><span class="linenos"> 12</span></a>        <span class="n">metrics</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+</span><span id="run-13"><a href="#run-13"><span class="linenos"> 13</span></a>        <span class="n">return_probs</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="run-14"><a href="#run-14"><span class="linenos"> 14</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="run-15"><a href="#run-15"><span class="linenos"> 15</span></a><span class="sd">    Wrapper function for training and test with multiple alpha values.</span>
+</span><span id="run-16"><a href="#run-16"><span class="linenos"> 16</span></a><span class="sd">    Returns metrics, predictions, group weights, and resource usage.</span>
+</span><span id="run-17"><a href="#run-17"><span class="linenos"> 17</span></a>
+</span><span id="run-18"><a href="#run-18"><span class="linenos"> 18</span></a><span class="sd">    Parameters</span>
+</span><span id="run-19"><a href="#run-19"><span class="linenos"> 19</span></a><span class="sd">    ----------</span>
+</span><span id="run-20"><a href="#run-20"><span class="linenos"> 20</span></a><span class="sd">    adata : ad.AnnData </span>
+</span><span id="run-21"><a href="#run-21"><span class="linenos"> 21</span></a><span class="sd">        A processed `ad.AnnData` with `&#39;Z_train&#39;`, `&#39;Z_test&#39;`, and </span>
+</span><span id="run-22"><a href="#run-22"><span class="linenos"> 22</span></a><span class="sd">        `&#39;group_dict&#39;` keys in `adata.uns`.</span>
+</span><span id="run-23"><a href="#run-23"><span class="linenos"> 23</span></a><span class="sd">    </span>
+</span><span id="run-24"><a href="#run-24"><span class="linenos"> 24</span></a><span class="sd">    alpha_list : np.ndarray </span>
+</span><span id="run-25"><a href="#run-25"><span class="linenos"> 25</span></a><span class="sd">        Sparsity values to create models with. Alpha refers to the </span>
+</span><span id="run-26"><a href="#run-26"><span class="linenos"> 26</span></a><span class="sd">        penalty parameter in Group Lasso. Larger alphas force group </span>
+</span><span id="run-27"><a href="#run-27"><span class="linenos"> 27</span></a><span class="sd">        weights to shrink towards zero while smaller alphas apply a </span>
+</span><span id="run-28"><a href="#run-28"><span class="linenos"> 28</span></a><span class="sd">        lesser penalty to kernal weights. Values too large will results </span>
+</span><span id="run-29"><a href="#run-29"><span class="linenos"> 29</span></a><span class="sd">        in models that weight all groups as zero.</span>
+</span><span id="run-30"><a href="#run-30"><span class="linenos"> 30</span></a>
+</span><span id="run-31"><a href="#run-31"><span class="linenos"> 31</span></a><span class="sd">    metrics : list[str]</span>
+</span><span id="run-32"><a href="#run-32"><span class="linenos"> 32</span></a><span class="sd">        Metrics that should be calculated on predictions. Options are </span>
+</span><span id="run-33"><a href="#run-33"><span class="linenos"> 33</span></a><span class="sd">        `[&#39;AUROC&#39;, &#39;F1-Score&#39;, &#39;Accuracy&#39;, &#39;Precision&#39;, &#39;Recall&#39;]`. </span>
+</span><span id="run-34"><a href="#run-34"><span class="linenos"> 34</span></a><span class="sd">        When set to `None`, all metrics are calculated.</span>
+</span><span id="run-35"><a href="#run-35"><span class="linenos"> 35</span></a><span class="sd">    </span>
+</span><span id="run-36"><a href="#run-36"><span class="linenos"> 36</span></a><span class="sd">    Returns</span>
+</span><span id="run-37"><a href="#run-37"><span class="linenos"> 37</span></a><span class="sd">    -------</span>
+</span><span id="run-38"><a href="#run-38"><span class="linenos"> 38</span></a><span class="sd">    results : dict</span>
+</span><span id="run-39"><a href="#run-39"><span class="linenos"> 39</span></a><span class="sd">        Results with keys and values: </span>
+</span><span id="run-40"><a href="#run-40"><span class="linenos"> 40</span></a>
+</span><span id="run-41"><a href="#run-41"><span class="linenos"> 41</span></a><span class="sd">        `&#39;Metrics&#39;` (dict): </span>
+</span><span id="run-42"><a href="#run-42"><span class="linenos"> 42</span></a><span class="sd">        A nested dictionary as `[alpha][metric] = value`.</span>
 </span><span id="run-43"><a href="#run-43"><span class="linenos"> 43</span></a>
-</span><span id="run-44"><a href="#run-44"><span class="linenos"> 44</span></a><span class="sd">    &gt; `&#39;Norms&#39;` : a dictionary as `[alpha]` = array of kernel weights</span>
-</span><span id="run-45"><a href="#run-45"><span class="linenos"> 45</span></a><span class="sd">        for each group, order respective to &#39;Group_names&#39;.</span>
-</span><span id="run-46"><a href="#run-46"><span class="linenos"> 46</span></a>
-</span><span id="run-47"><a href="#run-47"><span class="linenos"> 47</span></a><span class="sd">    &gt; `&#39;Predictions&#39;` : a dictionary as `[alpha]` = predicted class</span>
-</span><span id="run-48"><a href="#run-48"><span class="linenos"> 48</span></a><span class="sd">        respective to &#39;Observations&#39; for that `alpha`.</span>
-</span><span id="run-49"><a href="#run-49"><span class="linenos"> 49</span></a>
-</span><span id="run-50"><a href="#run-50"><span class="linenos"> 50</span></a><span class="sd">    &gt; `&#39;Observed&#39;` : an array of ground truth cell labels from the</span>
-</span><span id="run-51"><a href="#run-51"><span class="linenos"> 51</span></a><span class="sd">        test set.</span>
-</span><span id="run-52"><a href="#run-52"><span class="linenos"> 52</span></a>
-</span><span id="run-53"><a href="#run-53"><span class="linenos"> 53</span></a><span class="sd">    &gt; `&#39;Test_indices&#39;` : indices of samples respective to adata </span>
-</span><span id="run-54"><a href="#run-54"><span class="linenos"> 54</span></a><span class="sd">        used in the training set.</span>
+</span><span id="run-44"><a href="#run-44"><span class="linenos"> 44</span></a><span class="sd">        `&#39;Group_names&#39;` (np.ndarray): </span>
+</span><span id="run-45"><a href="#run-45"><span class="linenos"> 45</span></a><span class="sd">        Array of group names used in model(s).</span>
+</span><span id="run-46"><a href="#run-46"><span class="linenos"> 46</span></a><span class="sd">    </span>
+</span><span id="run-47"><a href="#run-47"><span class="linenos"> 47</span></a><span class="sd">        `&#39;Selected_groups&#39;` (dict): </span>
+</span><span id="run-48"><a href="#run-48"><span class="linenos"> 48</span></a><span class="sd">        A nested dictionary as `[alpha] = np.array([nonzero_groups])`.</span>
+</span><span id="run-49"><a href="#run-49"><span class="linenos"> 49</span></a><span class="sd">        Nonzero groups are groups that had a kernel weight above zero.</span>
+</span><span id="run-50"><a href="#run-50"><span class="linenos"> 50</span></a>
+</span><span id="run-51"><a href="#run-51"><span class="linenos"> 51</span></a><span class="sd">        `&#39;Norms&#39;` (dict): </span>
+</span><span id="run-52"><a href="#run-52"><span class="linenos"> 52</span></a><span class="sd">        A nested dictionary as `[alpha] = np.array([kernel_weights])`</span>
+</span><span id="run-53"><a href="#run-53"><span class="linenos"> 53</span></a><span class="sd">        Order of `kernel_weights` is respective to `&#39;Group_names&#39;` </span>
+</span><span id="run-54"><a href="#run-54"><span class="linenos"> 54</span></a><span class="sd">        values.</span>
 </span><span id="run-55"><a href="#run-55"><span class="linenos"> 55</span></a>
-</span><span id="run-56"><a href="#run-56"><span class="linenos"> 56</span></a><span class="sd">    &gt; `&#39;Group_names&#39;` : an array of group names respective to each</span>
-</span><span id="run-57"><a href="#run-57"><span class="linenos"> 57</span></a><span class="sd">        array in &#39;Norms&#39;.</span>
+</span><span id="run-56"><a href="#run-56"><span class="linenos"> 56</span></a><span class="sd">        `&#39;Observed&#39;` (np.nparray): </span>
+</span><span id="run-57"><a href="#run-57"><span class="linenos"> 57</span></a><span class="sd">        An array of ground truth cell labels from the test set.</span>
 </span><span id="run-58"><a href="#run-58"><span class="linenos"> 58</span></a>
-</span><span id="run-59"><a href="#run-59"><span class="linenos"> 59</span></a><span class="sd">    &gt; `&#39;Model&#39;` : a dictionary where `[alpha]` = Celer Group Lasso</span>
-</span><span id="run-60"><a href="#run-60"><span class="linenos"> 60</span></a><span class="sd">        object for that `alpha`.</span>
-</span><span id="run-61"><a href="#run-61"><span class="linenos"> 61</span></a>
-</span><span id="run-62"><a href="#run-62"><span class="linenos"> 62</span></a><span class="sd">    &gt; `&#39;RAM_usage&#39;` : memory usage after training models for each </span>
-</span><span id="run-63"><a href="#run-63"><span class="linenos"> 63</span></a><span class="sd">        `alpha`.</span>
-</span><span id="run-64"><a href="#run-64"><span class="linenos"> 64</span></a>
-</span><span id="run-65"><a href="#run-65"><span class="linenos"> 65</span></a><span class="sd">    Examples</span>
-</span><span id="run-66"><a href="#run-66"><span class="linenos"> 66</span></a><span class="sd">    --------</span>
-</span><span id="run-67"><a href="#run-67"><span class="linenos"> 67</span></a><span class="sd">    &gt;&gt;&gt; results = scmkl.run(adata = adata, </span>
-</span><span id="run-68"><a href="#run-68"><span class="linenos"> 68</span></a><span class="sd">    ...                     alpha_list = np.array([0.05, 0.1, 0.5]))</span>
-</span><span id="run-69"><a href="#run-69"><span class="linenos"> 69</span></a><span class="sd">    &gt;&gt;&gt; results</span>
-</span><span id="run-70"><a href="#run-70"><span class="linenos"> 70</span></a><span class="sd">    dict_keys([&#39;Metrics&#39;, &#39;Selected_groups&#39;, &#39;Norms&#39;, &#39;Predictions&#39;, </span>
-</span><span id="run-71"><a href="#run-71"><span class="linenos"> 71</span></a><span class="sd">    ...        &#39;Observed&#39;, &#39;Test_indices&#39;, &#39;Group_names&#39;, &#39;Models&#39;, </span>
-</span><span id="run-72"><a href="#run-72"><span class="linenos"> 72</span></a><span class="sd">    ...        &#39;Train_time&#39;, &#39;RAM_usage&#39;])</span>
-</span><span id="run-73"><a href="#run-73"><span class="linenos"> 73</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="run-74"><a href="#run-74"><span class="linenos"> 74</span></a><span class="sd">    &gt;&gt;&gt; # List of alpha values</span>
-</span><span id="run-75"><a href="#run-75"><span class="linenos"> 75</span></a><span class="sd">    &gt;&gt;&gt; results[&#39;Metrics&#39;].keys()</span>
-</span><span id="run-76"><a href="#run-76"><span class="linenos"> 76</span></a><span class="sd">    dict_keys([0.05, 0.1, 0.5])</span>
-</span><span id="run-77"><a href="#run-77"><span class="linenos"> 77</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="run-78"><a href="#run-78"><span class="linenos"> 78</span></a><span class="sd">    &gt;&gt;&gt; results[&#39;Metrics&#39;][0.05]</span>
-</span><span id="run-79"><a href="#run-79"><span class="linenos"> 79</span></a><span class="sd">    {&#39;AUROC&#39;: 0.9859,</span>
-</span><span id="run-80"><a href="#run-80"><span class="linenos"> 80</span></a><span class="sd">    &#39;Accuracy&#39;: 0.945,</span>
-</span><span id="run-81"><a href="#run-81"><span class="linenos"> 81</span></a><span class="sd">    &#39;F1-Score&#39;: 0.9452736318407959,</span>
-</span><span id="run-82"><a href="#run-82"><span class="linenos"> 82</span></a><span class="sd">    &#39;Precision&#39;: 0.9405940594059405,</span>
-</span><span id="run-83"><a href="#run-83"><span class="linenos"> 83</span></a><span class="sd">    &#39;Recall&#39;: 0.95}</span>
-</span><span id="run-84"><a href="#run-84"><span class="linenos"> 84</span></a><span class="sd">    &#39;&#39;&#39;</span>
-</span><span id="run-85"><a href="#run-85"><span class="linenos"> 85</span></a>    <span class="k">if</span> <span class="n">metrics</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="run-86"><a href="#run-86"><span class="linenos"> 86</span></a>        <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AUROC&#39;</span><span class="p">,</span> <span class="s1">&#39;F1-Score&#39;</span><span class="p">,</span><span class="s1">&#39;Accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;Precision&#39;</span><span class="p">,</span> <span class="s1">&#39;Recall&#39;</span><span class="p">]</span>
-</span><span id="run-87"><a href="#run-87"><span class="linenos"> 87</span></a>
-</span><span id="run-88"><a href="#run-88"><span class="linenos"> 88</span></a>    <span class="c1"># Initializing variables to capture metrics</span>
-</span><span id="run-89"><a href="#run-89"><span class="linenos"> 89</span></a>    <span class="n">group_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;group_dict&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-</span><span id="run-90"><a href="#run-90"><span class="linenos"> 90</span></a>    <span class="n">preds</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="run-91"><a href="#run-91"><span class="linenos"> 91</span></a>    <span class="n">group_norms</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="run-92"><a href="#run-92"><span class="linenos"> 92</span></a>    <span class="n">mets_dict</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="run-93"><a href="#run-93"><span class="linenos"> 93</span></a>    <span class="n">selected_groups</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="run-94"><a href="#run-94"><span class="linenos"> 94</span></a>    <span class="n">train_time</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="run-95"><a href="#run-95"><span class="linenos"> 95</span></a>    <span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="run-96"><a href="#run-96"><span class="linenos"> 96</span></a>    <span class="n">probs</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="run-59"><a href="#run-59"><span class="linenos"> 59</span></a><span class="sd">        `&#39;Predictions&#39;` (dict): </span>
+</span><span id="run-60"><a href="#run-60"><span class="linenos"> 60</span></a><span class="sd">        A nested dictionary as `[alpha] = predicted_class` respective </span>
+</span><span id="run-61"><a href="#run-61"><span class="linenos"> 61</span></a><span class="sd">        to `&#39;Observations&#39;` for `alpha`.</span>
+</span><span id="run-62"><a href="#run-62"><span class="linenos"> 62</span></a>
+</span><span id="run-63"><a href="#run-63"><span class="linenos"> 63</span></a><span class="sd">        `&#39;Test_indices&#39;` (np.array: </span>
+</span><span id="run-64"><a href="#run-64"><span class="linenos"> 64</span></a><span class="sd">        Indices of samples respective to adata used in the training </span>
+</span><span id="run-65"><a href="#run-65"><span class="linenos"> 65</span></a><span class="sd">        set.</span>
+</span><span id="run-66"><a href="#run-66"><span class="linenos"> 66</span></a>
+</span><span id="run-67"><a href="#run-67"><span class="linenos"> 67</span></a><span class="sd">        `&#39;Model&#39;` (dict): </span>
+</span><span id="run-68"><a href="#run-68"><span class="linenos"> 68</span></a><span class="sd">        A nested dictionary where `[alpha] = celer.GroupLasso` object </span>
+</span><span id="run-69"><a href="#run-69"><span class="linenos"> 69</span></a><span class="sd">        for `alpha`.</span>
+</span><span id="run-70"><a href="#run-70"><span class="linenos"> 70</span></a>
+</span><span id="run-71"><a href="#run-71"><span class="linenos"> 71</span></a><span class="sd">        `&#39;RAM_usage&#39;` (dict): </span>
+</span><span id="run-72"><a href="#run-72"><span class="linenos"> 72</span></a><span class="sd">        A nested dictionary with memory usage in GB after </span>
+</span><span id="run-73"><a href="#run-73"><span class="linenos"> 73</span></a><span class="sd">        training models for each `alpha`.</span>
+</span><span id="run-74"><a href="#run-74"><span class="linenos"> 74</span></a>
+</span><span id="run-75"><a href="#run-75"><span class="linenos"> 75</span></a><span class="sd">    Examples</span>
+</span><span id="run-76"><a href="#run-76"><span class="linenos"> 76</span></a><span class="sd">    --------</span>
+</span><span id="run-77"><a href="#run-77"><span class="linenos"> 77</span></a><span class="sd">    &gt;&gt;&gt; results = scmkl.run(adata = adata, </span>
+</span><span id="run-78"><a href="#run-78"><span class="linenos"> 78</span></a><span class="sd">    ...                     alpha_list = np.array([0.05, 0.1, 0.5]))</span>
+</span><span id="run-79"><a href="#run-79"><span class="linenos"> 79</span></a><span class="sd">    &gt;&gt;&gt; results</span>
+</span><span id="run-80"><a href="#run-80"><span class="linenos"> 80</span></a><span class="sd">    dict_keys([&#39;Metrics&#39;, &#39;Selected_groups&#39;, &#39;Norms&#39;, &#39;Predictions&#39;, </span>
+</span><span id="run-81"><a href="#run-81"><span class="linenos"> 81</span></a><span class="sd">    ...        &#39;Observed&#39;, &#39;Test_indices&#39;, &#39;Group_names&#39;, &#39;Models&#39;, </span>
+</span><span id="run-82"><a href="#run-82"><span class="linenos"> 82</span></a><span class="sd">    ...        &#39;Train_time&#39;, &#39;RAM_usage&#39;])</span>
+</span><span id="run-83"><a href="#run-83"><span class="linenos"> 83</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="run-84"><a href="#run-84"><span class="linenos"> 84</span></a><span class="sd">    &gt;&gt;&gt; alpha values</span>
+</span><span id="run-85"><a href="#run-85"><span class="linenos"> 85</span></a><span class="sd">    &gt;&gt;&gt; results[&#39;Metrics&#39;].keys()</span>
+</span><span id="run-86"><a href="#run-86"><span class="linenos"> 86</span></a><span class="sd">    dict_keys([0.05, 0.1, 0.5])</span>
+</span><span id="run-87"><a href="#run-87"><span class="linenos"> 87</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="run-88"><a href="#run-88"><span class="linenos"> 88</span></a><span class="sd">    &gt;&gt;&gt; results[&#39;Metrics&#39;][0.05]</span>
+</span><span id="run-89"><a href="#run-89"><span class="linenos"> 89</span></a><span class="sd">    {&#39;AUROC&#39;: 0.9859,</span>
+</span><span id="run-90"><a href="#run-90"><span class="linenos"> 90</span></a><span class="sd">    &#39;Accuracy&#39;: 0.945,</span>
+</span><span id="run-91"><a href="#run-91"><span class="linenos"> 91</span></a><span class="sd">    &#39;F1-Score&#39;: 0.9452736318407959,</span>
+</span><span id="run-92"><a href="#run-92"><span class="linenos"> 92</span></a><span class="sd">    &#39;Precision&#39;: 0.9405940594059405,</span>
+</span><span id="run-93"><a href="#run-93"><span class="linenos"> 93</span></a><span class="sd">    &#39;Recall&#39;: 0.95}</span>
+</span><span id="run-94"><a href="#run-94"><span class="linenos"> 94</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="run-95"><a href="#run-95"><span class="linenos"> 95</span></a>    <span class="k">if</span> <span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="run-96"><a href="#run-96"><span class="linenos"> 96</span></a>        <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AUROC&#39;</span><span class="p">,</span> <span class="s1">&#39;F1-Score&#39;</span><span class="p">,</span><span class="s1">&#39;Accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;Precision&#39;</span><span class="p">,</span> <span class="s1">&#39;Recall&#39;</span><span class="p">]</span>
 </span><span id="run-97"><a href="#run-97"><span class="linenos"> 97</span></a>
-</span><span id="run-98"><a href="#run-98"><span class="linenos"> 98</span></a>    <span class="n">D</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">]</span>
-</span><span id="run-99"><a href="#run-99"><span class="linenos"> 99</span></a>
-</span><span id="run-100"><a href="#run-100"><span class="linenos">100</span></a>    <span class="c1"># Generating models for each alpha and outputs</span>
-</span><span id="run-101"><a href="#run-101"><span class="linenos">101</span></a>    <span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="n">alpha_list</span><span class="p">:</span>
-</span><span id="run-102"><a href="#run-102"><span class="linenos">102</span></a>        
-</span><span id="run-103"><a href="#run-103"><span class="linenos">103</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  Evaluating model. Alpha: </span><span class="si">{</span><span class="n">alpha</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">flush</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-</span><span id="run-104"><a href="#run-104"><span class="linenos">104</span></a>
-</span><span id="run-105"><a href="#run-105"><span class="linenos">105</span></a>        <span class="n">train_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</span><span id="run-106"><a href="#run-106"><span class="linenos">106</span></a>
-</span><span id="run-107"><a href="#run-107"><span class="linenos">107</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">train_model</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">group_size</span><span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">D</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">)</span>
-</span><span id="run-108"><a href="#run-108"><span class="linenos">108</span></a>
-</span><span id="run-109"><a href="#run-109"><span class="linenos">109</span></a>        <span class="k">if</span> <span class="n">return_probs</span><span class="p">:</span>
-</span><span id="run-110"><a href="#run-110"><span class="linenos">110</span></a>            <span class="n">alpha_res</span> <span class="o">=</span> <span class="n">predict</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> 
-</span><span id="run-111"><a href="#run-111"><span class="linenos">111</span></a>                                <span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">,</span>
-</span><span id="run-112"><a href="#run-112"><span class="linenos">112</span></a>                                <span class="n">return_probs</span> <span class="o">=</span> <span class="n">return_probs</span><span class="p">)</span>
-</span><span id="run-113"><a href="#run-113"><span class="linenos">113</span></a>            <span class="n">preds</span><span class="p">[</span><span class="n">alpha</span><span class="p">],</span> <span class="n">mets_dict</span><span class="p">[</span><span class="n">alpha</span><span class="p">],</span> <span class="n">probs</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha_res</span>
+</span><span id="run-98"><a href="#run-98"><span class="linenos"> 98</span></a>    <span class="c1"># Initializing variables to capture metrics</span>
+</span><span id="run-99"><a href="#run-99"><span class="linenos"> 99</span></a>    <span class="n">group_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;group_dict&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</span><span id="run-100"><a href="#run-100"><span class="linenos">100</span></a>    <span class="n">preds</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="run-101"><a href="#run-101"><span class="linenos">101</span></a>    <span class="n">group_norms</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="run-102"><a href="#run-102"><span class="linenos">102</span></a>    <span class="n">mets_dict</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="run-103"><a href="#run-103"><span class="linenos">103</span></a>    <span class="n">selected_groups</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="run-104"><a href="#run-104"><span class="linenos">104</span></a>    <span class="n">train_time</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="run-105"><a href="#run-105"><span class="linenos">105</span></a>    <span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="run-106"><a href="#run-106"><span class="linenos">106</span></a>    <span class="n">probs</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="run-107"><a href="#run-107"><span class="linenos">107</span></a>
+</span><span id="run-108"><a href="#run-108"><span class="linenos">108</span></a>    <span class="n">D</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">]</span>
+</span><span id="run-109"><a href="#run-109"><span class="linenos">109</span></a>
+</span><span id="run-110"><a href="#run-110"><span class="linenos">110</span></a>    <span class="c1"># Generating models for each alpha and outputs</span>
+</span><span id="run-111"><a href="#run-111"><span class="linenos">111</span></a>    <span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="n">alpha_list</span><span class="p">:</span>
+</span><span id="run-112"><a href="#run-112"><span class="linenos">112</span></a>        
+</span><span id="run-113"><a href="#run-113"><span class="linenos">113</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  Evaluating model. Alpha: </span><span class="si">{</span><span class="n">alpha</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">flush</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 </span><span id="run-114"><a href="#run-114"><span class="linenos">114</span></a>
-</span><span id="run-115"><a href="#run-115"><span class="linenos">115</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="run-116"><a href="#run-116"><span class="linenos">116</span></a>            <span class="n">alpha_res</span> <span class="o">=</span> <span class="n">predict</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> 
-</span><span id="run-117"><a href="#run-117"><span class="linenos">117</span></a>                                <span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">,</span>
-</span><span id="run-118"><a href="#run-118"><span class="linenos">118</span></a>                                <span class="n">return_probs</span> <span class="o">=</span> <span class="n">return_probs</span><span class="p">)</span>
-</span><span id="run-119"><a href="#run-119"><span class="linenos">119</span></a>            <span class="n">preds</span><span class="p">[</span><span class="n">alpha</span><span class="p">],</span> <span class="n">mets_dict</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha_res</span>
-</span><span id="run-120"><a href="#run-120"><span class="linenos">120</span></a>
-</span><span id="run-121"><a href="#run-121"><span class="linenos">121</span></a>        <span class="n">selected_groups</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">find_selected_groups</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
-</span><span id="run-122"><a href="#run-122"><span class="linenos">122</span></a>
-</span><span id="run-123"><a href="#run-123"><span class="linenos">123</span></a>        <span class="n">kernel_weights</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">coef_</span>
-</span><span id="run-124"><a href="#run-124"><span class="linenos">124</span></a>        <span class="n">group_norms</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="run-125"><a href="#run-125"><span class="linenos">125</span></a>            <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">kernel_weights</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">D</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">D</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
-</span><span id="run-126"><a href="#run-126"><span class="linenos">126</span></a>            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">group_names</span><span class="p">))</span>
-</span><span id="run-127"><a href="#run-127"><span class="linenos">127</span></a>            <span class="p">]</span>
-</span><span id="run-128"><a href="#run-128"><span class="linenos">128</span></a>        
-</span><span id="run-129"><a href="#run-129"><span class="linenos">129</span></a>        <span class="n">models</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span>
-</span><span id="run-130"><a href="#run-130"><span class="linenos">130</span></a>        
-</span><span id="run-131"><a href="#run-131"><span class="linenos">131</span></a>        <span class="n">train_end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</span><span id="run-132"><a href="#run-132"><span class="linenos">132</span></a>        <span class="n">train_time</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_end</span> <span class="o">-</span> <span class="n">train_start</span>
-</span><span id="run-133"><a href="#run-133"><span class="linenos">133</span></a>
-</span><span id="run-134"><a href="#run-134"><span class="linenos">134</span></a>    <span class="c1"># Combining results into one object</span>
-</span><span id="run-135"><a href="#run-135"><span class="linenos">135</span></a>    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="run-136"><a href="#run-136"><span class="linenos">136</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mets_dict</span>
-</span><span id="run-137"><a href="#run-137"><span class="linenos">137</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Selected_groups&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">selected_groups</span>
-</span><span id="run-138"><a href="#run-138"><span class="linenos">138</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Norms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_norms</span>
-</span><span id="run-139"><a href="#run-139"><span class="linenos">139</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Predictions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">preds</span>
-</span><span id="run-140"><a href="#run-140"><span class="linenos">140</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Observed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]]</span>
-</span><span id="run-141"><a href="#run-141"><span class="linenos">141</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Test_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]</span>
-</span><span id="run-142"><a href="#run-142"><span class="linenos">142</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Group_names&#39;</span><span class="p">]</span><span class="o">=</span> <span class="n">group_names</span>
-</span><span id="run-143"><a href="#run-143"><span class="linenos">143</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Models&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span>
-</span><span id="run-144"><a href="#run-144"><span class="linenos">144</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Train_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_time</span>
-</span><span id="run-145"><a href="#run-145"><span class="linenos">145</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;RAM_usage&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">tracemalloc</span><span class="o">.</span><span class="n">get_traced_memory</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1e9</span><span class="si">}</span><span class="s1"> GB&#39;</span>
-</span><span id="run-146"><a href="#run-146"><span class="linenos">146</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Probabilities&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">probs</span>
-</span><span id="run-147"><a href="#run-147"><span class="linenos">147</span></a>
-</span><span id="run-148"><a href="#run-148"><span class="linenos">148</span></a>    <span class="k">return</span> <span class="n">results</span>
+</span><span id="run-115"><a href="#run-115"><span class="linenos">115</span></a>        <span class="n">train_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span id="run-116"><a href="#run-116"><span class="linenos">116</span></a>
+</span><span id="run-117"><a href="#run-117"><span class="linenos">117</span></a>        <span class="n">adata</span> <span class="o">=</span> <span class="n">train_model</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">group_size</span><span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">D</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">)</span>
+</span><span id="run-118"><a href="#run-118"><span class="linenos">118</span></a>
+</span><span id="run-119"><a href="#run-119"><span class="linenos">119</span></a>        <span class="k">if</span> <span class="n">return_probs</span><span class="p">:</span>
+</span><span id="run-120"><a href="#run-120"><span class="linenos">120</span></a>            <span class="n">alpha_res</span> <span class="o">=</span> <span class="n">predict</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> 
+</span><span id="run-121"><a href="#run-121"><span class="linenos">121</span></a>                                <span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">,</span>
+</span><span id="run-122"><a href="#run-122"><span class="linenos">122</span></a>                                <span class="n">return_probs</span> <span class="o">=</span> <span class="n">return_probs</span><span class="p">)</span>
+</span><span id="run-123"><a href="#run-123"><span class="linenos">123</span></a>            <span class="n">preds</span><span class="p">[</span><span class="n">alpha</span><span class="p">],</span> <span class="n">mets_dict</span><span class="p">[</span><span class="n">alpha</span><span class="p">],</span> <span class="n">probs</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha_res</span>
+</span><span id="run-124"><a href="#run-124"><span class="linenos">124</span></a>
+</span><span id="run-125"><a href="#run-125"><span class="linenos">125</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="run-126"><a href="#run-126"><span class="linenos">126</span></a>            <span class="n">alpha_res</span> <span class="o">=</span> <span class="n">predict</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> 
+</span><span id="run-127"><a href="#run-127"><span class="linenos">127</span></a>                                <span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">,</span>
+</span><span id="run-128"><a href="#run-128"><span class="linenos">128</span></a>                                <span class="n">return_probs</span> <span class="o">=</span> <span class="n">return_probs</span><span class="p">)</span>
+</span><span id="run-129"><a href="#run-129"><span class="linenos">129</span></a>            <span class="n">preds</span><span class="p">[</span><span class="n">alpha</span><span class="p">],</span> <span class="n">mets_dict</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha_res</span>
+</span><span id="run-130"><a href="#run-130"><span class="linenos">130</span></a>
+</span><span id="run-131"><a href="#run-131"><span class="linenos">131</span></a>        <span class="n">selected_groups</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">find_selected_groups</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+</span><span id="run-132"><a href="#run-132"><span class="linenos">132</span></a>
+</span><span id="run-133"><a href="#run-133"><span class="linenos">133</span></a>        <span class="n">kernel_weights</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">coef_</span>
+</span><span id="run-134"><a href="#run-134"><span class="linenos">134</span></a>        <span class="n">group_norms</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="run-135"><a href="#run-135"><span class="linenos">135</span></a>            <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">kernel_weights</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">D</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">D</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+</span><span id="run-136"><a href="#run-136"><span class="linenos">136</span></a>            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">group_names</span><span class="p">))</span>
+</span><span id="run-137"><a href="#run-137"><span class="linenos">137</span></a>            <span class="p">]</span>
+</span><span id="run-138"><a href="#run-138"><span class="linenos">138</span></a>        
+</span><span id="run-139"><a href="#run-139"><span class="linenos">139</span></a>        <span class="n">models</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span>
+</span><span id="run-140"><a href="#run-140"><span class="linenos">140</span></a>        
+</span><span id="run-141"><a href="#run-141"><span class="linenos">141</span></a>        <span class="n">train_end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span id="run-142"><a href="#run-142"><span class="linenos">142</span></a>        <span class="n">train_time</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_end</span> <span class="o">-</span> <span class="n">train_start</span>
+</span><span id="run-143"><a href="#run-143"><span class="linenos">143</span></a>
+</span><span id="run-144"><a href="#run-144"><span class="linenos">144</span></a>    <span class="c1"># Combining results into one object</span>
+</span><span id="run-145"><a href="#run-145"><span class="linenos">145</span></a>    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="run-146"><a href="#run-146"><span class="linenos">146</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mets_dict</span>
+</span><span id="run-147"><a href="#run-147"><span class="linenos">147</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Selected_groups&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">selected_groups</span>
+</span><span id="run-148"><a href="#run-148"><span class="linenos">148</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Norms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_norms</span>
+</span><span id="run-149"><a href="#run-149"><span class="linenos">149</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Predictions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">preds</span>
+</span><span id="run-150"><a href="#run-150"><span class="linenos">150</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Observed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]]</span>
+</span><span id="run-151"><a href="#run-151"><span class="linenos">151</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Test_indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]</span>
+</span><span id="run-152"><a href="#run-152"><span class="linenos">152</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Group_names&#39;</span><span class="p">]</span><span class="o">=</span> <span class="n">group_names</span>
+</span><span id="run-153"><a href="#run-153"><span class="linenos">153</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Models&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">models</span>
+</span><span id="run-154"><a href="#run-154"><span class="linenos">154</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Train_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_time</span>
+</span><span id="run-155"><a href="#run-155"><span class="linenos">155</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;RAM_usage&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">tracemalloc</span><span class="o">.</span><span class="n">get_traced_memory</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mf">1e9</span><span class="si">}</span><span class="s1"> GB&#39;</span>
+</span><span id="run-156"><a href="#run-156"><span class="linenos">156</span></a>    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Probabilities&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">probs</span>
+</span><span id="run-157"><a href="#run-157"><span class="linenos">157</span></a>
+</span><span id="run-158"><a href="#run-158"><span class="linenos">158</span></a>    <span class="k">return</span> <span class="n">results</span>
 </span></pre></div>
 
 
             <div class="docstring"><p>Wrapper function for training and test with multiple alpha values.
 Returns metrics, predictions, group weights, and resource usage.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p><strong>adata</strong> : <em>AnnData</em> </p>
+<ul>
+<li><strong>adata</strong> (ad.AnnData):
+A processed <code>ad.AnnData</code> with <code>'Z_train'</code>, <code>'Z_test'</code>, and 
+<code>'group_dict'</code> keys in <code>adata.uns</code>.</li>
+<li><strong>alpha_list</strong> (np.ndarray):
+Sparsity values to create models with. Alpha refers to the 
+penalty parameter in Group Lasso. Larger alphas force group 
+weights to shrink towards zero while smaller alphas apply a 
+lesser penalty to kernal weights. Values too large will results 
+in models that weight all groups as zero.</li>
+<li><strong>metrics</strong> (list[str]):
+Metrics that should be calculated on predictions. Options are 
+<code>['AUROC', 'F1-Score', 'Accuracy', 'Precision', 'Recall']</code>. 
+When set to <code>None</code>, all metrics are calculated.</li>
+</ul>
 
-<blockquote>
-  <p>A processed <em>AnnData</em> with <code>'Z_train'</code>, <code>'Z_test'</code>, and 
-      <code>'group_dict'</code> keys in <code>adata.uns</code>.</p>
-</blockquote>
+<h6 id="returns">Returns</h6>
 
-<p><strong>alpha_list</strong> : <em>np.ndarray</em> </p>
+<ul>
+<li><p><strong>results</strong> (dict):
+Results with keys and values: </p>
 
-<blockquote>
-  <p><code>alpha</code> values to create models using. Alpha refers to the 
-      penalty parameter in Group Lasso. Larger alphas force group 
-      weights to shrink towards 0 while smaller alphas apply a lesser 
-      penalty to kernal weights.</p>
-</blockquote>
+<p><code>'Metrics'</code> (dict): 
+A nested dictionary as <code>[alpha][metric] = value</code>.</p>
 
-<p><strong>metrics</strong> : <em>list[str]</em></p>
+<p><code>'Group_names'</code> (np.ndarray): 
+Array of group names used in model(s).</p>
 
-<blockquote>
-  <p>What metrics should be calculated on predictions. Options are 
-      ['AUROC', 'F1-Score', 'Accuracy', 'Precision', 'Recall']. When 
-      set to <code>None</code>, all metrics are calculated.</p>
-</blockquote>
+<p><code>'Selected_groups'</code> (dict): 
+A nested dictionary as <code>[alpha] = np.array([nonzero_groups])</code>.
+Nonzero groups are groups that had a kernel weight above zero.</p>
 
-<h2 id="returns">Returns</h2>
+<p><code>'Norms'</code> (dict): 
+A nested dictionary as <code>[alpha] = np.array([kernel_weights])</code>
+Order of <code>kernel_weights</code> is respective to <code>'Group_names'</code> 
+values.</p>
 
-<p><strong>results</strong> : <em>dict</em></p>
+<p><code>'Observed'</code> (np.nparray): 
+An array of ground truth cell labels from the test set.</p>
 
-<blockquote>
-  <p>With keys and values: </p>
-</blockquote>
+<p><code>'Predictions'</code> (dict): 
+A nested dictionary as <code>[alpha] = predicted_class</code> respective 
+to <code>'Observations'</code> for <code>alpha</code>.</p>
 
-<blockquote>
-  <p><code>'Metrics'</code> : a nested dictionary as <code>[alpha][metric]</code> = value.</p>
-</blockquote>
+<p><code>'Test_indices'</code> (np.array: 
+Indices of samples respective to adata used in the training 
+set.</p>
 
-<blockquote>
-  <p><code>'Selected_groups'</code> : a dictionary as <code>[alpha]</code> = array of 
-      groups with nonzero weights.</p>
-</blockquote>
+<p><code>'Model'</code> (dict): 
+A nested dictionary where <code>[alpha] = celer.GroupLasso</code> object 
+for <code>alpha</code>.</p>
 
-<blockquote>
-  <p><code>'Norms'</code> : a dictionary as <code>[alpha]</code> = array of kernel weights
-      for each group, order respective to 'Group_names'.</p>
-</blockquote>
+<p><code>'RAM_usage'</code> (dict): 
+A nested dictionary with memory usage in GB after 
+training models for each <code>alpha</code>.</p></li>
+</ul>
 
-<blockquote>
-  <p><code>'Predictions'</code> : a dictionary as <code>[alpha]</code> = predicted class
-      respective to 'Observations' for that <code>alpha</code>.</p>
-</blockquote>
-
-<blockquote>
-  <p><code>'Observed'</code> : an array of ground truth cell labels from the
-      test set.</p>
-</blockquote>
-
-<blockquote>
-  <p><code>'Test_indices'</code> : indices of samples respective to adata 
-      used in the training set.</p>
-</blockquote>
-
-<blockquote>
-  <p><code>'Group_names'</code> : an array of group names respective to each
-      array in 'Norms'.</p>
-</blockquote>
-
-<blockquote>
-  <p><code>'Model'</code> : a dictionary where <code>[alpha]</code> = Celer Group Lasso
-      object for that <code>alpha</code>.</p>
-</blockquote>
-
-<blockquote>
-  <p><code>'RAM_usage'</code> : memory usage after training models for each 
-      <code>alpha</code>.</p>
-</blockquote>
-
-<h2 id="examples">Examples</h2>
+<h6 id="examples">Examples</h6>
 
 <div class="pdoc-code codehilite">
 <pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">results</span> <span class="o">=</span> <span class="n"><a href="">scmkl.run</a></span><span class="p">(</span><span class="n">adata</span> <span class="o">=</span> <span class="n">adata</span><span class="p">,</span> 
@@ -449,7 +450,7 @@ Returns metrics, predictions, group weights, and resource usage.</p>
 <span class="go">...        &#39;Observed&#39;, &#39;Test_indices&#39;, &#39;Group_names&#39;, &#39;Models&#39;, </span>
 <span class="go">...        &#39;Train_time&#39;, &#39;RAM_usage&#39;])</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># List of alpha values</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">alpha</span> <span class="n">values</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;Metrics&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 <span class="go">dict_keys([0.05, 0.1, 0.5])</span>
 <span class="gp">&gt;&gt;&gt;</span>

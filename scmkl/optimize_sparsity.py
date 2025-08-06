@@ -13,41 +13,41 @@ def optimize_sparsity(adata: ad.AnnData, group_size: int | None=None, starting_a
     
     Parameters
     ----------
-    **adata** : *AnnData*
-        > `AnnData` with `'Z_train'` and `'Z_test'` in 
+    adata : ad.AnnData
+        `ad.AnnData` with `'Z_train'` and `'Z_test'` in 
         `adata.uns.keys()`.
 
-    **group_size** : *None* | *int*
-        > Argument describing how the features are grouped. If *None*, 
-        `2 * adata.uns['D'] will be used. 
-        For more information see 
-        [celer documentation](https://mathurinm.github.io/celer/generated/celer.GroupLasso.html).
+    group_size : None | int
+        Argument describing how the features are grouped. If `None`, 
+        `2 * adata.uns['D']` will be used. For more information see 
+        [celer documentation](https://mathurinm.github.io/celer/
+        generated/celer.GroupLasso.html).
 
-    **starting_alpha** : *float*
-        > The alpha value to start the search at.
+    starting_alpha : float
+        The alpha value to start the search at.
     
-    **increment** : *float* 
-        > Amount to adjust alpha by between iterations.
+    increment : float 
+        Amount to adjust alpha by between iterations.
     
-    **target** : *int*
-        > The desired number of groups selected by the model.
+    target : int
+        The desired number of groups selected by the model.
 
-    **n_iter** : *int*
-        > The maximum number of iterations to run.
+    n_iter : int
+        The maximum number of iterations to run.
             
     Returns
     -------
-    **sparsity_dict** : *dict*
-        > Tested alpha as keys and the number of selected pathways as 
+    sparsity_dict : dict
+        Tested alpha as keys and the number of selected groups as 
         the values.
         
-    **alpha** : *float*
-        >The alpha value yielding the number of selected groups closest 
+    alpha : float
+        The alpha value yielding the number of selected groups closest 
         to the target.
 
     Examples
     --------
-    >>> sparcity_dict, alpha = scmkl.optimize_sparsity(adata, (2 * D), 
+    >>> sparcity_dict, alpha = scmkl.optimize_sparsity(adata, 
     ...                                                target = 1)
     >>>
     >>> alpha
@@ -55,8 +55,7 @@ def optimize_sparsity(adata: ad.AnnData, group_size: int | None=None, starting_a
 
     See Also
     --------
-    celer.GroupLasso : 
-    https://mathurinm.github.io/celer/generated/celer.GroupLasso.html
+    celer.GroupLasso : https://mathurinm.github.io/celer/
     '''
     assert increment > 0 and increment < starting_alpha, ("Choose a positive "
                                                           "increment less "
@@ -102,4 +101,5 @@ def optimize_sparsity(adata: ad.AnnData, group_size: int | None=None, starting_a
     spar_idx = np.argmin([np.abs(selected - target) 
                           for selected in sparsity_dict.values()])
     optimal_alpha = list(sparsity_dict.keys())[spar_idx]
+    
     return sparsity_dict, optimal_alpha

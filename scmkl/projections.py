@@ -13,27 +13,24 @@ def gaussian_trans(X: np.ndarray, sigma: float,
 
     Parameters
     ----------
-    **X**: *np.ndarray*
-        > Data matrix X to calculate an approximate 
-        kernel of.
+    X : np.ndarray
+        Data matrix X to calculate an approximate kernel of.
     
-    **sigma**: *float*
-        > Parameter from data distribution controlling the
-        approximate kernel width.
+    sigma : float
+        Parameter from data distribution controlling the approximate 
+        kernel width.
 
-    **seed_obj** : *np.random._generator.Generator*
-        > Numpy random generator object from `adata.uns['seed_obj']`.
+    seed_obj : np.random._generator.Generator
+        Numpy random generator object from `adata.uns['seed_obj']`.
 
-    **D**: *int*
-        > Parameter determining the number of RFF used
-        to approximate the kernel function.
+    D : int
+        Parameter determining the number of RFF used to approximate 
+        the kernel function.
 
     Returns
     -------
-
-    **W**: *np.ndarray*
-        > Vector defining the direction of the projection
-        of RFF.
+    W : np.ndarray
+        Vector defining the direction of the projection of RFF.
     '''
     gamma = 1 / ( 2*sigma**2)
     sigma_p = 0.5*np.sqrt(2*gamma)
@@ -53,27 +50,24 @@ def laplacian_trans(X: np.ndarray, sigma: float, seed_obj, d: int):
 
     Parameters
     ----------
-    **X**: *np.ndarray*
-        > Data matrix X to calculate an approximate 
-        kernel of.
+    X : np.ndarray
+        Data matrix X to calculate an approximate kernel of.
     
-    **sigma**: *float*
-        > Parameter from data distribution controlling the
-        approximate kernel width.
+    sigma : float
+        Parameter from data distribution controlling the approximate 
+        kernel width.
 
-    **seed_obj** : *np.random._generator.Generator*
-        > Numpy random generator object from `adata.uns['seed_obj']`.
+    seed_obj : np.random._generator.Generator
+        Numpy random generator object from `adata.uns['seed_obj']`.
 
-    **D**: *int*
-        > Parameter determining the number of RFF used
-        to approximate the kernel function.
+    D : int
+        Parameter determining the number of RFF used to approximate 
+        the kernel function.
 
     Returns
     -------
-
-    **W**: *np.ndarray*
-        > Vector defining the direction of the projection
-        of RFF.
+    W : np.ndarray
+        Vector defining the direction of the projection of RFF.
     '''
     gamma = 1 / (2 * sigma)
 
@@ -92,27 +86,25 @@ def cauchy_trans(X: np.ndarray, sigma: float, seed_obj, d: int):
 
     Parameters
     ----------
-    **X**: *np.ndarray*
-        > Data matrix X to calculate an approximate 
+    X : np.ndarray
+        Data matrix X to calculate an approximate 
         kernel of.
     
-    **sigma**: *float*
-        > Parameter from data distribution controlling the
-        approximate kernel width.
+    sigma : float
+        Parameter from data distribution controlling the approximate 
+        kernel width.
 
-    **seed_obj** : *np.random._generator.Generator*
-        > Numpy random generator object from `adata.uns['seed_obj']`.
+    seed_obj : np.random._generator.Generator
+        Numpy random generator object from `adata.uns['seed_obj']`.
 
-    **D**: *int*
-        > Parameter determining the number of RFF used
-        to approximate the kernel function.
+    D : int
+        Parameter determining the number of RFF used to approximate 
+        the kernel function.
 
     Returns
     -------
-
-    **W**: *np.ndarray*
-        > Vector defining the direction of the projection
-        of RFF.
+    W : np.ndarray
+        Vector defining the direction of the projection of RFF.
     '''
     gamma = 1 / (2 * sigma ** 2)
     b = 0.5 * np.sqrt(gamma)

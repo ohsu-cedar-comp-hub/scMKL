@@ -2,41 +2,41 @@ import numpy as np
 import sklearn.metrics as skm
 import anndata as ad
 
+
 def predict(adata: ad.AnnData, metrics: list | None=None,
             return_probs: bool=False):
     '''
     Function to return predicted labels and calculate any of AUROC, 
     Accuracy, F1 Score, Precision, Recall for a classification. 
 
-    ** If labeled_test flag in `adata` is set to False,
+    **If labeled_test flag in `adata` is set to `False`,
     metrics cannot be computed.**
     
     Parameters
-    ----------  
-    **adata** : *AnnData*
-        > Has keys `'model'`, `'Z_train'`, and `'Z_test'` in 
-        `adata.uns`.
+    ----------
+    adata : ad.AnnData
+        Has keys `'model'`, `'Z_train'`, and `'Z_test'` in `adata.uns`.
 
-    **metrics** : *list[str]* | *None*
-        > Which metrics to calculate on the predicted values. Options
+    metrics : list[str] | None
+        Which metrics to calculate on the predicted values. Options
         are `'AUROC'`, `'Accuracy'`, `'F1-Score'`, `'Precision'`, and 
-        `'Recall'`.
+        `'Recall'`. If `None`, all five metrics are calculated.
 
-    **return_probs** : *bool*
-        > If `True`, will return a dictionary with class probabilities.
+    return_probs : bool
+        If `True`, will return a dictionary with class probabilities.
 
     Returns
     -------
-    **y_pred** : *np.ndarray*
-        > Predicted cell classes.
+    y_pred : np.ndarray
+        Predicted cell classes.
 
-    **metrics_dict** : *dict*
-        > Contains `'AUROC'`, `'Accuracy'`, `'F1-Score'`, 
+    metrics_dict : dict
+        Contains `'AUROC'`, `'Accuracy'`, `'F1-Score'`, 
         `'Precision'`, and/or `'Recall'` keys depending on metrics 
         argument.
 
-    **probs** : *dict*
-        > If `return_probs` is `True`, will return a dictionary with 
+    probs : dict
+        If `return_probs` is `True`, will return a dictionary with 
         probabilities for each class in `y_test`.
 
     Examples
@@ -133,13 +133,13 @@ def find_selected_groups(adata: ad.AnnData) -> np.ndarray:
 
     Parameters
     ----------
-    **adata** : *AnnData*
-        > Has *celer.GroupLasso* object in `adata.uns['model']`.
+    adata : ad.AnnData
+        Has `celer.GroupLasso` object in `adata.uns['model']`.
 
     Returns
     -------
-    **selected_groups** : *np.ndarray*
-        > Array containing the names of the groups with nonzero kernel 
+    selected_groups : np.ndarray
+        Array containing the names of the groups with nonzero kernel 
         weights.
 
     Examples

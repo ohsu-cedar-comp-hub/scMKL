@@ -2,30 +2,32 @@ import numpy as np
 import scipy
 import anndata as ad
 
-def _tfidf(X: np.ndarray | scipy.sparse._csc.csc_matrix, mode: str='filter'):
+def tfidf(X: np.ndarray | scipy.sparse._csc.csc_matrix, mode: str='filter'):
     '''
-    Function to use Term Frequency Inverse Document Frequency 
-    filtering for atac data to find meaningful features. If input is 
-    pandas data frame or scipy sparse array, it will be converted to a 
-    numpy array.
+    Function to use Term Frequency Inverse Document Frequency (TF-IDF)
+    filtering for atac data to find meaningful features.
     
     Parameters
     ----------
-    **X** : *np.ndarray* | *scipy.sparse._csc.csc_matrix*
-        > Data matrix of cell x feature.  Must be a Numpy array or Scipy 
-        sparse array.
-    **mode** : *str*
-        > Argument to determine what to return.  Must be filter or 
-        normalize
+    X : np.ndarray | scipy.sparse._csc.csc_matrix
+        Data matrix of cell x feature.  Must be a `np.ndarray` or 
+        `scipy.sparse` matrix.
+
+    mode : str
+        Argument to determine what to return. Must be `'filter'` or 
+        `'normalize'`.
     
     Returns
     -------
-    TFIDF : Output depends on given 'mode' parameter
-            'filter' : returns which column sums are non 0 i.e. which 
-                       features are significant
-            'normalize' : returns TFIDF filtered data matrix of the 
-                          same dimensions as x. Returns as scipy 
-                          sparse matrix
+    tfidf | significant_features : array_like
+        Output depends on given `'mode'` parameter:
+
+        `'filter'` (np.ndarray): 
+        Which column sums are nonzero (i.e. which features are 
+        significant).
+
+        `'normalize'` (np.ndarray | scipy.sparse._csc.csc_matrix): 
+        TF-IDF filtered data matrix of the same dimensions as `X`. 
     '''
     assert mode in ['filter', 'normalize'], ("mode must be 'filter' or "
                                              "'normalize'.")
@@ -44,11 +46,12 @@ def _tfidf(X: np.ndarray | scipy.sparse._csc.csc_matrix, mode: str='filter'):
         if scipy.sparse.issparse(tfidf):
             tfidf = scipy.sparse.csc_matrix(tfidf)
         return tfidf
+    
     elif mode == 'filter':
         significant_features = np.where(np.sum(tfidf, axis=0) > 0)[0]
         return significant_features
         
-def _tfidf_train_test(X_train, X_test):
+def tfidf_train_test(X_train, X_test):
     if scipy.sparse.issparse(X_train):
         tf_train = scipy.sparse.csc_array(X_train)
         tf_test = scipy.sparse.csc_array(X_test)
@@ -72,28 +75,28 @@ def _tfidf_train_test(X_train, X_test):
 
 def tfidf_normalize(adata: ad.AnnData, binarize: bool=False):
     '''
-    Function to TFIDF normalize the data in an adata object. If any 
+    Function to TF-IDF normalize the data in an adata object. If any 
     rows are entirely 0, that row and its metadata will be removed from
     the object.
 
     Parameters
     ----------
-    **adata** : *ad.AnnData* 
-        > `adata.X` to be normalized. If `'train_indices'` and 
-        `'test_indices'` in `'adata.uns.keys()'`, normalization will be
-        done separately for the training and testing data. Otherwise, 
-        it will calculate it on the entire dataset.
+    adata : ad.AnnData
+        `ad.Anndata` with `.X` to be normalized. If `'train_indices'` 
+        and `'test_indices'` in `'adata.uns.keys()'`, normalization 
+        will be done separately for the training and testing data. 
+        Otherwise, it will calculate it on the entire dataset.
 
-    **binarize** : *bool* 
-        > If `True`, all values in `adata.X` greater than 1 will become 
+    binarize : bool 
+        If `True`, all values in `adata.X` greater than 1 will become 
         1.
 
     Returns
     -------
-    **adata** : *ad.AnnData* 
-        > adata with adata.X TFIDF normalized. Will now have the train 
-        data stacked on test data, and the indices will be adjusted 
-        accordingly.
+    adata : ad.AnnData 
+        `adata` with `adata.X` TF-IDF normalized. Will now have the 
+        train data stacked on test data, and the indices will be 
+        adjusted accordingly.
 
     Examples
     --------
@@ -117,11 +120,11 @@ def tfidf_normalize(adata: ad.AnnData, binarize: bool=False):
 
         # Calculate the train TFIDF matrix on just the training data so it is 
         # not biased by testing data
-        tfidf_train = _tfidf(X[train_indices,:], mode = 'normalize')
+        tfidf_train = tfidf(X[train_indices,:], mode = 'normalize')
 
         # Calculate the test TFIDF by calculating it on the train and test 
         # data and index the test data
-        tfidf_test = _tfidf(X, mode = 'normalize')[test_indices,:]
+        tfidf_test = tfidf(X, mode = 'normalize')[test_indices,:]
 
         # Impossible to add rows back to original location so we need to 
         # stack the matrices to maintain train/test
@@ -144,7 +147,7 @@ def tfidf_normalize(adata: ad.AnnData, binarize: bool=False):
 
     else:
 
-        tfidf_norm = _tfidf(X, mode = 'normalize')
+        tfidf_norm = tfidf(X, mode = 'normalize')
 
     adata.X = tfidf_norm.copy()
 

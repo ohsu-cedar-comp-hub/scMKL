@@ -12,12 +12,13 @@ __all__ = ['calculate_z',
            'data_processing',
            'dataframes',
            'estimate_sigma', 
-           'get_atac_groupings',
+           'get_region_groupings',
            'multimodal_processing', 
            'one_v_rest', 
            'optimize_alpha', 
            'optimize_sparsity',
            'plotting',
+           'projections',
            'read_gtf',
            'run',
            'test',
@@ -31,12 +32,13 @@ from scmkl.create_adata import *
 from scmkl.data_processing import *
 from scmkl.dataframes import *
 from scmkl.estimate_sigma import *
-from scmkl.get_atac_groupings import *
+from scmkl.get_region_groupings import *
 from scmkl.multimodal_processing import *
 from scmkl.one_v_rest import *
 from scmkl.optimize_alpha import *
 from scmkl.optimize_sparsity import *
 from scmkl.plotting import *
+from scmkl.projections import *
 from scmkl.run import *
 from scmkl.test import *
 from scmkl.tfidf_normalize import *

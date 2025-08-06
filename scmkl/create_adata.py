@@ -231,14 +231,34 @@ def sort_samples(train_indices, test_indices):
     '''
     Ensures that samples in adata obj are all training, then all 
     testing.
+
+    Parameters
+    ----------
+    train_indices : np.ndarray
+        Indices in ad.AnnData object for training.
+    
+    test_indices : np.ndarray
+        Indices in ad.AnnData object for testing.
+
+    Returns
+    -------
+    sort_idc : np.ndarray
+        Ordered indices that will sort ad.AnnData object as all 
+        training samples, then all testing.
+
+    train_indices : np.ndarray
+        The new training indices given the new index order, `sort_idc`.
+
+    test_indices : np.ndarray
+        The new testing indices given the new index order, `sort_idc`.
     '''
-    sort_idx = np.concatenate([train_indices, test_indices])
+    sort_idc = np.concatenate([train_indices, test_indices])
 
     train_indices = np.arange(0, train_indices.shape[0])
     test_indices = np.arange(train_indices.shape[0], 
                              train_indices.shape[0] + test_indices.shape[0])
     
-    return sort_idx, train_indices, test_indices
+    return sort_idc, train_indices, test_indices
 
 
 def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame, 
@@ -269,9 +289,9 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
         the cells in `X`.
 
     group_dict : dict 
-        > Dictionary containing feature grouping information.
-            - Example: `{geneset: np.array([gene_1, gene_2, ..., 
-                        gene_n])}`.
+        Dictionary containing feature grouping information (i.e. 
+        `{geneset1: np.array([gene_1, gene_2, ..., gene_n]), geneset2: 
+        np.array([...]), ...}`.
 
     scale_data : bool  
         If `True`, data matrix is log transformed and standard 
@@ -282,8 +302,8 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
         Else, is an array of precalculated train/test split 
         corresponding to samples. Can include labels for entire
         dataset to benchmark performance or for only training
-        data to classify unknown cell types.
-            - Example: `np.array(['train', 'test', ..., 'train'])`
+        data to classify unknown cell types (i.e. `np.array(['train', 
+        'test', ..., 'train'])`.
 
     D : int 
         Number of Random Fourier Features used to calculate Z. 

@@ -16,9 +16,6 @@ def sparse_var(X: scipy.sparse._csc.csc_matrix | np.ndarray, axis: int | None=No
     axis : int | None
         Determines which axis variance is calculated on. Same usage 
         as Numpy.
-            axis = 0 => column variances
-            axis = 1 => row variances
-            axis = None => total variance (calculated on all data)
     
     Returns
     -------
@@ -117,7 +114,8 @@ def process_data(X_train: np.ndarray | scipy.sparse._csc.csc_matrix,
     
 
 def svd_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
-                       X_test: scipy.sparse._csc.csc_matrix | np.ndarray | None=None):
+                       X_test: scipy.sparse._csc.csc_matrix | 
+                       np.ndarray | None=None):
     '''
     Returns matrices with SVD reduction. If `X_test is None`, only 
     X_train is returned.
@@ -211,7 +209,7 @@ def pca_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
     return X_train, X_test
 
 
-def no_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
+def _no_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
                       X_test: scipy.sparse._csc.csc_matrix | np.ndarray | None=None):
     '''
     Dummy function used to return mat inputs.
@@ -241,7 +239,7 @@ def get_reduction(reduction: str):
         case 'svd':
             red_func = svd_transformation
         case 'None':
-            red_func = no_transformation
+            red_func = _no_transformation
 
     return red_func
 
@@ -276,7 +274,7 @@ def get_group_mat(adata: ad.AnnData, n_features: int,
     Returns
     -------
     X_train, X_test : np.ndarray, np.ndarray
-        Filtered matrices. If `n_samples` is provided, only X_train 
+        Filtered matrices. If `n_samples` is provided, only `X_train` 
         is returned. If `adata.uns['reduction']` is `'pca'` or 
         `'svd'` the matrices are transformed before being returned.
     '''

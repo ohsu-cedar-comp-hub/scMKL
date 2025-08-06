@@ -313,9 +313,9 @@ def get_weights(results : dict | None = None, rfiles : dict | None = None,
     '''
     Takes either a single scMKL result or dictionary of results and 
     returns a pd.DataFrame with cols ['Alpha', 'Group', 
-    'Kernel Weight']. If include_as == True, a fourth col will be 
+    'Kernel Weight']. If `include_as == True`, a fourth col will be 
     added to indicate whether or not the run respective to that alpha 
-    was chosen as optimal via CV.
+    was chosen as optimal via cross validation.
 
     Parameters
     ----------

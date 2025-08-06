@@ -3,7 +3,7 @@ import anndata as ad
 import numpy as np
 
 from scmkl.data_processing import process_data, get_group_mat, sample_cells
-from scmkl.tfidf_normalize import _tfidf
+from scmkl.tfidf_normalize import tfidf
 
 
 def get_batches(sample_range: list | np.ndarray, 
@@ -76,7 +76,7 @@ def batch_sigma(X_train: np.ndarray,
         A 2D array with each row cooresponding to the sample indices 
         for each batch.    
 
-    Returns 
+    Returns
     -------
     sigma : float
         The estimated group kernel with for Z projection before 
@@ -98,7 +98,7 @@ def batch_sigma(X_train: np.ndarray,
 
 
 def est_group_sigma(adata: ad.AnnData,
-                    X_train: np.array,
+                    X_train: np.ndarray,
                     n_group_features: int,
                     n_features: int, 
                     batch_idx: np.ndarray) -> float:
@@ -126,13 +126,14 @@ def est_group_sigma(adata: ad.AnnData,
         A 2D array with each row cooresponding to the sample indices 
         for each batch.
 
-    Returns 
+    Returns
     -------
     sigma : float
         The estimated group kernel with for Z projection.
+
     '''    
     if adata.uns['tfidf']:
-        X_train = _tfidf(X_train, mode = 'normalize')
+        X_train = tfidf(X_train, mode = 'normalize')
 
     X_train = process_data(X_train, 
                         scale_data = adata.uns['scale_data'], 
@@ -239,7 +240,7 @@ def estimate_sigma(adata: ad.AnnData,
                             n_group_features=n_group_features)
         
         if adata.uns['tfidf']:
-            X_train = _tfidf(X_train, mode='normalize')
+            X_train = tfidf(X_train, mode='normalize')
 
         # Data filtering, and transformation according to given data_type
         # Will remove low variance (< 1e5) features regardless of data_type
