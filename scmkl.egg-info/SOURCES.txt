@@ -8,7 +8,7 @@ scmkl/create_adata.py
 scmkl/data_processing.py
 scmkl/dataframes.py
 scmkl/estimate_sigma.py
-scmkl/get_atac_groupings.py
+scmkl/get_region_groupings.py
 scmkl/multimodal_processing.py
 scmkl/one_v_rest.py
 scmkl/optimize_alpha.py
@@ -27,8 +27,11 @@ scmkl.egg-info/top_level.txt
 tests/__init__.py
 tests/test_calculate_z.py
 tests/test_create_adata.py
+tests/test_dataframes.py
 tests/test_estimate_sigma.py
+tests/test_get_region_grouping.py
 tests/test_multimodal_processing.py
+tests/test_one_v_rest.py
 tests/test_optimize_alpha.py
 tests/test_run.py
 tests/test_test.py

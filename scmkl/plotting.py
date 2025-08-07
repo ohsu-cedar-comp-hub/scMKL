@@ -9,7 +9,7 @@ from plotnine import (ggplot, aes, theme_classic, ylim,
 
 def plot_conf_mat(results, title = '', cmap = None, normalize = True,
                           alpha = None, save = None) -> None:
-    '''
+    """
     Creates a confusion matrix from the output of scMKL.
 
     Parameters
@@ -55,7 +55,7 @@ def plot_conf_mat(results, title = '', cmap = None, normalize = True,
     ---------
     http://scikit-learn.org/stable/auto_examples/model_selection/
     plot_confusion_matrix.html
-    '''
+    """
     # Determining type of results
     if ('Observed' in results.keys()) and ('Metrics' in results.keys()):
         multi_class = False
@@ -120,7 +120,7 @@ def plot_conf_mat(results, title = '', cmap = None, normalize = True,
 
 
 def plot_metric(summary_df : pd.DataFrame, alpha_star = None, color = 'red'):
-    '''
+    """
     Takes a data frame of model metrics and optionally alpha star and
     creates a scatter plot given metrics against alpha values.
     
@@ -150,7 +150,7 @@ def plot_metric(summary_df : pd.DataFrame, alpha_star = None, color = 'red'):
     >>> metric_plot = plot_metric(results)
     >>>
     >>> metric_plot.save('scMKL_performance.png')
-    '''
+    """
     # Capturing metric from summary_df
     metric_options = ['AUROC', 'Accuracy', 'F1-Score', 'Precision', 'Recall']
     metric = np.intersect1d(metric_options, summary_df.columns)[0]

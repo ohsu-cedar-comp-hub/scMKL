@@ -9,7 +9,7 @@ from scmkl.projections import gaussian_trans, laplacian_trans, cauchy_trans
 
 
 def get_z_indices(m, D):
-    '''
+    """
     Takes the number associated with the group as `m` and returns the 
     indices for cos and sin functions to be applied.
 
@@ -25,7 +25,7 @@ def get_z_indices(m, D):
     -------
     cos_idx, sin_idx : np.ndarray, np.ndarray
         The indices for cos and sin projections in overall Z matrix.
-    '''
+    """
     x_idx = np.arange(m*2*D ,(m + 1)*2*D)
     cos_idx = x_idx[:len(x_idx)//2]
     sin_idx = x_idx[len(x_idx)//2:]
@@ -34,7 +34,7 @@ def get_z_indices(m, D):
 
 
 def calc_groupz(X_train, X_test, adata, D, sigma, proj_func):
-    '''
+    """
     Calculates the Z matrix for grouping.
 
     Parameters
@@ -61,7 +61,7 @@ def calc_groupz(X_train, X_test, adata, D, sigma, proj_func):
     -------
     train_projections, test_projections : np.ndarray, np.ndarray
         Training and testing Z matrices for group.
-    '''   
+    """  
     if scipy.sparse.issparse(X_train):
         X_train = X_train.toarray().astype(np.float16)
         X_test = X_test.toarray().astype(np.float16)
@@ -169,7 +169,7 @@ def calculate_z(adata, n_features=5000, batches=10,
                                         n_group_features, process_test=True)
         
         if adata.uns['tfidf']:
-            X_train, X_test = _tfidf_train_test(X_train, X_test)
+            X_train, X_test = tfidf_train_test(X_train, X_test)
 
         # Data filtering, and transformation according to given data_type
         # Will remove low variance (< 1e5) features regardless of data_type

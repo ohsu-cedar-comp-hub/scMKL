@@ -4,7 +4,7 @@ import re
 
 
 def _find_overlap(start1 : int, end1 : int, start2 : int, end2 : int) -> bool:
-    '''
+    """
     Function to determine whether two regions on the same chromosome 
     overlap.
     
@@ -27,12 +27,12 @@ def _find_overlap(start1 : int, end1 : int, start2 : int, end2 : int) -> bool:
     is_overlapping : bool
         `True` if the regions overlap by 1bp. `False` if the regions 
         do not overlap
-    '''
+    """
     return max(start1, start2) <= min(end1, end2)
 
 
 def get_tss(row : pd.DataFrame) -> int:
-    '''
+    """
     Takes a row from a DataFrame as a DataFrame with columns 
     ['start', 'end', 'strand'] and returns the transcription start site
     depending on gene strandedness.
@@ -47,7 +47,7 @@ def get_tss(row : pd.DataFrame) -> int:
     -------
     tss : int
         The transcription start site for row's respective annotation.
-    '''
+    """
     if row.iloc[2] == '+':
         return row.iloc[0]
     
@@ -59,7 +59,7 @@ def get_tss(row : pd.DataFrame) -> int:
     
 
 def calc_range(row : pd.DataFrame, len_up : int, len_down : int) -> list:
-    '''
+    """
     Returns an infered promotor region for given annotation range 
     depending on transcription start site and user-defined upstream 
     and downstream adjustments.
@@ -84,7 +84,7 @@ def calc_range(row : pd.DataFrame, len_up : int, len_down : int) -> list:
     start_end : list
         A 2 element list where the first element is the adjusted start
         position and the second the the adjusted end position.
-    '''
+    """
     if row.iloc[1] == '+':
         start = row.iloc[0] - len_up
         end = row.iloc[0] + len_down
@@ -101,7 +101,7 @@ def calc_range(row : pd.DataFrame, len_up : int, len_down : int) -> list:
 
 def adjust_regions(gene_anno : pd.DataFrame, len_up : int, len_down : int
                     ) -> pd.DataFrame:
-    '''
+    """
     Takes a GTF file as a pd.DataFrame and adjusts start and end 
     positions to represent promotor regions given user-defined 
     upstream and downstream adjustments relative to the transcription
@@ -127,7 +127,7 @@ def adjust_regions(gene_anno : pd.DataFrame, len_up : int, len_down : int
         A dataframe where `['start', 'end']` columns represent the 
         start and end positions of inferred promotor regions for each 
         annotation.
-    '''
+    """
     # Subsetting DataFrame to only required data
     required_cols = ['chr', 'start', 'end', 'strand', 'gene_name']
     gene_anno = gene_anno[required_cols]
@@ -152,7 +152,7 @@ def adjust_regions(gene_anno : pd.DataFrame, len_up : int, len_down : int
 
 
 def create_region_dicts(gene_anno : pd.DataFrame) -> dict:
-    '''
+    """
     Takes a GTF as a pd.DataFrame and returns dictionaries required for
     region comparisons between gene_annotations and assay features.
 
@@ -169,7 +169,7 @@ def create_region_dicts(gene_anno : pd.DataFrame) -> dict:
         
     ga_regions : dict
         Chromosomes are keys and regions are values.
-    '''
+    """
     peak_gene_dict = {}
     ga_regions = {}
 
@@ -195,7 +195,7 @@ def create_region_dicts(gene_anno : pd.DataFrame) -> dict:
 
 def create_feature_dict(feature_names : list | set | np.ndarray | pd.Series
                          ) -> dict:
-    '''
+    """
     Takes an array of feature names and returns data formatted for
     feature comparisons.
     
@@ -208,7 +208,7 @@ def create_feature_dict(feature_names : list | set | np.ndarray | pd.Series
     -------
     feature_dict : dict
         Keys are chromosomes and values are regions.
-    '''
+    """
     feature_dict = {}
     feature_names = [re.split(":|-", peak) for peak in feature_names]
     for peak_set in feature_names:
@@ -230,7 +230,7 @@ def create_feature_dict(feature_names : list | set | np.ndarray | pd.Series
 def compare_regions(feature_dict : dict, ga_regions : dict,
                      peak_gene_dict : dict, gene_sets : dict, chr_sep : str
                      ) -> dict:
-    '''
+    """
     Takes features from a single-cell data matrix and regions from
     a gene annotation file to return an region grouping where regions 
     from feature_dict and regions from gene annotations overlap.
@@ -266,7 +266,7 @@ def compare_regions(feature_dict : dict, ga_regions : dict,
         `feature_names` overlaps with promotor region from a gene in a 
         gene set from `gene_sets`, that region will be added to the new 
         dictionary under the respective gene set name).
-    '''
+    """
     epi_grouping = {group : [] for group in gene_sets.keys()}
 
     for chrom in feature_dict.keys():
@@ -289,7 +289,7 @@ def compare_regions(feature_dict : dict, ga_regions : dict,
 def get_region_groupings(gene_anno : pd.DataFrame, gene_sets : dict, 
                        feature_names : np.ndarray | pd.Series | list | set,
                        len_up : int = 5000, len_down : int = 5000) -> dict:
-    '''
+    """
     Creates a peak set where keys are gene set names from `gene_sets` 
     and values are arrays of features pulled from `feature_names`. 
     Features are added to each peak set given overlap between regions 
@@ -338,7 +338,7 @@ def get_region_groupings(gene_anno : pd.DataFrame, gene_sets : dict,
     >>>
     >>> region_grouping.keys()
     dict_keys(['HALLMARK_TNFA_SIGNALING_VIA_NFKB', ...])
-    '''
+    """
     # Getting a unique set of gene names from gene_sets
     all_genes = {gene for group in gene_sets.keys()
                  for gene in gene_sets[group]}

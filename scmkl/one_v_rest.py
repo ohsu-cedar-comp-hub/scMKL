@@ -11,7 +11,7 @@ from scmkl._checks import _check_adatas
 
 def _eval_labels(cell_labels: np.ndarray, train_indices: np.ndarray, 
                   test_indices: np.ndarray) -> np.ndarray:
-    '''
+    """
     Takes an array of multiclass cell labels and returns a unique array 
     of cell labels to test for.
 
@@ -36,7 +36,7 @@ def _eval_labels(cell_labels: np.ndarray, train_indices: np.ndarray,
     uniq_labels : np.ndarray
         Returns a numpy array of unique cell labels to be iterated 
         through during one versus all setups.
-    '''
+    """
     train_uniq_labels = np.unique(cell_labels[train_indices])
     test_uniq_labels = np.unique(cell_labels[test_indices])
 
@@ -52,8 +52,8 @@ def _eval_labels(cell_labels: np.ndarray, train_indices: np.ndarray,
     return uniq_labels
 
 
-def prob_table(results : dict, alpha: float):
-    '''
+def get_prob_table(results : dict, alpha: float):
+    """
     Takes a results dictionary with class and probabilities keys and 
     returns a table of probabilities for each class and the most 
     probable class for each cell.
@@ -81,7 +81,7 @@ def prob_table(results : dict, alpha: float):
     low_conf : list[bool]
         A bool list where `True`, sample max probability is less than 
         0.5.
-    '''
+    """
     prob_table = {class_ : results[class_]['Probabilities'][alpha][class_]
                   for class_ in results.keys()}
     prob_table = pd.DataFrame(prob_table)
@@ -110,7 +110,7 @@ def prob_table(results : dict, alpha: float):
 
 def per_model_summary(results: dict, uniq_labels: np.ndarray | list | tuple, 
                       alpha: float) -> pd.DataFrame:
-    '''
+    """
     Takes the results dictionary from `scmkl.one_v_rest()` and adds a 
     summary dataframe show metrics for each model generated from the 
     runs.
@@ -130,7 +130,7 @@ def per_model_summary(results: dict, uniq_labels: np.ndarray | list | tuple,
     -------
     summary_df : pd.DataFrame
         Dataframe with classes on rows and metrics as cols.
-    '''
+    """
     # Getting metrics availible in results
     avail_mets = list(results[uniq_labels[0]]['Metrics'][alpha])
 
@@ -150,7 +150,7 @@ def get_class_train(train_indices: np.ndarray,
                     cell_labels: np.ndarray | list | pd.Series,
                     seed_obj: np.random._generator.Generator,
                     other_factor = 1.5):
-    '''
+    """
     This function returns a dict with each entry being a set of 
     training indices for each cell class to be used in 
     `scmkl.one_v_rest()`.
@@ -178,7 +178,7 @@ def get_class_train(train_indices: np.ndarray,
     train_idx : dict
         Keys are cell classes and values are the train indices to 
         train scmkl that include both target and non-target samples.
-    '''
+    """
     uniq_labels = set(cell_labels)
     train_idx = dict()
 
@@ -205,7 +205,7 @@ def get_class_train(train_indices: np.ndarray,
 def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray, 
               tfidf : list, batches: int=10, batch_size: int=100, 
               force_balance: bool=False, other_factor: float=1.0) -> dict:
-    '''
+    """
     For each cell class, creates model(s) comparing that class to all 
     others. Then, predicts on the training data using `scmkl.run()`.
     Only labels in both training and testing will be run.
@@ -275,7 +275,7 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
     >>>
     >>> adata.keys()
     dict_keys(['B cells', 'Monocytes', 'Dendritic cells', ...])
-    '''
+    """
     # Formatting checks ensuring all adata elements are 
     # AnnData objects and train/test indices are all the same
     _check_adatas(adatas, check_obs = True, check_uns = True)
@@ -336,7 +336,7 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
 
     # Getting final predictions
     alpha = np.min(alpha_list)
-    prob_table, pred_class, low_conf = prob_table(results, alpha)
+    prob_table, pred_class, low_conf = get_prob_table(results, alpha)
     macro_f1 = f1_score(cell_labels[adata.uns['test_indices']], 
                         pred_class, average='macro')
 

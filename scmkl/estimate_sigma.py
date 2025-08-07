@@ -10,7 +10,7 @@ def get_batches(sample_range: list | np.ndarray,
                 seed_obj: np.random._generator.Generator, 
                 batches: int,
                 batch_size: int) -> np.ndarray:
-    '''
+    """
     Gets batch indices for estimating sigma.
 
     Parameters
@@ -33,7 +33,7 @@ def get_batches(sample_range: list | np.ndarray,
     batches_idx : np.ndarray
         A 2D array with each row cooresponding to the sample indices 
         for each batch.
-    '''
+    """
     required_n = batches*batch_size
     train_n = len(sample_range)
     assert required_n <= train_n, (f"{required_n} cells required for "
@@ -58,7 +58,7 @@ def get_batches(sample_range: list | np.ndarray,
 def batch_sigma(X_train: np.ndarray,
                 distance_metric: str,
                 batch_idx: np.ndarray) -> float:
-    '''
+    """
     Calculates the kernel width (sigma) for a feature grouping through 
     sample batching.
 
@@ -81,7 +81,7 @@ def batch_sigma(X_train: np.ndarray,
     sigma : float
         The estimated group kernel with for Z projection before 
         adjustments for small kernel width or large groupings.
-    '''
+    """
     # Calculate Distance Matrix with specified metric
     n_batches = batch_idx.shape[0]
     batch_sigmas = np.zeros(n_batches)
@@ -102,7 +102,7 @@ def est_group_sigma(adata: ad.AnnData,
                     n_group_features: int,
                     n_features: int, 
                     batch_idx: np.ndarray) -> float:
-    '''
+    """
     Processes data and calculates the kernel width (sigma) for a 
     feature grouping through sample batching.
 
@@ -131,7 +131,7 @@ def est_group_sigma(adata: ad.AnnData,
     sigma : float
         The estimated group kernel with for Z projection.
 
-    '''    
+    """   
     if adata.uns['tfidf']:
         X_train = tfidf(X_train, mode = 'normalize')
 
@@ -164,7 +164,7 @@ def estimate_sigma(adata: ad.AnnData,
                    n_features: int = 5000,
                    batches: int = 10, 
                    batch_size: int = 100) -> ad.AnnData:
-    '''
+    """
     Calculate kernel widths to inform distribution for projection of 
     Fourier Features. Calculates one sigma per group of features.
 
@@ -202,8 +202,8 @@ def estimate_sigma(adata: ad.AnnData,
     >>> adata = scmkl.estimate_sigma(adata)
     >>> adata.uns['sigma']
     array([10.4640895 , 10.82011454,  6.16769438,  9.86156855, ...])
-    '''
-    assert batch_size <= len(adata.uns['train_indices']), ("Batch size much be "
+    """
+    assert batch_size <= len(adata.uns['train_indices']), ("Batch size must be "
                                                           "smaller than the "
                                                           "training set.")
 

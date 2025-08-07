@@ -3,7 +3,7 @@ import scipy
 import anndata as ad
 
 def tfidf(X: np.ndarray | scipy.sparse._csc.csc_matrix, mode: str='filter'):
-    '''
+    """
     Function to use Term Frequency Inverse Document Frequency (TF-IDF)
     filtering for atac data to find meaningful features.
     
@@ -28,7 +28,7 @@ def tfidf(X: np.ndarray | scipy.sparse._csc.csc_matrix, mode: str='filter'):
 
         `'normalize'` (np.ndarray | scipy.sparse._csc.csc_matrix): 
         TF-IDF filtered data matrix of the same dimensions as `X`. 
-    '''
+    """
     assert mode in ['filter', 'normalize'], ("mode must be 'filter' or "
                                              "'normalize'.")
 
@@ -74,7 +74,7 @@ def tfidf_train_test(X_train, X_test):
 
 
 def tfidf_normalize(adata: ad.AnnData, binarize: bool=False):
-    '''
+    """
     Function to TF-IDF normalize the data in an adata object. If any 
     rows are entirely 0, that row and its metadata will be removed from
     the object.
@@ -105,7 +105,7 @@ def tfidf_normalize(adata: ad.AnnData, binarize: bool=False):
     ...                            group_dict = group_dict)
     >>> 
     >>> adata = scmkl.tfidf_normalize(adata)
-    '''
+    """
     X = adata.X.copy()
     row_sums = np.sum(X, axis = 1)
     assert np.all(row_sums > 0), "TFIDF requires all row sums be positive"

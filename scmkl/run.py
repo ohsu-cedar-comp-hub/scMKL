@@ -10,7 +10,7 @@ from scmkl.test import predict, find_selected_groups
 def run(adata: ad.AnnData, alpha_list: np.ndarray, 
         metrics: list | None = None, 
         return_probs: bool=False) -> dict:
-    '''
+    """
     Wrapper function for training and test with multiple alpha values.
     Returns metrics, predictions, group weights, and resource usage.
 
@@ -90,7 +90,7 @@ def run(adata: ad.AnnData, alpha_list: np.ndarray,
     'F1-Score': 0.9452736318407959,
     'Precision': 0.9405940594059405,
     'Recall': 0.95}
-    '''
+    """
     if metrics is None:
         metrics = ['AUROC', 'F1-Score','Accuracy', 'Precision', 'Recall']
 

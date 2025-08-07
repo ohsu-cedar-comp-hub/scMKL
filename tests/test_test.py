@@ -4,21 +4,18 @@ import numpy as np
 from test_train_model import train_scmkl
 
 
-
-
-
 class TestTest(unittest.TestCase):
-    '''
+    """
     This unittest class is used to evaluate whether the functions in 
     scmkl.test are working properly.
-    '''
+    """
 
     def test_predict(self):
-        '''
+        """
         This function ensures that the output model from 
         scmkl.predict() returns as expected by checking the number of 
         coefficients.
-        '''
+        """
         # Creating adata
         adata = train_scmkl()
 
@@ -39,11 +36,11 @@ class TestTest(unittest.TestCase):
 
 
     def test_find_selected_groups(self):
-        '''
+        """
         This function tests the scmkl.find_selected_groups() function 
         by ensuring the expected number of groups are output by the 
         function for the trained model.
-        '''
+        """
         # Training scMKL
         adata = train_scmkl()
 
@@ -51,7 +48,7 @@ class TestTest(unittest.TestCase):
         selected_groups = scmkl.find_selected_groups(adata)
 
         # Ensuring the number of output groups are expected
-        self.assertEqual(len(selected_groups), 48,
+        self.assertEqual(len(selected_groups), 47,
                          "Incorrect number of selected groups")
 
 

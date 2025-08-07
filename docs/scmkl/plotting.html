@@ -69,7 +69,7 @@
 </span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a>
 </span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="k">def</span><span class="w"> </span><span class="nf">plot_conf_mat</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">normalize</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a>                          <span class="n">alpha</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">save</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="sd">    Creates a confusion matrix from the output of scMKL.</span>
 </span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a>
 </span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a><span class="sd">    Parameters</span>
@@ -115,7 +115,7 @@
 </span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a><span class="sd">    ---------</span>
 </span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a><span class="sd">    http://scikit-learn.org/stable/auto_examples/model_selection/</span>
 </span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a><span class="sd">    plot_confusion_matrix.html</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a>    <span class="c1"># Determining type of results</span>
 </span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a>    <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;Observed&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;Metrics&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
 </span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a>        <span class="n">multi_class</span> <span class="o">=</span> <span class="kc">False</span>
@@ -180,7 +180,7 @@
 </span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>
 </span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>
 </span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a><span class="k">def</span><span class="w"> </span><span class="nf">plot_metric</span><span class="p">(</span><span class="n">summary_df</span> <span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">alpha_star</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;red&#39;</span><span class="p">):</span>
-</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a><span class="sd">    Takes a data frame of model metrics and optionally alpha star and</span>
 </span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a><span class="sd">    creates a scatter plot given metrics against alpha values.</span>
 </span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a><span class="sd">    </span>
@@ -210,7 +210,7 @@
 </span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a><span class="sd">    &gt;&gt;&gt; metric_plot = plot_metric(results)</span>
 </span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a><span class="sd">    &gt;&gt;&gt;</span>
 </span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a><span class="sd">    &gt;&gt;&gt; metric_plot.save(&#39;scMKL_performance.png&#39;)</span>
-</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>    <span class="c1"># Capturing metric from summary_df</span>
 </span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>    <span class="n">metric_options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AUROC&#39;</span><span class="p">,</span> <span class="s1">&#39;Accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;F1-Score&#39;</span><span class="p">,</span> <span class="s1">&#39;Precision&#39;</span><span class="p">,</span> <span class="s1">&#39;Recall&#39;</span><span class="p">]</span>
 </span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a>    <span class="n">metric</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">metric_options</span><span class="p">,</span> <span class="n">summary_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -257,7 +257,7 @@
     <a class="headerlink" href="#plot_conf_mat"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="plot_conf_mat-11"><a href="#plot_conf_mat-11"><span class="linenos"> 11</span></a><span class="k">def</span><span class="w"> </span><span class="nf">plot_conf_mat</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">normalize</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 </span><span id="plot_conf_mat-12"><a href="#plot_conf_mat-12"><span class="linenos"> 12</span></a>                          <span class="n">alpha</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">save</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="plot_conf_mat-13"><a href="#plot_conf_mat-13"><span class="linenos"> 13</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="plot_conf_mat-13"><a href="#plot_conf_mat-13"><span class="linenos"> 13</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="plot_conf_mat-14"><a href="#plot_conf_mat-14"><span class="linenos"> 14</span></a><span class="sd">    Creates a confusion matrix from the output of scMKL.</span>
 </span><span id="plot_conf_mat-15"><a href="#plot_conf_mat-15"><span class="linenos"> 15</span></a>
 </span><span id="plot_conf_mat-16"><a href="#plot_conf_mat-16"><span class="linenos"> 16</span></a><span class="sd">    Parameters</span>
@@ -303,7 +303,7 @@
 </span><span id="plot_conf_mat-56"><a href="#plot_conf_mat-56"><span class="linenos"> 56</span></a><span class="sd">    ---------</span>
 </span><span id="plot_conf_mat-57"><a href="#plot_conf_mat-57"><span class="linenos"> 57</span></a><span class="sd">    http://scikit-learn.org/stable/auto_examples/model_selection/</span>
 </span><span id="plot_conf_mat-58"><a href="#plot_conf_mat-58"><span class="linenos"> 58</span></a><span class="sd">    plot_confusion_matrix.html</span>
-</span><span id="plot_conf_mat-59"><a href="#plot_conf_mat-59"><span class="linenos"> 59</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="plot_conf_mat-59"><a href="#plot_conf_mat-59"><span class="linenos"> 59</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="plot_conf_mat-60"><a href="#plot_conf_mat-60"><span class="linenos"> 60</span></a>    <span class="c1"># Determining type of results</span>
 </span><span id="plot_conf_mat-61"><a href="#plot_conf_mat-61"><span class="linenos"> 61</span></a>    <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;Observed&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;Metrics&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
 </span><span id="plot_conf_mat-62"><a href="#plot_conf_mat-62"><span class="linenos"> 62</span></a>        <span class="n">multi_class</span> <span class="o">=</span> <span class="kc">False</span>
@@ -431,7 +431,7 @@ plot_confusion_matrix.html</p>
     </div>
     <a class="headerlink" href="#plot_metric"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="plot_metric-123"><a href="#plot_metric-123"><span class="linenos">123</span></a><span class="k">def</span><span class="w"> </span><span class="nf">plot_metric</span><span class="p">(</span><span class="n">summary_df</span> <span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">alpha_star</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;red&#39;</span><span class="p">):</span>
-</span><span id="plot_metric-124"><a href="#plot_metric-124"><span class="linenos">124</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="plot_metric-124"><a href="#plot_metric-124"><span class="linenos">124</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="plot_metric-125"><a href="#plot_metric-125"><span class="linenos">125</span></a><span class="sd">    Takes a data frame of model metrics and optionally alpha star and</span>
 </span><span id="plot_metric-126"><a href="#plot_metric-126"><span class="linenos">126</span></a><span class="sd">    creates a scatter plot given metrics against alpha values.</span>
 </span><span id="plot_metric-127"><a href="#plot_metric-127"><span class="linenos">127</span></a><span class="sd">    </span>
@@ -461,7 +461,7 @@ plot_confusion_matrix.html</p>
 </span><span id="plot_metric-151"><a href="#plot_metric-151"><span class="linenos">151</span></a><span class="sd">    &gt;&gt;&gt; metric_plot = plot_metric(results)</span>
 </span><span id="plot_metric-152"><a href="#plot_metric-152"><span class="linenos">152</span></a><span class="sd">    &gt;&gt;&gt;</span>
 </span><span id="plot_metric-153"><a href="#plot_metric-153"><span class="linenos">153</span></a><span class="sd">    &gt;&gt;&gt; metric_plot.save(&#39;scMKL_performance.png&#39;)</span>
-</span><span id="plot_metric-154"><a href="#plot_metric-154"><span class="linenos">154</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="plot_metric-154"><a href="#plot_metric-154"><span class="linenos">154</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="plot_metric-155"><a href="#plot_metric-155"><span class="linenos">155</span></a>    <span class="c1"># Capturing metric from summary_df</span>
 </span><span id="plot_metric-156"><a href="#plot_metric-156"><span class="linenos">156</span></a>    <span class="n">metric_options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AUROC&#39;</span><span class="p">,</span> <span class="s1">&#39;Accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;F1-Score&#39;</span><span class="p">,</span> <span class="s1">&#39;Precision&#39;</span><span class="p">,</span> <span class="s1">&#39;Recall&#39;</span><span class="p">]</span>
 </span><span id="plot_metric-157"><a href="#plot_metric-157"><span class="linenos">157</span></a>    <span class="n">metric</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">metric_options</span><span class="p">,</span> <span class="n">summary_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>

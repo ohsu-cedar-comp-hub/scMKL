@@ -5,24 +5,24 @@ from test_calculate_z import create_test_adata
 
 
 class TestRun(unittest.TestCase):
-    '''
+    """
     This unittest class is used to ensure scmkl.run() works for both 
     unimodal and multimodal experiments.
-    '''
+    """
 
     def test_unimodal_run(self):
-        '''
+        """
         This functions ensures that unimodal tasks will run properly 
         for scmkl.run() by checking the output for the correct keys, 
         that all alphas are accounted for, and all samples are 
         accounted for in each model.
-        '''
+        """
         # Creating adata
         adata = create_test_adata()
 
         # Estimating sigma and Z matrices
-        adata = scmkl.estimate_sigma(adata)
-        adata = scmkl.calculate_z(adata)
+        adata = scmkl.estimate_sigma(adata, batch_size=80)
+        adata = scmkl.calculate_z(adata, batch_size=80)
 
         # Running scMKL
         alpha_list = np.array([0.1, 0.25, 0.4])
@@ -63,12 +63,12 @@ class TestRun(unittest.TestCase):
                          "Alphas are missing in the 'Models' dictionary")
         
     def test_multimodal_run(self):
-        '''
+        """
         This functions ensures that multimodal tasks will run properly 
         for scmkl.run() by checking the output for the correct keys, 
         that all alphas are accounted for, and all samples are 
         accounted for in each model.
-        '''
+        """
         rna_adata = create_test_adata('RNA')
         atac_adata = create_test_adata('ATAC')
 
@@ -80,7 +80,8 @@ class TestRun(unittest.TestCase):
         num_alphas = alpha_list.shape[0]
 
         # Combining adatas
-        adata = scmkl.multimodal_processing(adatas, names, tfidf_list)
+        adata = scmkl.multimodal_processing(adatas, names, 
+                                            tfidf_list, batch_size=80)
 
         results = scmkl.run(adata, alpha_list)
 

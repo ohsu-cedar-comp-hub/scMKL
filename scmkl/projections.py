@@ -6,7 +6,7 @@ import numba as nb
 def gaussian_trans(X: np.ndarray, sigma: float, 
                    seed_obj: np.random._generator.Generator,
                    D: int):
-    '''
+    """
     Function to sample the projection direction vector W
     for calculating gaussian Random Fourier Features (RFF)
     for X.
@@ -31,7 +31,7 @@ def gaussian_trans(X: np.ndarray, sigma: float,
     -------
     W : np.ndarray
         Vector defining the direction of the projection of RFF.
-    '''
+    """
     gamma = 1 / ( 2*sigma**2)
     sigma_p = 0.5*np.sqrt(2*gamma)
 
@@ -43,7 +43,7 @@ def gaussian_trans(X: np.ndarray, sigma: float,
 
 @nb.njit(fastmath = True, cache = True)
 def laplacian_trans(X: np.ndarray, sigma: float, seed_obj, d: int):
-    '''
+    """
     Function to sample the projection direction vector W
     for calculating laplacian Random Fourier Features (RFF)
     for X.
@@ -68,7 +68,7 @@ def laplacian_trans(X: np.ndarray, sigma: float, seed_obj, d: int):
     -------
     W : np.ndarray
         Vector defining the direction of the projection of RFF.
-    '''
+    """
     gamma = 1 / (2 * sigma)
 
     W = seed_obj.standard_cauchy(X.shape[1] * d)
@@ -79,7 +79,7 @@ def laplacian_trans(X: np.ndarray, sigma: float, seed_obj, d: int):
 
 @nb.njit(fastmath = True, cache = True)
 def cauchy_trans(X: np.ndarray, sigma: float, seed_obj, d: int):
-    '''
+    """
     Function to sample the projection direction vector W
     for calculating cauchy Random Fourier Features (RFF)
     for X.
@@ -105,7 +105,7 @@ def cauchy_trans(X: np.ndarray, sigma: float, seed_obj, d: int):
     -------
     W : np.ndarray
         Vector defining the direction of the projection of RFF.
-    '''
+    """
     gamma = 1 / (2 * sigma ** 2)
     b = 0.5 * np.sqrt(gamma)
 

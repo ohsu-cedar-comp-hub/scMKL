@@ -5,7 +5,7 @@ import anndata as ad
 
 
 def sparse_var(X: scipy.sparse._csc.csc_matrix | np.ndarray, axis: int | None=None):
-    '''
+    """
     Function to calculate variance on a scipy sparse matrix.
     
     Parameters
@@ -21,7 +21,7 @@ def sparse_var(X: scipy.sparse._csc.csc_matrix | np.ndarray, axis: int | None=No
     -------
     var : np.ndarray | float
         Variance values calculated over the given axis.
-    '''
+    """
     # E[X^2] - E[X]^2
     if scipy.sparse.issparse(X):
         exp_mean = np.asarray(X.power(2).mean(axis = axis)).flatten()
@@ -37,7 +37,7 @@ def process_data(X_train: np.ndarray | scipy.sparse._csc.csc_matrix,
                  X_test: np.ndarray | scipy.sparse._csc.csc_matrix | None=None,
                  scale_data: bool=True, 
                  return_dense: bool=True):
-    '''
+    """
     Function to preprocess data matrix according to type of data 
     (e.g. counts/rna, or binary/atac). Will process test data 
     according to parameters calculated from test data.
@@ -65,7 +65,7 @@ def process_data(X_train: np.ndarray | scipy.sparse._csc.csc_matrix,
     X_train, X_test : np.ndarray, np.ndarray
         Numpy arrays with the process train/test data 
         respectively. If X_test is `None`, only X_train is returned.
-    '''
+    """
     if X_test is None:
         # Creates dummy matrix to for the sake of calculation without 
         # increasing computational time
@@ -116,7 +116,7 @@ def process_data(X_train: np.ndarray | scipy.sparse._csc.csc_matrix,
 def svd_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
                        X_test: scipy.sparse._csc.csc_matrix | 
                        np.ndarray | None=None):
-    '''
+    """
     Returns matrices with SVD reduction. If `X_test is None`, only 
     X_train is returned.
 
@@ -135,7 +135,7 @@ def svd_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
     X_train, X_test : np.ndarray, np.ndarray
         Transformed matrices. Only X_train is returned if 
         `X_test is None`.
-    '''
+    """
     n_components = np.min([50, X_train.shape[1]])
     SVD_func = TruncatedSVD(n_components = n_components, random_state = 1)
     
@@ -153,7 +153,7 @@ def svd_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
 def sample_cells(train_indices: np.ndarray,
                  sample_size: int,
                  seed_obj: np.random._generator.Generator):
-    '''
+    """
     Samples cells indices from training indices for calculations.
 
     Parameters
@@ -169,7 +169,7 @@ def sample_cells(train_indices: np.ndarray,
     -------
     indices : np.ndarray
         The sampled indices from `train_indices`.
-    '''
+    """
     n_samples = np.min((train_indices.shape[0], sample_size))
     indices = seed_obj.choice(train_indices, n_samples, replace = False)
 
@@ -178,7 +178,7 @@ def sample_cells(train_indices: np.ndarray,
 
 def pca_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
                        X_test: scipy.sparse._csc.csc_matrix | np.ndarray | None=None):
-    '''
+    """
     Returns matrices with PCA reduction. If `X_test is None`, only 
     X_train is returned.
 
@@ -197,7 +197,7 @@ def pca_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
     X_train, X_test : np.ndarray, np.ndarray
         Transformed matrices. Only X_train is returned if 
         `X_test is None`.
-    '''
+    """
     n_components = np.min([50, X_train.shape[1]])
     PCA_func = PCA(n_components = n_components, random_state = 1)
 
@@ -211,14 +211,14 @@ def pca_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
 
 def _no_transformation(X_train: scipy.sparse._csc.csc_matrix | np.ndarray,
                       X_test: scipy.sparse._csc.csc_matrix | np.ndarray | None=None):
-    '''
+    """
     Dummy function used to return mat inputs.
-    '''
+    """
     return X_train, X_test
 
 
 def get_reduction(reduction: str):
-    '''
+    """
     Function used to identify reduction type and return function to 
     apply to data matrices.
 
@@ -232,7 +232,7 @@ def get_reduction(reduction: str):
     -------
     red_func : function
         The function to reduce the data.
-    '''
+    """
     match reduction:
         case 'pca':
             red_func = pca_transformation
@@ -248,7 +248,7 @@ def get_group_mat(adata: ad.AnnData, n_features: int,
                   group_features: np.ndarray,
                   n_group_features: int, 
                   process_test: bool=False) -> np.ndarray:
-    '''
+    """
     Filters to only features in group. Will sample features if 
     `n_features < n_group_features`.
 
@@ -277,7 +277,7 @@ def get_group_mat(adata: ad.AnnData, n_features: int,
         Filtered matrices. If `n_samples` is provided, only `X_train` 
         is returned. If `adata.uns['reduction']` is `'pca'` or 
         `'svd'` the matrices are transformed before being returned.
-    '''
+    """
     # Getting reduction function
     reduction_func = get_reduction(adata.uns['reduction'])
 

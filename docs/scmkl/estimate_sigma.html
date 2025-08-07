@@ -76,7 +76,7 @@
 </span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a>                <span class="n">seed_obj</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">_generator</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span> 
 </span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a>                <span class="n">batches</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 </span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a>                <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="sd">    Gets batch indices for estimating sigma.</span>
 </span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a>
 </span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a><span class="sd">    Parameters</span>
@@ -99,7 +99,7 @@
 </span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a><span class="sd">    batches_idx : np.ndarray</span>
 </span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a><span class="sd">        A 2D array with each row cooresponding to the sample indices </span>
 </span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a><span class="sd">        for each batch.</span>
-</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a>    <span class="n">required_n</span> <span class="o">=</span> <span class="n">batches</span><span class="o">*</span><span class="n">batch_size</span>
 </span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a>    <span class="n">train_n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample_range</span><span class="p">)</span>
 </span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a>    <span class="k">assert</span> <span class="n">required_n</span> <span class="o">&lt;=</span> <span class="n">train_n</span><span class="p">,</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">required_n</span><span class="si">}</span><span class="s2"> cells required for &quot;</span>
@@ -124,7 +124,7 @@
 </span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a><span class="k">def</span><span class="w"> </span><span class="nf">batch_sigma</span><span class="p">(</span><span class="n">X_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 </span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a>                <span class="n">distance_metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 </span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a>                <span class="n">batch_idx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a><span class="sd">    Calculates the kernel width (sigma) for a feature grouping through </span>
 </span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a><span class="sd">    sample batching.</span>
 </span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a>
@@ -147,7 +147,7 @@
 </span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="sd">    sigma : float</span>
 </span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a><span class="sd">        The estimated group kernel with for Z projection before </span>
 </span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a><span class="sd">        adjustments for small kernel width or large groupings.</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>    <span class="c1"># Calculate Distance Matrix with specified metric</span>
 </span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>    <span class="n">n_batches</span> <span class="o">=</span> <span class="n">batch_idx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>    <span class="n">batch_sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_batches</span><span class="p">)</span>
@@ -168,7 +168,7 @@
 </span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>                    <span class="n">n_group_features</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 </span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>                    <span class="n">n_features</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> 
 </span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>                    <span class="n">batch_idx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a><span class="sd">    Processes data and calculates the kernel width (sigma) for a </span>
 </span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a><span class="sd">    feature grouping through sample batching.</span>
 </span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>
@@ -197,7 +197,7 @@
 </span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a><span class="sd">    sigma : float</span>
 </span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a><span class="sd">        The estimated group kernel with for Z projection.</span>
 </span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>
-</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a><span class="sd">    &#39;&#39;&#39;</span>    
+</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a><span class="sd">    &quot;&quot;&quot;</span>   
 </span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>    <span class="k">if</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;tfidf&#39;</span><span class="p">]:</span>
 </span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>        <span class="n">X_train</span> <span class="o">=</span> <span class="n">tfidf</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;normalize&#39;</span><span class="p">)</span>
 </span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>
@@ -230,7 +230,7 @@
 </span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a>                   <span class="n">n_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
 </span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>                   <span class="n">batches</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> 
 </span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a>                   <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ad</span><span class="o">.</span><span class="n">AnnData</span><span class="p">:</span>
-</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a><span class="sd">    Calculate kernel widths to inform distribution for projection of </span>
 </span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a><span class="sd">    Fourier Features. Calculates one sigma per group of features.</span>
 </span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a>
@@ -268,8 +268,8 @@
 </span><span id="L-202"><a href="#L-202"><span class="linenos">202</span></a><span class="sd">    &gt;&gt;&gt; adata = scmkl.estimate_sigma(adata)</span>
 </span><span id="L-203"><a href="#L-203"><span class="linenos">203</span></a><span class="sd">    &gt;&gt;&gt; adata.uns[&#39;sigma&#39;]</span>
 </span><span id="L-204"><a href="#L-204"><span class="linenos">204</span></a><span class="sd">    array([10.4640895 , 10.82011454,  6.16769438,  9.86156855, ...])</span>
-</span><span id="L-205"><a href="#L-205"><span class="linenos">205</span></a><span class="sd">    &#39;&#39;&#39;</span>
-</span><span id="L-206"><a href="#L-206"><span class="linenos">206</span></a>    <span class="k">assert</span> <span class="n">batch_size</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">]),</span> <span class="p">(</span><span class="s2">&quot;Batch size much be &quot;</span>
+</span><span id="L-205"><a href="#L-205"><span class="linenos">205</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-206"><a href="#L-206"><span class="linenos">206</span></a>    <span class="k">assert</span> <span class="n">batch_size</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">]),</span> <span class="p">(</span><span class="s2">&quot;Batch size must be &quot;</span>
 </span><span id="L-207"><a href="#L-207"><span class="linenos">207</span></a>                                                          <span class="s2">&quot;smaller than the &quot;</span>
 </span><span id="L-208"><a href="#L-208"><span class="linenos">208</span></a>                                                          <span class="s2">&quot;training set.&quot;</span><span class="p">)</span>
 </span><span id="L-209"><a href="#L-209"><span class="linenos">209</span></a>
@@ -343,7 +343,7 @@
 </span><span id="get_batches-11"><a href="#get_batches-11"><span class="linenos">11</span></a>                <span class="n">seed_obj</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">_generator</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span> 
 </span><span id="get_batches-12"><a href="#get_batches-12"><span class="linenos">12</span></a>                <span class="n">batches</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 </span><span id="get_batches-13"><a href="#get_batches-13"><span class="linenos">13</span></a>                <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="get_batches-14"><a href="#get_batches-14"><span class="linenos">14</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="get_batches-14"><a href="#get_batches-14"><span class="linenos">14</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="get_batches-15"><a href="#get_batches-15"><span class="linenos">15</span></a><span class="sd">    Gets batch indices for estimating sigma.</span>
 </span><span id="get_batches-16"><a href="#get_batches-16"><span class="linenos">16</span></a>
 </span><span id="get_batches-17"><a href="#get_batches-17"><span class="linenos">17</span></a><span class="sd">    Parameters</span>
@@ -366,7 +366,7 @@
 </span><span id="get_batches-34"><a href="#get_batches-34"><span class="linenos">34</span></a><span class="sd">    batches_idx : np.ndarray</span>
 </span><span id="get_batches-35"><a href="#get_batches-35"><span class="linenos">35</span></a><span class="sd">        A 2D array with each row cooresponding to the sample indices </span>
 </span><span id="get_batches-36"><a href="#get_batches-36"><span class="linenos">36</span></a><span class="sd">        for each batch.</span>
-</span><span id="get_batches-37"><a href="#get_batches-37"><span class="linenos">37</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="get_batches-37"><a href="#get_batches-37"><span class="linenos">37</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="get_batches-38"><a href="#get_batches-38"><span class="linenos">38</span></a>    <span class="n">required_n</span> <span class="o">=</span> <span class="n">batches</span><span class="o">*</span><span class="n">batch_size</span>
 </span><span id="get_batches-39"><a href="#get_batches-39"><span class="linenos">39</span></a>    <span class="n">train_n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample_range</span><span class="p">)</span>
 </span><span id="get_batches-40"><a href="#get_batches-40"><span class="linenos">40</span></a>    <span class="k">assert</span> <span class="n">required_n</span> <span class="o">&lt;=</span> <span class="n">train_n</span><span class="p">,</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">required_n</span><span class="si">}</span><span class="s2"> cells required for &quot;</span>
@@ -430,7 +430,7 @@ for each batch.</li>
             <div class="pdoc-code codehilite"><pre><span></span><span id="batch_sigma-59"><a href="#batch_sigma-59"><span class="linenos">59</span></a><span class="k">def</span><span class="w"> </span><span class="nf">batch_sigma</span><span class="p">(</span><span class="n">X_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 </span><span id="batch_sigma-60"><a href="#batch_sigma-60"><span class="linenos">60</span></a>                <span class="n">distance_metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 </span><span id="batch_sigma-61"><a href="#batch_sigma-61"><span class="linenos">61</span></a>                <span class="n">batch_idx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span id="batch_sigma-62"><a href="#batch_sigma-62"><span class="linenos">62</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="batch_sigma-62"><a href="#batch_sigma-62"><span class="linenos">62</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="batch_sigma-63"><a href="#batch_sigma-63"><span class="linenos">63</span></a><span class="sd">    Calculates the kernel width (sigma) for a feature grouping through </span>
 </span><span id="batch_sigma-64"><a href="#batch_sigma-64"><span class="linenos">64</span></a><span class="sd">    sample batching.</span>
 </span><span id="batch_sigma-65"><a href="#batch_sigma-65"><span class="linenos">65</span></a>
@@ -453,7 +453,7 @@ for each batch.</li>
 </span><span id="batch_sigma-82"><a href="#batch_sigma-82"><span class="linenos">82</span></a><span class="sd">    sigma : float</span>
 </span><span id="batch_sigma-83"><a href="#batch_sigma-83"><span class="linenos">83</span></a><span class="sd">        The estimated group kernel with for Z projection before </span>
 </span><span id="batch_sigma-84"><a href="#batch_sigma-84"><span class="linenos">84</span></a><span class="sd">        adjustments for small kernel width or large groupings.</span>
-</span><span id="batch_sigma-85"><a href="#batch_sigma-85"><span class="linenos">85</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="batch_sigma-85"><a href="#batch_sigma-85"><span class="linenos">85</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="batch_sigma-86"><a href="#batch_sigma-86"><span class="linenos">86</span></a>    <span class="c1"># Calculate Distance Matrix with specified metric</span>
 </span><span id="batch_sigma-87"><a href="#batch_sigma-87"><span class="linenos">87</span></a>    <span class="n">n_batches</span> <span class="o">=</span> <span class="n">batch_idx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </span><span id="batch_sigma-88"><a href="#batch_sigma-88"><span class="linenos">88</span></a>    <span class="n">batch_sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_batches</span><span class="p">)</span>
@@ -514,7 +514,7 @@ adjustments for small kernel width or large groupings.</li>
 </span><span id="est_group_sigma-103"><a href="#est_group_sigma-103"><span class="linenos">103</span></a>                    <span class="n">n_group_features</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 </span><span id="est_group_sigma-104"><a href="#est_group_sigma-104"><span class="linenos">104</span></a>                    <span class="n">n_features</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> 
 </span><span id="est_group_sigma-105"><a href="#est_group_sigma-105"><span class="linenos">105</span></a>                    <span class="n">batch_idx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span id="est_group_sigma-106"><a href="#est_group_sigma-106"><span class="linenos">106</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="est_group_sigma-106"><a href="#est_group_sigma-106"><span class="linenos">106</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="est_group_sigma-107"><a href="#est_group_sigma-107"><span class="linenos">107</span></a><span class="sd">    Processes data and calculates the kernel width (sigma) for a </span>
 </span><span id="est_group_sigma-108"><a href="#est_group_sigma-108"><span class="linenos">108</span></a><span class="sd">    feature grouping through sample batching.</span>
 </span><span id="est_group_sigma-109"><a href="#est_group_sigma-109"><span class="linenos">109</span></a>
@@ -543,7 +543,7 @@ adjustments for small kernel width or large groupings.</li>
 </span><span id="est_group_sigma-132"><a href="#est_group_sigma-132"><span class="linenos">132</span></a><span class="sd">    sigma : float</span>
 </span><span id="est_group_sigma-133"><a href="#est_group_sigma-133"><span class="linenos">133</span></a><span class="sd">        The estimated group kernel with for Z projection.</span>
 </span><span id="est_group_sigma-134"><a href="#est_group_sigma-134"><span class="linenos">134</span></a>
-</span><span id="est_group_sigma-135"><a href="#est_group_sigma-135"><span class="linenos">135</span></a><span class="sd">    &#39;&#39;&#39;</span>    
+</span><span id="est_group_sigma-135"><a href="#est_group_sigma-135"><span class="linenos">135</span></a><span class="sd">    &quot;&quot;&quot;</span>   
 </span><span id="est_group_sigma-136"><a href="#est_group_sigma-136"><span class="linenos">136</span></a>    <span class="k">if</span> <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;tfidf&#39;</span><span class="p">]:</span>
 </span><span id="est_group_sigma-137"><a href="#est_group_sigma-137"><span class="linenos">137</span></a>        <span class="n">X_train</span> <span class="o">=</span> <span class="n">tfidf</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;normalize&#39;</span><span class="p">)</span>
 </span><span id="est_group_sigma-138"><a href="#est_group_sigma-138"><span class="linenos">138</span></a>
@@ -618,7 +618,7 @@ The estimated group kernel with for Z projection.</li>
 </span><span id="estimate_sigma-165"><a href="#estimate_sigma-165"><span class="linenos">165</span></a>                   <span class="n">n_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
 </span><span id="estimate_sigma-166"><a href="#estimate_sigma-166"><span class="linenos">166</span></a>                   <span class="n">batches</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> 
 </span><span id="estimate_sigma-167"><a href="#estimate_sigma-167"><span class="linenos">167</span></a>                   <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ad</span><span class="o">.</span><span class="n">AnnData</span><span class="p">:</span>
-</span><span id="estimate_sigma-168"><a href="#estimate_sigma-168"><span class="linenos">168</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="estimate_sigma-168"><a href="#estimate_sigma-168"><span class="linenos">168</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="estimate_sigma-169"><a href="#estimate_sigma-169"><span class="linenos">169</span></a><span class="sd">    Calculate kernel widths to inform distribution for projection of </span>
 </span><span id="estimate_sigma-170"><a href="#estimate_sigma-170"><span class="linenos">170</span></a><span class="sd">    Fourier Features. Calculates one sigma per group of features.</span>
 </span><span id="estimate_sigma-171"><a href="#estimate_sigma-171"><span class="linenos">171</span></a>
@@ -656,8 +656,8 @@ The estimated group kernel with for Z projection.</li>
 </span><span id="estimate_sigma-203"><a href="#estimate_sigma-203"><span class="linenos">203</span></a><span class="sd">    &gt;&gt;&gt; adata = scmkl.estimate_sigma(adata)</span>
 </span><span id="estimate_sigma-204"><a href="#estimate_sigma-204"><span class="linenos">204</span></a><span class="sd">    &gt;&gt;&gt; adata.uns[&#39;sigma&#39;]</span>
 </span><span id="estimate_sigma-205"><a href="#estimate_sigma-205"><span class="linenos">205</span></a><span class="sd">    array([10.4640895 , 10.82011454,  6.16769438,  9.86156855, ...])</span>
-</span><span id="estimate_sigma-206"><a href="#estimate_sigma-206"><span class="linenos">206</span></a><span class="sd">    &#39;&#39;&#39;</span>
-</span><span id="estimate_sigma-207"><a href="#estimate_sigma-207"><span class="linenos">207</span></a>    <span class="k">assert</span> <span class="n">batch_size</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">]),</span> <span class="p">(</span><span class="s2">&quot;Batch size much be &quot;</span>
+</span><span id="estimate_sigma-206"><a href="#estimate_sigma-206"><span class="linenos">206</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="estimate_sigma-207"><a href="#estimate_sigma-207"><span class="linenos">207</span></a>    <span class="k">assert</span> <span class="n">batch_size</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;train_indices&#39;</span><span class="p">]),</span> <span class="p">(</span><span class="s2">&quot;Batch size must be &quot;</span>
 </span><span id="estimate_sigma-208"><a href="#estimate_sigma-208"><span class="linenos">208</span></a>                                                          <span class="s2">&quot;smaller than the &quot;</span>
 </span><span id="estimate_sigma-209"><a href="#estimate_sigma-209"><span class="linenos">209</span></a>                                                          <span class="s2">&quot;training set.&quot;</span><span class="p">)</span>
 </span><span id="estimate_sigma-210"><a href="#estimate_sigma-210"><span class="linenos">210</span></a>

@@ -32,7 +32,7 @@
             <h2>API Documentation</h2>
                 <ul class="memberlist">
             <li>
-                    <a class="function" href="#prob_table">prob_table</a>
+                    <a class="function" href="#get_prob_table">get_prob_table</a>
             </li>
             <li>
                     <a class="function" href="#per_model_summary">per_model_summary</a>
@@ -77,7 +77,7 @@
 </span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a>
 </span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="k">def</span><span class="w"> </span><span class="nf">_eval_labels</span><span class="p">(</span><span class="n">cell_labels</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">train_indices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
 </span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a>                  <span class="n">test_indices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a><span class="sd">    Takes an array of multiclass cell labels and returns a unique array </span>
 </span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a><span class="sd">    of cell labels to test for.</span>
 </span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a>
@@ -102,7 +102,7 @@
 </span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a><span class="sd">    uniq_labels : np.ndarray</span>
 </span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a><span class="sd">        Returns a numpy array of unique cell labels to be iterated </span>
 </span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a><span class="sd">        through during one versus all setups.</span>
-</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a>    <span class="n">train_uniq_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">cell_labels</span><span class="p">[</span><span class="n">train_indices</span><span class="p">])</span>
 </span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a>    <span class="n">test_uniq_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">cell_labels</span><span class="p">[</span><span class="n">test_indices</span><span class="p">])</span>
 </span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a>
@@ -118,8 +118,8 @@
 </span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a>    <span class="k">return</span> <span class="n">uniq_labels</span>
 </span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a>
 </span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>
-</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a><span class="k">def</span><span class="w"> </span><span class="nf">prob_table</span><span class="p">(</span><span class="n">results</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a><span class="k">def</span><span class="w"> </span><span class="nf">get_prob_table</span><span class="p">(</span><span class="n">results</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a><span class="sd">    Takes a results dictionary with class and probabilities keys and </span>
 </span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a><span class="sd">    returns a table of probabilities for each class and the most </span>
 </span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a><span class="sd">    probable class for each cell.</span>
@@ -147,7 +147,7 @@
 </span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="sd">    low_conf : list[bool]</span>
 </span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a><span class="sd">        A bool list where `True`, sample max probability is less than </span>
 </span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a><span class="sd">        0.5.</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>    <span class="n">prob_table</span> <span class="o">=</span> <span class="p">{</span><span class="n">class_</span> <span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="n">class_</span><span class="p">][</span><span class="s1">&#39;Probabilities&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">][</span><span class="n">class_</span><span class="p">]</span>
 </span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>                  <span class="k">for</span> <span class="n">class_</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
 </span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>    <span class="n">prob_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">prob_table</span><span class="p">)</span>
@@ -176,7 +176,7 @@
 </span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>
 </span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a><span class="k">def</span><span class="w"> </span><span class="nf">per_model_summary</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">uniq_labels</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">,</span> 
 </span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>                      <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a><span class="sd">    Takes the results dictionary from `scmkl.one_v_rest()` and adds a </span>
 </span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a><span class="sd">    summary dataframe show metrics for each model generated from the </span>
 </span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a><span class="sd">    runs.</span>
@@ -196,7 +196,7 @@
 </span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a><span class="sd">    -------</span>
 </span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a><span class="sd">    summary_df : pd.DataFrame</span>
 </span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a><span class="sd">        Dataframe with classes on rows and metrics as cols.</span>
-</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>    <span class="c1"># Getting metrics availible in results</span>
 </span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>    <span class="n">avail_mets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="n">uniq_labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s1">&#39;Metrics&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">])</span>
 </span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>
@@ -216,7 +216,7 @@
 </span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>                    <span class="n">cell_labels</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
 </span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>                    <span class="n">seed_obj</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">_generator</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span>
 </span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>                    <span class="n">other_factor</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">):</span>
-</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a><span class="sd">    This function returns a dict with each entry being a set of </span>
 </span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a><span class="sd">    training indices for each cell class to be used in </span>
 </span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a><span class="sd">    `scmkl.one_v_rest()`.</span>
@@ -244,7 +244,7 @@
 </span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a><span class="sd">    train_idx : dict</span>
 </span><span id="L-179"><a href="#L-179"><span class="linenos">179</span></a><span class="sd">        Keys are cell classes and values are the train indices to </span>
 </span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a><span class="sd">        train scmkl that include both target and non-target samples.</span>
-</span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a>    <span class="n">uniq_labels</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">cell_labels</span><span class="p">)</span>
 </span><span id="L-183"><a href="#L-183"><span class="linenos">183</span></a>    <span class="n">train_idx</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 </span><span id="L-184"><a href="#L-184"><span class="linenos">184</span></a>
@@ -271,7 +271,7 @@
 </span><span id="L-205"><a href="#L-205"><span class="linenos">205</span></a><span class="k">def</span><span class="w"> </span><span class="nf">one_v_rest</span><span class="p">(</span><span class="n">adatas</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">names</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">alpha_list</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
 </span><span id="L-206"><a href="#L-206"><span class="linenos">206</span></a>              <span class="n">tfidf</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">batches</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> 
 </span><span id="L-207"><a href="#L-207"><span class="linenos">207</span></a>              <span class="n">force_balance</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">other_factor</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span id="L-208"><a href="#L-208"><span class="linenos">208</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-208"><a href="#L-208"><span class="linenos">208</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-209"><a href="#L-209"><span class="linenos">209</span></a><span class="sd">    For each cell class, creates model(s) comparing that class to all </span>
 </span><span id="L-210"><a href="#L-210"><span class="linenos">210</span></a><span class="sd">    others. Then, predicts on the training data using `scmkl.run()`.</span>
 </span><span id="L-211"><a href="#L-211"><span class="linenos">211</span></a><span class="sd">    Only labels in both training and testing will be run.</span>
@@ -341,7 +341,7 @@
 </span><span id="L-275"><a href="#L-275"><span class="linenos">275</span></a><span class="sd">    &gt;&gt;&gt;</span>
 </span><span id="L-276"><a href="#L-276"><span class="linenos">276</span></a><span class="sd">    &gt;&gt;&gt; adata.keys()</span>
 </span><span id="L-277"><a href="#L-277"><span class="linenos">277</span></a><span class="sd">    dict_keys([&#39;B cells&#39;, &#39;Monocytes&#39;, &#39;Dendritic cells&#39;, ...])</span>
-</span><span id="L-278"><a href="#L-278"><span class="linenos">278</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-278"><a href="#L-278"><span class="linenos">278</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-279"><a href="#L-279"><span class="linenos">279</span></a>    <span class="c1"># Formatting checks ensuring all adata elements are </span>
 </span><span id="L-280"><a href="#L-280"><span class="linenos">280</span></a>    <span class="c1"># AnnData objects and train/test indices are all the same</span>
 </span><span id="L-281"><a href="#L-281"><span class="linenos">281</span></a>    <span class="n">_check_adatas</span><span class="p">(</span><span class="n">adatas</span><span class="p">,</span> <span class="n">check_obs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_uns</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
@@ -402,7 +402,7 @@
 </span><span id="L-336"><a href="#L-336"><span class="linenos">336</span></a>
 </span><span id="L-337"><a href="#L-337"><span class="linenos">337</span></a>    <span class="c1"># Getting final predictions</span>
 </span><span id="L-338"><a href="#L-338"><span class="linenos">338</span></a>    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">alpha_list</span><span class="p">)</span>
-</span><span id="L-339"><a href="#L-339"><span class="linenos">339</span></a>    <span class="n">prob_table</span><span class="p">,</span> <span class="n">pred_class</span><span class="p">,</span> <span class="n">low_conf</span> <span class="o">=</span> <span class="n">prob_table</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+</span><span id="L-339"><a href="#L-339"><span class="linenos">339</span></a>    <span class="n">prob_table</span><span class="p">,</span> <span class="n">pred_class</span><span class="p">,</span> <span class="n">low_conf</span> <span class="o">=</span> <span class="n">get_prob_table</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
 </span><span id="L-340"><a href="#L-340"><span class="linenos">340</span></a>    <span class="n">macro_f1</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">cell_labels</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]],</span> 
 </span><span id="L-341"><a href="#L-341"><span class="linenos">341</span></a>                        <span class="n">pred_class</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s1">&#39;macro&#39;</span><span class="p">)</span>
 </span><span id="L-342"><a href="#L-342"><span class="linenos">342</span></a>
@@ -424,71 +424,71 @@
 
 
             </section>
-                <section id="prob_table">
-                            <input id="prob_table-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+                <section id="get_prob_table">
+                            <input id="get_prob_table-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">prob_table</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">results</span><span class="p">:</span> <span class="nb">dict</span>, </span><span class="param"><span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span></span><span class="return-annotation">):</span></span>
+        <span class="name">get_prob_table</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">results</span><span class="p">:</span> <span class="nb">dict</span>, </span><span class="param"><span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span></span><span class="return-annotation">):</span></span>
 
-                <label class="view-source-button" for="prob_table-view-source"><span>View Source</span></label>
+                <label class="view-source-button" for="get_prob_table-view-source"><span>View Source</span></label>
 
     </div>
-    <a class="headerlink" href="#prob_table"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="prob_table-56"><a href="#prob_table-56"><span class="linenos"> 56</span></a><span class="k">def</span><span class="w"> </span><span class="nf">prob_table</span><span class="p">(</span><span class="n">results</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-</span><span id="prob_table-57"><a href="#prob_table-57"><span class="linenos"> 57</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-</span><span id="prob_table-58"><a href="#prob_table-58"><span class="linenos"> 58</span></a><span class="sd">    Takes a results dictionary with class and probabilities keys and </span>
-</span><span id="prob_table-59"><a href="#prob_table-59"><span class="linenos"> 59</span></a><span class="sd">    returns a table of probabilities for each class and the most </span>
-</span><span id="prob_table-60"><a href="#prob_table-60"><span class="linenos"> 60</span></a><span class="sd">    probable class for each cell.</span>
-</span><span id="prob_table-61"><a href="#prob_table-61"><span class="linenos"> 61</span></a>
-</span><span id="prob_table-62"><a href="#prob_table-62"><span class="linenos"> 62</span></a><span class="sd">    Parameters</span>
-</span><span id="prob_table-63"><a href="#prob_table-63"><span class="linenos"> 63</span></a><span class="sd">    ----------</span>
-</span><span id="prob_table-64"><a href="#prob_table-64"><span class="linenos"> 64</span></a><span class="sd">    results : dict</span>
-</span><span id="prob_table-65"><a href="#prob_table-65"><span class="linenos"> 65</span></a><span class="sd">        A nested dictionary that contains a dictionary for each class </span>
-</span><span id="prob_table-66"><a href="#prob_table-66"><span class="linenos"> 66</span></a><span class="sd">        containing probabilities for each cell class.</span>
-</span><span id="prob_table-67"><a href="#prob_table-67"><span class="linenos"> 67</span></a>
-</span><span id="prob_table-68"><a href="#prob_table-68"><span class="linenos"> 68</span></a><span class="sd">    alpha : float</span>
-</span><span id="prob_table-69"><a href="#prob_table-69"><span class="linenos"> 69</span></a><span class="sd">        A float for which model probabilities should be evaluated </span>
-</span><span id="prob_table-70"><a href="#prob_table-70"><span class="linenos"> 70</span></a><span class="sd">        for.</span>
-</span><span id="prob_table-71"><a href="#prob_table-71"><span class="linenos"> 71</span></a>
-</span><span id="prob_table-72"><a href="#prob_table-72"><span class="linenos"> 72</span></a><span class="sd">    Returns</span>
-</span><span id="prob_table-73"><a href="#prob_table-73"><span class="linenos"> 73</span></a><span class="sd">    -------</span>
-</span><span id="prob_table-74"><a href="#prob_table-74"><span class="linenos"> 74</span></a><span class="sd">    prob_table : pd.DataFrame</span>
-</span><span id="prob_table-75"><a href="#prob_table-75"><span class="linenos"> 75</span></a><span class="sd">        Each column is a cell class and the elements are the</span>
-</span><span id="prob_table-76"><a href="#prob_table-76"><span class="linenos"> 76</span></a><span class="sd">        class probability outputs from the model.</span>
-</span><span id="prob_table-77"><a href="#prob_table-77"><span class="linenos"> 77</span></a>
-</span><span id="prob_table-78"><a href="#prob_table-78"><span class="linenos"> 78</span></a><span class="sd">    pred_class : list[str]</span>
-</span><span id="prob_table-79"><a href="#prob_table-79"><span class="linenos"> 79</span></a><span class="sd">        The most probable cell classes respective to the training set </span>
-</span><span id="prob_table-80"><a href="#prob_table-80"><span class="linenos"> 80</span></a><span class="sd">        cells. </span>
-</span><span id="prob_table-81"><a href="#prob_table-81"><span class="linenos"> 81</span></a>
-</span><span id="prob_table-82"><a href="#prob_table-82"><span class="linenos"> 82</span></a><span class="sd">    low_conf : list[bool]</span>
-</span><span id="prob_table-83"><a href="#prob_table-83"><span class="linenos"> 83</span></a><span class="sd">        A bool list where `True`, sample max probability is less than </span>
-</span><span id="prob_table-84"><a href="#prob_table-84"><span class="linenos"> 84</span></a><span class="sd">        0.5.</span>
-</span><span id="prob_table-85"><a href="#prob_table-85"><span class="linenos"> 85</span></a><span class="sd">    &#39;&#39;&#39;</span>
-</span><span id="prob_table-86"><a href="#prob_table-86"><span class="linenos"> 86</span></a>    <span class="n">prob_table</span> <span class="o">=</span> <span class="p">{</span><span class="n">class_</span> <span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="n">class_</span><span class="p">][</span><span class="s1">&#39;Probabilities&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">][</span><span class="n">class_</span><span class="p">]</span>
-</span><span id="prob_table-87"><a href="#prob_table-87"><span class="linenos"> 87</span></a>                  <span class="k">for</span> <span class="n">class_</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
-</span><span id="prob_table-88"><a href="#prob_table-88"><span class="linenos"> 88</span></a>    <span class="n">prob_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">prob_table</span><span class="p">)</span>
-</span><span id="prob_table-89"><a href="#prob_table-89"><span class="linenos"> 89</span></a>
-</span><span id="prob_table-90"><a href="#prob_table-90"><span class="linenos"> 90</span></a>    <span class="n">pred_class</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="prob_table-91"><a href="#prob_table-91"><span class="linenos"> 91</span></a>    <span class="n">maxes</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="prob_table-92"><a href="#prob_table-92"><span class="linenos"> 92</span></a>
-</span><span id="prob_table-93"><a href="#prob_table-93"><span class="linenos"> 93</span></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">prob_table</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-</span><span id="prob_table-94"><a href="#prob_table-94"><span class="linenos"> 94</span></a>        <span class="n">row_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-</span><span id="prob_table-95"><a href="#prob_table-95"><span class="linenos"> 95</span></a>        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">row</span> <span class="o">==</span> <span class="n">row_max</span><span class="p">)</span>
-</span><span id="prob_table-96"><a href="#prob_table-96"><span class="linenos"> 96</span></a>        <span class="n">prediction</span> <span class="o">=</span> <span class="n">prob_table</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
-</span><span id="prob_table-97"><a href="#prob_table-97"><span class="linenos"> 97</span></a>
-</span><span id="prob_table-98"><a href="#prob_table-98"><span class="linenos"> 98</span></a>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-</span><span id="prob_table-99"><a href="#prob_table-99"><span class="linenos"> 99</span></a>            <span class="n">prediction</span> <span class="o">=</span> <span class="s2">&quot; and &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
-</span><span id="prob_table-100"><a href="#prob_table-100"><span class="linenos">100</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="prob_table-101"><a href="#prob_table-101"><span class="linenos">101</span></a>            <span class="n">prediction</span> <span class="o">=</span> <span class="n">prediction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span id="prob_table-102"><a href="#prob_table-102"><span class="linenos">102</span></a>
-</span><span id="prob_table-103"><a href="#prob_table-103"><span class="linenos">103</span></a>        <span class="n">pred_class</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
-</span><span id="prob_table-104"><a href="#prob_table-104"><span class="linenos">104</span></a>        <span class="n">maxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row_max</span><span class="p">)</span>
-</span><span id="prob_table-105"><a href="#prob_table-105"><span class="linenos">105</span></a>
-</span><span id="prob_table-106"><a href="#prob_table-106"><span class="linenos">106</span></a>    <span class="n">maxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">maxes</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-</span><span id="prob_table-107"><a href="#prob_table-107"><span class="linenos">107</span></a>    <span class="n">low_conf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">maxes</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">))</span>
-</span><span id="prob_table-108"><a href="#prob_table-108"><span class="linenos">108</span></a>
-</span><span id="prob_table-109"><a href="#prob_table-109"><span class="linenos">109</span></a>    <span class="k">return</span> <span class="n">prob_table</span><span class="p">,</span> <span class="n">pred_class</span><span class="p">,</span> <span class="n">low_conf</span>
+    <a class="headerlink" href="#get_prob_table"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="get_prob_table-56"><a href="#get_prob_table-56"><span class="linenos"> 56</span></a><span class="k">def</span><span class="w"> </span><span class="nf">get_prob_table</span><span class="p">(</span><span class="n">results</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+</span><span id="get_prob_table-57"><a href="#get_prob_table-57"><span class="linenos"> 57</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="get_prob_table-58"><a href="#get_prob_table-58"><span class="linenos"> 58</span></a><span class="sd">    Takes a results dictionary with class and probabilities keys and </span>
+</span><span id="get_prob_table-59"><a href="#get_prob_table-59"><span class="linenos"> 59</span></a><span class="sd">    returns a table of probabilities for each class and the most </span>
+</span><span id="get_prob_table-60"><a href="#get_prob_table-60"><span class="linenos"> 60</span></a><span class="sd">    probable class for each cell.</span>
+</span><span id="get_prob_table-61"><a href="#get_prob_table-61"><span class="linenos"> 61</span></a>
+</span><span id="get_prob_table-62"><a href="#get_prob_table-62"><span class="linenos"> 62</span></a><span class="sd">    Parameters</span>
+</span><span id="get_prob_table-63"><a href="#get_prob_table-63"><span class="linenos"> 63</span></a><span class="sd">    ----------</span>
+</span><span id="get_prob_table-64"><a href="#get_prob_table-64"><span class="linenos"> 64</span></a><span class="sd">    results : dict</span>
+</span><span id="get_prob_table-65"><a href="#get_prob_table-65"><span class="linenos"> 65</span></a><span class="sd">        A nested dictionary that contains a dictionary for each class </span>
+</span><span id="get_prob_table-66"><a href="#get_prob_table-66"><span class="linenos"> 66</span></a><span class="sd">        containing probabilities for each cell class.</span>
+</span><span id="get_prob_table-67"><a href="#get_prob_table-67"><span class="linenos"> 67</span></a>
+</span><span id="get_prob_table-68"><a href="#get_prob_table-68"><span class="linenos"> 68</span></a><span class="sd">    alpha : float</span>
+</span><span id="get_prob_table-69"><a href="#get_prob_table-69"><span class="linenos"> 69</span></a><span class="sd">        A float for which model probabilities should be evaluated </span>
+</span><span id="get_prob_table-70"><a href="#get_prob_table-70"><span class="linenos"> 70</span></a><span class="sd">        for.</span>
+</span><span id="get_prob_table-71"><a href="#get_prob_table-71"><span class="linenos"> 71</span></a>
+</span><span id="get_prob_table-72"><a href="#get_prob_table-72"><span class="linenos"> 72</span></a><span class="sd">    Returns</span>
+</span><span id="get_prob_table-73"><a href="#get_prob_table-73"><span class="linenos"> 73</span></a><span class="sd">    -------</span>
+</span><span id="get_prob_table-74"><a href="#get_prob_table-74"><span class="linenos"> 74</span></a><span class="sd">    prob_table : pd.DataFrame</span>
+</span><span id="get_prob_table-75"><a href="#get_prob_table-75"><span class="linenos"> 75</span></a><span class="sd">        Each column is a cell class and the elements are the</span>
+</span><span id="get_prob_table-76"><a href="#get_prob_table-76"><span class="linenos"> 76</span></a><span class="sd">        class probability outputs from the model.</span>
+</span><span id="get_prob_table-77"><a href="#get_prob_table-77"><span class="linenos"> 77</span></a>
+</span><span id="get_prob_table-78"><a href="#get_prob_table-78"><span class="linenos"> 78</span></a><span class="sd">    pred_class : list[str]</span>
+</span><span id="get_prob_table-79"><a href="#get_prob_table-79"><span class="linenos"> 79</span></a><span class="sd">        The most probable cell classes respective to the training set </span>
+</span><span id="get_prob_table-80"><a href="#get_prob_table-80"><span class="linenos"> 80</span></a><span class="sd">        cells. </span>
+</span><span id="get_prob_table-81"><a href="#get_prob_table-81"><span class="linenos"> 81</span></a>
+</span><span id="get_prob_table-82"><a href="#get_prob_table-82"><span class="linenos"> 82</span></a><span class="sd">    low_conf : list[bool]</span>
+</span><span id="get_prob_table-83"><a href="#get_prob_table-83"><span class="linenos"> 83</span></a><span class="sd">        A bool list where `True`, sample max probability is less than </span>
+</span><span id="get_prob_table-84"><a href="#get_prob_table-84"><span class="linenos"> 84</span></a><span class="sd">        0.5.</span>
+</span><span id="get_prob_table-85"><a href="#get_prob_table-85"><span class="linenos"> 85</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="get_prob_table-86"><a href="#get_prob_table-86"><span class="linenos"> 86</span></a>    <span class="n">prob_table</span> <span class="o">=</span> <span class="p">{</span><span class="n">class_</span> <span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="n">class_</span><span class="p">][</span><span class="s1">&#39;Probabilities&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">][</span><span class="n">class_</span><span class="p">]</span>
+</span><span id="get_prob_table-87"><a href="#get_prob_table-87"><span class="linenos"> 87</span></a>                  <span class="k">for</span> <span class="n">class_</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+</span><span id="get_prob_table-88"><a href="#get_prob_table-88"><span class="linenos"> 88</span></a>    <span class="n">prob_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">prob_table</span><span class="p">)</span>
+</span><span id="get_prob_table-89"><a href="#get_prob_table-89"><span class="linenos"> 89</span></a>
+</span><span id="get_prob_table-90"><a href="#get_prob_table-90"><span class="linenos"> 90</span></a>    <span class="n">pred_class</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="get_prob_table-91"><a href="#get_prob_table-91"><span class="linenos"> 91</span></a>    <span class="n">maxes</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="get_prob_table-92"><a href="#get_prob_table-92"><span class="linenos"> 92</span></a>
+</span><span id="get_prob_table-93"><a href="#get_prob_table-93"><span class="linenos"> 93</span></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">prob_table</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+</span><span id="get_prob_table-94"><a href="#get_prob_table-94"><span class="linenos"> 94</span></a>        <span class="n">row_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span><span id="get_prob_table-95"><a href="#get_prob_table-95"><span class="linenos"> 95</span></a>        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">row</span> <span class="o">==</span> <span class="n">row_max</span><span class="p">)</span>
+</span><span id="get_prob_table-96"><a href="#get_prob_table-96"><span class="linenos"> 96</span></a>        <span class="n">prediction</span> <span class="o">=</span> <span class="n">prob_table</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+</span><span id="get_prob_table-97"><a href="#get_prob_table-97"><span class="linenos"> 97</span></a>
+</span><span id="get_prob_table-98"><a href="#get_prob_table-98"><span class="linenos"> 98</span></a>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+</span><span id="get_prob_table-99"><a href="#get_prob_table-99"><span class="linenos"> 99</span></a>            <span class="n">prediction</span> <span class="o">=</span> <span class="s2">&quot; and &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
+</span><span id="get_prob_table-100"><a href="#get_prob_table-100"><span class="linenos">100</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="get_prob_table-101"><a href="#get_prob_table-101"><span class="linenos">101</span></a>            <span class="n">prediction</span> <span class="o">=</span> <span class="n">prediction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="get_prob_table-102"><a href="#get_prob_table-102"><span class="linenos">102</span></a>
+</span><span id="get_prob_table-103"><a href="#get_prob_table-103"><span class="linenos">103</span></a>        <span class="n">pred_class</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
+</span><span id="get_prob_table-104"><a href="#get_prob_table-104"><span class="linenos">104</span></a>        <span class="n">maxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row_max</span><span class="p">)</span>
+</span><span id="get_prob_table-105"><a href="#get_prob_table-105"><span class="linenos">105</span></a>
+</span><span id="get_prob_table-106"><a href="#get_prob_table-106"><span class="linenos">106</span></a>    <span class="n">maxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">maxes</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</span><span id="get_prob_table-107"><a href="#get_prob_table-107"><span class="linenos">107</span></a>    <span class="n">low_conf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">maxes</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">))</span>
+</span><span id="get_prob_table-108"><a href="#get_prob_table-108"><span class="linenos">108</span></a>
+</span><span id="get_prob_table-109"><a href="#get_prob_table-109"><span class="linenos">109</span></a>    <span class="k">return</span> <span class="n">prob_table</span><span class="p">,</span> <span class="n">pred_class</span><span class="p">,</span> <span class="n">low_conf</span>
 </span></pre></div>
 
 
@@ -537,7 +537,7 @@ A bool list where <code>True</code>, sample max probability is less than
     <a class="headerlink" href="#per_model_summary"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="per_model_summary-112"><a href="#per_model_summary-112"><span class="linenos">112</span></a><span class="k">def</span><span class="w"> </span><span class="nf">per_model_summary</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">uniq_labels</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">,</span> 
 </span><span id="per_model_summary-113"><a href="#per_model_summary-113"><span class="linenos">113</span></a>                      <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-</span><span id="per_model_summary-114"><a href="#per_model_summary-114"><span class="linenos">114</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="per_model_summary-114"><a href="#per_model_summary-114"><span class="linenos">114</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="per_model_summary-115"><a href="#per_model_summary-115"><span class="linenos">115</span></a><span class="sd">    Takes the results dictionary from `scmkl.one_v_rest()` and adds a </span>
 </span><span id="per_model_summary-116"><a href="#per_model_summary-116"><span class="linenos">116</span></a><span class="sd">    summary dataframe show metrics for each model generated from the </span>
 </span><span id="per_model_summary-117"><a href="#per_model_summary-117"><span class="linenos">117</span></a><span class="sd">    runs.</span>
@@ -557,7 +557,7 @@ A bool list where <code>True</code>, sample max probability is less than
 </span><span id="per_model_summary-131"><a href="#per_model_summary-131"><span class="linenos">131</span></a><span class="sd">    -------</span>
 </span><span id="per_model_summary-132"><a href="#per_model_summary-132"><span class="linenos">132</span></a><span class="sd">    summary_df : pd.DataFrame</span>
 </span><span id="per_model_summary-133"><a href="#per_model_summary-133"><span class="linenos">133</span></a><span class="sd">        Dataframe with classes on rows and metrics as cols.</span>
-</span><span id="per_model_summary-134"><a href="#per_model_summary-134"><span class="linenos">134</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="per_model_summary-134"><a href="#per_model_summary-134"><span class="linenos">134</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="per_model_summary-135"><a href="#per_model_summary-135"><span class="linenos">135</span></a>    <span class="c1"># Getting metrics availible in results</span>
 </span><span id="per_model_summary-136"><a href="#per_model_summary-136"><span class="linenos">136</span></a>    <span class="n">avail_mets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="n">uniq_labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s1">&#39;Metrics&#39;</span><span class="p">][</span><span class="n">alpha</span><span class="p">])</span>
 </span><span id="per_model_summary-137"><a href="#per_model_summary-137"><span class="linenos">137</span></a>
@@ -614,7 +614,7 @@ Dataframe with classes on rows and metrics as cols.</li>
 </span><span id="get_class_train-151"><a href="#get_class_train-151"><span class="linenos">151</span></a>                    <span class="n">cell_labels</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
 </span><span id="get_class_train-152"><a href="#get_class_train-152"><span class="linenos">152</span></a>                    <span class="n">seed_obj</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">_generator</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span>
 </span><span id="get_class_train-153"><a href="#get_class_train-153"><span class="linenos">153</span></a>                    <span class="n">other_factor</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">):</span>
-</span><span id="get_class_train-154"><a href="#get_class_train-154"><span class="linenos">154</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="get_class_train-154"><a href="#get_class_train-154"><span class="linenos">154</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="get_class_train-155"><a href="#get_class_train-155"><span class="linenos">155</span></a><span class="sd">    This function returns a dict with each entry being a set of </span>
 </span><span id="get_class_train-156"><a href="#get_class_train-156"><span class="linenos">156</span></a><span class="sd">    training indices for each cell class to be used in </span>
 </span><span id="get_class_train-157"><a href="#get_class_train-157"><span class="linenos">157</span></a><span class="sd">    `scmkl.one_v_rest()`.</span>
@@ -642,7 +642,7 @@ Dataframe with classes on rows and metrics as cols.</li>
 </span><span id="get_class_train-179"><a href="#get_class_train-179"><span class="linenos">179</span></a><span class="sd">    train_idx : dict</span>
 </span><span id="get_class_train-180"><a href="#get_class_train-180"><span class="linenos">180</span></a><span class="sd">        Keys are cell classes and values are the train indices to </span>
 </span><span id="get_class_train-181"><a href="#get_class_train-181"><span class="linenos">181</span></a><span class="sd">        train scmkl that include both target and non-target samples.</span>
-</span><span id="get_class_train-182"><a href="#get_class_train-182"><span class="linenos">182</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="get_class_train-182"><a href="#get_class_train-182"><span class="linenos">182</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="get_class_train-183"><a href="#get_class_train-183"><span class="linenos">183</span></a>    <span class="n">uniq_labels</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">cell_labels</span><span class="p">)</span>
 </span><span id="get_class_train-184"><a href="#get_class_train-184"><span class="linenos">184</span></a>    <span class="n">train_idx</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 </span><span id="get_class_train-185"><a href="#get_class_train-185"><span class="linenos">185</span></a>
@@ -713,7 +713,7 @@ train scmkl that include both target and non-target samples.</li>
             <div class="pdoc-code codehilite"><pre><span></span><span id="one_v_rest-206"><a href="#one_v_rest-206"><span class="linenos">206</span></a><span class="k">def</span><span class="w"> </span><span class="nf">one_v_rest</span><span class="p">(</span><span class="n">adatas</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">names</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">alpha_list</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
 </span><span id="one_v_rest-207"><a href="#one_v_rest-207"><span class="linenos">207</span></a>              <span class="n">tfidf</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">batches</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> 
 </span><span id="one_v_rest-208"><a href="#one_v_rest-208"><span class="linenos">208</span></a>              <span class="n">force_balance</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">other_factor</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span id="one_v_rest-209"><a href="#one_v_rest-209"><span class="linenos">209</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="one_v_rest-209"><a href="#one_v_rest-209"><span class="linenos">209</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="one_v_rest-210"><a href="#one_v_rest-210"><span class="linenos">210</span></a><span class="sd">    For each cell class, creates model(s) comparing that class to all </span>
 </span><span id="one_v_rest-211"><a href="#one_v_rest-211"><span class="linenos">211</span></a><span class="sd">    others. Then, predicts on the training data using `scmkl.run()`.</span>
 </span><span id="one_v_rest-212"><a href="#one_v_rest-212"><span class="linenos">212</span></a><span class="sd">    Only labels in both training and testing will be run.</span>
@@ -783,7 +783,7 @@ train scmkl that include both target and non-target samples.</li>
 </span><span id="one_v_rest-276"><a href="#one_v_rest-276"><span class="linenos">276</span></a><span class="sd">    &gt;&gt;&gt;</span>
 </span><span id="one_v_rest-277"><a href="#one_v_rest-277"><span class="linenos">277</span></a><span class="sd">    &gt;&gt;&gt; adata.keys()</span>
 </span><span id="one_v_rest-278"><a href="#one_v_rest-278"><span class="linenos">278</span></a><span class="sd">    dict_keys([&#39;B cells&#39;, &#39;Monocytes&#39;, &#39;Dendritic cells&#39;, ...])</span>
-</span><span id="one_v_rest-279"><a href="#one_v_rest-279"><span class="linenos">279</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="one_v_rest-279"><a href="#one_v_rest-279"><span class="linenos">279</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="one_v_rest-280"><a href="#one_v_rest-280"><span class="linenos">280</span></a>    <span class="c1"># Formatting checks ensuring all adata elements are </span>
 </span><span id="one_v_rest-281"><a href="#one_v_rest-281"><span class="linenos">281</span></a>    <span class="c1"># AnnData objects and train/test indices are all the same</span>
 </span><span id="one_v_rest-282"><a href="#one_v_rest-282"><span class="linenos">282</span></a>    <span class="n">_check_adatas</span><span class="p">(</span><span class="n">adatas</span><span class="p">,</span> <span class="n">check_obs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_uns</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
@@ -844,7 +844,7 @@ train scmkl that include both target and non-target samples.</li>
 </span><span id="one_v_rest-337"><a href="#one_v_rest-337"><span class="linenos">337</span></a>
 </span><span id="one_v_rest-338"><a href="#one_v_rest-338"><span class="linenos">338</span></a>    <span class="c1"># Getting final predictions</span>
 </span><span id="one_v_rest-339"><a href="#one_v_rest-339"><span class="linenos">339</span></a>    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">alpha_list</span><span class="p">)</span>
-</span><span id="one_v_rest-340"><a href="#one_v_rest-340"><span class="linenos">340</span></a>    <span class="n">prob_table</span><span class="p">,</span> <span class="n">pred_class</span><span class="p">,</span> <span class="n">low_conf</span> <span class="o">=</span> <span class="n">prob_table</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+</span><span id="one_v_rest-340"><a href="#one_v_rest-340"><span class="linenos">340</span></a>    <span class="n">prob_table</span><span class="p">,</span> <span class="n">pred_class</span><span class="p">,</span> <span class="n">low_conf</span> <span class="o">=</span> <span class="n">get_prob_table</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
 </span><span id="one_v_rest-341"><a href="#one_v_rest-341"><span class="linenos">341</span></a>    <span class="n">macro_f1</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">cell_labels</span><span class="p">[</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;test_indices&#39;</span><span class="p">]],</span> 
 </span><span id="one_v_rest-342"><a href="#one_v_rest-342"><span class="linenos">342</span></a>                        <span class="n">pred_class</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s1">&#39;macro&#39;</span><span class="p">)</span>
 </span><span id="one_v_rest-343"><a href="#one_v_rest-343"><span class="linenos">343</span></a>

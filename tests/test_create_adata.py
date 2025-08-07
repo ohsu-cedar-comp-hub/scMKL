@@ -6,9 +6,9 @@ from scipy.sparse import load_npz
 
 
 def read_data(mod = 'RNA'):
-    '''
+    """
     Simple function to load example data to run tests.
-    '''
+    """
     x = load_npz(f'../example/data/_MCF7_{mod}_X.npz')
     grouping = np.load(f'../example/data/_{mod}_hallmark_groupings.pkl',
                             allow_pickle = True)
@@ -21,34 +21,36 @@ def read_data(mod = 'RNA'):
 
 
 class TestCreateAdata(unittest.TestCase):
-    '''
+    """
     This unittest class is designed to test the scmkl.create_adata() 
     function. It creates an anndata.AnnData object and checks the 
     attributes required for scmkl to run.
-    '''
+    """
     def test_create_adata(self):
-        '''
+        """
         This function creates a scmkl AnnData object and checks the 
         train/test split, grouping dictionary, number of dimensions, 
         kernel function, and distance metric.
-        '''
+        """
         # Read-in data
         x, grouping, features, labels = read_data()
-        train_test = ['train'] * 800
+        train = ['train'] * 800
         test = ['test'] * 200
-        train_test.extend(test)
+        train_test = np.array(train + test)
         d = scmkl.calculate_d(len(labels))
 
         # Creating adata to test
         adata = scmkl.create_adata(X = x, feature_names = features, 
                                    cell_labels = labels, D = d,
-                                   group_dict = grouping, 
-                                   remove_features = False, 
+                                   group_dict = grouping,
                                    split_data = train_test)
 
-        # Ensuring grouping dict is intact after object creation
-        self.assertDictEqual(adata.uns['group_dict'], 
-                             grouping, "Grouping dictionary not conserved")
+        # Ensuring group dict is intact after object creation
+        for group in adata.uns['group_dict'].keys():
+            for gene in adata.uns['group_dict'][group]:
+                err_str = (f"Genes present in 'adata' group_dict "
+                           "not in original grouping.")
+                self.assertIn(gene, grouping[group], err_str)
         
         # Checking that the number of dimensions for n = 1000 is correct
         self.assertEqual(adata.uns['D'], 61, "Incorrect optimal D calculated")

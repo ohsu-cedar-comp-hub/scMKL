@@ -67,7 +67,7 @@
 </span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">ad</span><span class="o">.</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">alpha_list</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
 </span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a>        <span class="n">metrics</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
 </span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a>        <span class="n">return_probs</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="sd">    Wrapper function for training and test with multiple alpha values.</span>
 </span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a><span class="sd">    Returns metrics, predictions, group weights, and resource usage.</span>
 </span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a>
@@ -147,7 +147,7 @@
 </span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a><span class="sd">    &#39;F1-Score&#39;: 0.9452736318407959,</span>
 </span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a><span class="sd">    &#39;Precision&#39;: 0.9405940594059405,</span>
 </span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a><span class="sd">    &#39;Recall&#39;: 0.95}</span>
-</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>    <span class="k">if</span> <span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>        <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AUROC&#39;</span><span class="p">,</span> <span class="s1">&#39;F1-Score&#39;</span><span class="p">,</span><span class="s1">&#39;Accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;Precision&#39;</span><span class="p">,</span> <span class="s1">&#39;Recall&#39;</span><span class="p">]</span>
 </span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>
@@ -230,7 +230,7 @@
             <div class="pdoc-code codehilite"><pre><span></span><span id="run-11"><a href="#run-11"><span class="linenos"> 11</span></a><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">adata</span><span class="p">:</span> <span class="n">ad</span><span class="o">.</span><span class="n">AnnData</span><span class="p">,</span> <span class="n">alpha_list</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
 </span><span id="run-12"><a href="#run-12"><span class="linenos"> 12</span></a>        <span class="n">metrics</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
 </span><span id="run-13"><a href="#run-13"><span class="linenos"> 13</span></a>        <span class="n">return_probs</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span id="run-14"><a href="#run-14"><span class="linenos"> 14</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="run-14"><a href="#run-14"><span class="linenos"> 14</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="run-15"><a href="#run-15"><span class="linenos"> 15</span></a><span class="sd">    Wrapper function for training and test with multiple alpha values.</span>
 </span><span id="run-16"><a href="#run-16"><span class="linenos"> 16</span></a><span class="sd">    Returns metrics, predictions, group weights, and resource usage.</span>
 </span><span id="run-17"><a href="#run-17"><span class="linenos"> 17</span></a>
@@ -310,7 +310,7 @@
 </span><span id="run-91"><a href="#run-91"><span class="linenos"> 91</span></a><span class="sd">    &#39;F1-Score&#39;: 0.9452736318407959,</span>
 </span><span id="run-92"><a href="#run-92"><span class="linenos"> 92</span></a><span class="sd">    &#39;Precision&#39;: 0.9405940594059405,</span>
 </span><span id="run-93"><a href="#run-93"><span class="linenos"> 93</span></a><span class="sd">    &#39;Recall&#39;: 0.95}</span>
-</span><span id="run-94"><a href="#run-94"><span class="linenos"> 94</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="run-94"><a href="#run-94"><span class="linenos"> 94</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="run-95"><a href="#run-95"><span class="linenos"> 95</span></a>    <span class="k">if</span> <span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="run-96"><a href="#run-96"><span class="linenos"> 96</span></a>        <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AUROC&#39;</span><span class="p">,</span> <span class="s1">&#39;F1-Score&#39;</span><span class="p">,</span><span class="s1">&#39;Accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;Precision&#39;</span><span class="p">,</span> <span class="s1">&#39;Recall&#39;</span><span class="p">]</span>
 </span><span id="run-97"><a href="#run-97"><span class="linenos"> 97</span></a>

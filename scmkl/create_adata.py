@@ -7,7 +7,7 @@ import warnings
 
 
 def _filter_features(feature_names: np.ndarray, group_dict: dict):
-    '''
+    """
     Function to remove features only in feature names or group_dict.
     Any features not included in group_dict will be removed from the
     matrix. Also puts the features in the same relative order (of 
@@ -30,8 +30,7 @@ def _filter_features(feature_names: np.ndarray, group_dict: dict):
     group_dict : dict
         Dictionary containing features overlapping input grouping 
         information and full feature names.
-    ''' 
-
+    """
     group_features = set()
     feature_set = set(feature_names)
 
@@ -55,7 +54,7 @@ def _filter_features(feature_names: np.ndarray, group_dict: dict):
 
 def _multi_class_split(y: np.ndarray, train_ratio: float=0.8, class_threshold: str | int='median', 
                        seed_obj: np.random._generator.Generator=np.random.default_rng(100)):
-    '''
+    """
     Function for calculating the training and testing cell positions 
     for multiclass data sets.
 
@@ -87,7 +86,7 @@ def _multi_class_split(y: np.ndarray, train_ratio: float=0.8, class_threshold: s
 
     test_indices : np.ndarray
         Indices for testing samples.
-    '''
+    """
     uniq_labels = np.unique(y)
 
     # Finding indices for each cell class
@@ -135,7 +134,7 @@ def _multi_class_split(y: np.ndarray, train_ratio: float=0.8, class_threshold: s
 def _binary_split(y: np.ndarray, train_indices: np.ndarray | None=None, 
                   train_ratio: float=0.8,
                   seed_obj: np.random._generator.Generator=np.random.default_rng(100)):
-    '''
+    """
     Function to calculate training and testing indices for given 
     dataset. If train indices are given, it will calculate the test 
     indices. If train_indices == None, then it calculates both indices, 
@@ -165,8 +164,7 @@ def _binary_split(y: np.ndarray, train_indices: np.ndarray | None=None,
 
     test_indices : np.ndarray:
         Array of indices of testing cells.
-    '''
-
+    """
     # If train indices aren't provided
     if train_indices is None:
 
@@ -197,7 +195,7 @@ def _binary_split(y: np.ndarray, train_indices: np.ndarray | None=None,
 
 
 def calculate_d(num_samples : int):
-    '''
+    """
     This function calculates the optimal number of dimensions for 
     performance. See https://doi.org/10.48550/arXiv.1806.09178 for more
     information.
@@ -222,13 +220,13 @@ def calculate_d(num_samples : int):
     >>> d = scmkl.calculate_d(num_cells)
     >>> d
     161
-    '''
+    """
     d = int(np.sqrt(num_samples)*np.log(np.log(num_samples)))
     return d
 
 
 def sort_samples(train_indices, test_indices):
-    '''
+    """
     Ensures that samples in adata obj are all training, then all 
     testing.
 
@@ -251,7 +249,7 @@ def sort_samples(train_indices, test_indices):
 
     test_indices : np.ndarray
         The new testing indices given the new index order, `sort_idc`.
-    '''
+    """
     sort_idc = np.concatenate([train_indices, test_indices])
 
     train_indices = np.arange(0, train_indices.shape[0])
@@ -270,7 +268,7 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
                  random_state: int=1, allow_multiclass: bool = False, 
                  class_threshold: str | int = 'median',
                  reduction: str | None = None, tfidf: bool = False):
-    '''
+    """
     Function to create an AnnData object to carry all relevant 
     information going forward.
 
@@ -413,7 +411,7 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
     obs: 'labels'
     uns: 'group_dict', 'seed_obj', 'scale_data', 'D', 'kernel_type', 
     'distance_metric', 'train_indices', 'test_indices'
-    '''
+    """
 
     assert X.shape[1] == len(feature_names), ("Different number of features "
                                               "in X than feature names")

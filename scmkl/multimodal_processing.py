@@ -9,7 +9,7 @@ from scmkl.calculate_z import calculate_z
 
 def combine_modalities(adatas: list[ad.AnnData], names: list[str], 
                         combination: str = 'concatenate'):
-    '''
+    """
     Combines data sets for multimodal classification. Combined group 
     names are `f'{assay}+{group_name}'`.
 
@@ -31,7 +31,7 @@ def combine_modalities(adatas: list[ad.AnnData], names: list[str],
     -------
     combined_adata : ad.Anndata
         Adata object with the combined Z matrices and annotations. 
-    '''
+    """
     assert len({adata.shape[0] for adata in adatas}) == 1, ("All adatas must "
                                                             "have the same "
                                                             "number of rows")
@@ -100,7 +100,7 @@ def combine_modalities(adatas: list[ad.AnnData], names: list[str],
 def multimodal_processing(adatas : list[ad.AnnData], names : list[str], 
                           tfidf: list[bool], combination: str='concatenate', 
                           batches: int=10, batch_size: int=100) -> ad.AnnData:
-    '''
+    """
     Combines and processes a list of `ad.AnnData` objects.
 
     Parameters
@@ -165,7 +165,7 @@ def multimodal_processing(adatas : list[ad.AnnData], names : list[str],
     var: 'labels'
     uns: 'D', 'kernel_type', 'distance_metric', 'train_indices',  
     'test_indices', 'Z_train', 'Z_test', 'group_dict', 'seed_obj'
-    '''
+    """
     import warnings 
     warnings.filterwarnings('ignore')
 

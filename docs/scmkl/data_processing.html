@@ -80,7 +80,7 @@
 </span><span id="L-5"><a href="#L-5"><span class="linenos">  5</span></a>
 </span><span id="L-6"><a href="#L-6"><span class="linenos">  6</span></a>
 </span><span id="L-7"><a href="#L-7"><span class="linenos">  7</span></a><span class="k">def</span><span class="w"> </span><span class="nf">sparse_var</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">_csc</span><span class="o">.</span><span class="n">csc_matrix</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a><span class="sd">    Function to calculate variance on a scipy sparse matrix.</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="sd">    </span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a><span class="sd">    Parameters</span>
@@ -96,7 +96,7 @@
 </span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a><span class="sd">    -------</span>
 </span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a><span class="sd">    var : np.ndarray | float</span>
 </span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a><span class="sd">        Variance values calculated over the given axis.</span>
-</span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-25"><a href="#L-25"><span class="linenos"> 25</span></a>    <span class="c1"># E[X^2] - E[X]^2</span>
 </span><span id="L-26"><a href="#L-26"><span class="linenos"> 26</span></a>    <span class="k">if</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">issparse</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
 </span><span id="L-27"><a href="#L-27"><span class="linenos"> 27</span></a>        <span class="n">exp_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span><span class="p">))</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
@@ -112,7 +112,7 @@
 </span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a>                 <span class="n">X_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">_csc</span><span class="o">.</span><span class="n">csc_matrix</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 </span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a>                 <span class="n">scale_data</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
 </span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a>                 <span class="n">return_dense</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="sd">    Function to preprocess data matrix according to type of data </span>
 </span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a><span class="sd">    (e.g. counts/rna, or binary/atac). Will process test data </span>
 </span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a><span class="sd">    according to parameters calculated from test data.</span>
@@ -140,7 +140,7 @@
 </span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a><span class="sd">    X_train, X_test : np.ndarray, np.ndarray</span>
 </span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a><span class="sd">        Numpy arrays with the process train/test data </span>
 </span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a><span class="sd">        respectively. If X_test is `None`, only X_train is returned.</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>    <span class="k">if</span> <span class="n">X_test</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>        <span class="c1"># Creates dummy matrix to for the sake of calculation without </span>
 </span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a>        <span class="c1"># increasing computational time</span>
@@ -191,7 +191,7 @@
 </span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a><span class="k">def</span><span class="w"> </span><span class="nf">svd_transformation</span><span class="p">(</span><span class="n">X_train</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">_csc</span><span class="o">.</span><span class="n">csc_matrix</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 </span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>                       <span class="n">X_test</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">_csc</span><span class="o">.</span><span class="n">csc_matrix</span> <span class="o">|</span> 
 </span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>                       <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a><span class="sd">    Returns matrices with SVD reduction. If `X_test is None`, only </span>
 </span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a><span class="sd">    X_train is returned.</span>
 </span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>
@@ -210,7 +210,7 @@
 </span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a><span class="sd">    X_train, X_test : np.ndarray, np.ndarray</span>
 </span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a><span class="sd">        Transformed matrices. Only X_train is returned if </span>
 </span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a><span class="sd">        `X_test is None`.</span>
-</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>    <span class="n">n_components</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="mi">50</span><span class="p">,</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
 </span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>    <span class="n">SVD_func</span> <span class="o">=</span> <span class="n">TruncatedSVD</span><span class="p">(</span><span class="n">n_components</span> <span class="o">=</span> <span class="n">n_components</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
 </span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>    
@@ -228,7 +228,7 @@
 </span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a><span class="k">def</span><span class="w"> </span><span class="nf">sample_cells</span><span class="p">(</span><span class="n">train_indices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 </span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>                 <span class="n">sample_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 </span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a>                 <span class="n">seed_obj</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">_generator</span><span class="o">.</span><span class="n">Generator</span><span class="p">):</span>
-</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a><span class="sd">    Samples cells indices from training indices for calculations.</span>
 </span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a>
 </span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a><span class="sd">    Parameters</span>
@@ -244,7 +244,7 @@
 </span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a><span class="sd">    -------</span>
 </span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a><span class="sd">    indices : np.ndarray</span>
 </span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a><span class="sd">        The sampled indices from `train_indices`.</span>
-</span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-173"><a href="#L-173"><span class="linenos">173</span></a>    <span class="n">n_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">((</span><span class="n">train_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sample_size</span><span class="p">))</span>
 </span><span id="L-174"><a href="#L-174"><span class="linenos">174</span></a>    <span class="n">indices</span> <span class="o">=</span> <span class="n">seed_obj</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">train_indices</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="n">replace</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
 </span><span id="L-175"><a href="#L-175"><span class="linenos">175</span></a>
@@ -253,7 +253,7 @@
 </span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a>
 </span><span id="L-179"><a href="#L-179"><span class="linenos">179</span></a><span class="k">def</span><span class="w"> </span><span class="nf">pca_transformation</span><span class="p">(</span><span class="n">X_train</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">_csc</span><span class="o">.</span><span class="n">csc_matrix</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 </span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a>                       <span class="n">X_test</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">_csc</span><span class="o">.</span><span class="n">csc_matrix</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a><span class="sd">    Returns matrices with PCA reduction. If `X_test is None`, only </span>
 </span><span id="L-183"><a href="#L-183"><span class="linenos">183</span></a><span class="sd">    X_train is returned.</span>
 </span><span id="L-184"><a href="#L-184"><span class="linenos">184</span></a>
@@ -272,7 +272,7 @@
 </span><span id="L-197"><a href="#L-197"><span class="linenos">197</span></a><span class="sd">    X_train, X_test : np.ndarray, np.ndarray</span>
 </span><span id="L-198"><a href="#L-198"><span class="linenos">198</span></a><span class="sd">        Transformed matrices. Only X_train is returned if </span>
 </span><span id="L-199"><a href="#L-199"><span class="linenos">199</span></a><span class="sd">        `X_test is None`.</span>
-</span><span id="L-200"><a href="#L-200"><span class="linenos">200</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-200"><a href="#L-200"><span class="linenos">200</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-201"><a href="#L-201"><span class="linenos">201</span></a>    <span class="n">n_components</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="mi">50</span><span class="p">,</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
 </span><span id="L-202"><a href="#L-202"><span class="linenos">202</span></a>    <span class="n">PCA_func</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span> <span class="o">=</span> <span class="n">n_components</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
 </span><span id="L-203"><a href="#L-203"><span class="linenos">203</span></a>
@@ -286,14 +286,14 @@
 </span><span id="L-211"><a href="#L-211"><span class="linenos">211</span></a>
 </span><span id="L-212"><a href="#L-212"><span class="linenos">212</span></a><span class="k">def</span><span class="w"> </span><span class="nf">_no_transformation</span><span class="p">(</span><span class="n">X_train</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">_csc</span><span class="o">.</span><span class="n">csc_matrix</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 </span><span id="L-213"><a href="#L-213"><span class="linenos">213</span></a>                      <span class="n">X_test</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">_csc</span><span class="o">.</span><span class="n">csc_matrix</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="L-214"><a href="#L-214"><span class="linenos">214</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-214"><a href="#L-214"><span class="linenos">214</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-215"><a href="#L-215"><span class="linenos">215</span></a><span class="sd">    Dummy function used to return mat inputs.</span>
-</span><span id="L-216"><a href="#L-216"><span class="linenos">216</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-216"><a href="#L-216"><span class="linenos">216</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-217"><a href="#L-217"><span class="linenos">217</span></a>    <span class="k">return</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span>
 </span><span id="L-218"><a href="#L-218"><span class="linenos">218</span></a>
 </span><span id="L-219"><a href="#L-219"><span class="linenos">219</span></a>
 </span><span id="L-220"><a href="#L-220"><span class="linenos">220</span></a><span class="k">def</span><span class="w"> </span><span class="nf">get_reduction</span><span class="p">(</span><span class="n">reduction</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="L-221"><a href="#L-221"><span class="linenos">221</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-221"><a href="#L-221"><span class="linenos">221</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-222"><a href="#L-222"><span class="linenos">222</span></a><span class="sd">    Function used to identify reduction type and return function to </span>
 </span><span id="L-223"><a href="#L-223"><span class="linenos">223</span></a><span class="sd">    apply to data matrices.</span>
 </span><span id="L-224"><a href="#L-224"><span class="linenos">224</span></a>
@@ -307,7 +307,7 @@
 </span><span id="L-232"><a href="#L-232"><span class="linenos">232</span></a><span class="sd">    -------</span>
 </span><span id="L-233"><a href="#L-233"><span class="linenos">233</span></a><span class="sd">    red_func : function</span>
 </span><span id="L-234"><a href="#L-234"><span class="linenos">234</span></a><span class="sd">        The function to reduce the data.</span>
-</span><span id="L-235"><a href="#L-235"><span class="linenos">235</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-235"><a href="#L-235"><span class="linenos">235</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-236"><a href="#L-236"><span class="linenos">236</span></a>    <span class="k">match</span> <span class="n">reduction</span><span class="p">:</span>
 </span><span id="L-237"><a href="#L-237"><span class="linenos">237</span></a>        <span class="k">case</span> <span class="s1">&#39;pca&#39;</span><span class="p">:</span>
 </span><span id="L-238"><a href="#L-238"><span class="linenos">238</span></a>            <span class="n">red_func</span> <span class="o">=</span> <span class="n">pca_transformation</span>
@@ -323,7 +323,7 @@
 </span><span id="L-248"><a href="#L-248"><span class="linenos">248</span></a>                  <span class="n">group_features</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 </span><span id="L-249"><a href="#L-249"><span class="linenos">249</span></a>                  <span class="n">n_group_features</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> 
 </span><span id="L-250"><a href="#L-250"><span class="linenos">250</span></a>                  <span class="n">process_test</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="L-251"><a href="#L-251"><span class="linenos">251</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="L-251"><a href="#L-251"><span class="linenos">251</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-252"><a href="#L-252"><span class="linenos">252</span></a><span class="sd">    Filters to only features in group. Will sample features if </span>
 </span><span id="L-253"><a href="#L-253"><span class="linenos">253</span></a><span class="sd">    `n_features &lt; n_group_features`.</span>
 </span><span id="L-254"><a href="#L-254"><span class="linenos">254</span></a>
@@ -352,7 +352,7 @@
 </span><span id="L-277"><a href="#L-277"><span class="linenos">277</span></a><span class="sd">        Filtered matrices. If `n_samples` is provided, only `X_train` </span>
 </span><span id="L-278"><a href="#L-278"><span class="linenos">278</span></a><span class="sd">        is returned. If `adata.uns[&#39;reduction&#39;]` is `&#39;pca&#39;` or </span>
 </span><span id="L-279"><a href="#L-279"><span class="linenos">279</span></a><span class="sd">        `&#39;svd&#39;` the matrices are transformed before being returned.</span>
-</span><span id="L-280"><a href="#L-280"><span class="linenos">280</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="L-280"><a href="#L-280"><span class="linenos">280</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-281"><a href="#L-281"><span class="linenos">281</span></a>    <span class="c1"># Getting reduction function</span>
 </span><span id="L-282"><a href="#L-282"><span class="linenos">282</span></a>    <span class="n">reduction_func</span> <span class="o">=</span> <span class="n">get_reduction</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;reduction&#39;</span><span class="p">])</span>
 </span><span id="L-283"><a href="#L-283"><span class="linenos">283</span></a>
@@ -391,7 +391,7 @@
     </div>
     <a class="headerlink" href="#sparse_var"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="sparse_var-8"><a href="#sparse_var-8"><span class="linenos"> 8</span></a><span class="k">def</span><span class="w"> </span><span class="nf">sparse_var</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">_csc</span><span class="o">.</span><span class="n">csc_matrix</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="sparse_var-9"><a href="#sparse_var-9"><span class="linenos"> 9</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="sparse_var-9"><a href="#sparse_var-9"><span class="linenos"> 9</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="sparse_var-10"><a href="#sparse_var-10"><span class="linenos">10</span></a><span class="sd">    Function to calculate variance on a scipy sparse matrix.</span>
 </span><span id="sparse_var-11"><a href="#sparse_var-11"><span class="linenos">11</span></a><span class="sd">    </span>
 </span><span id="sparse_var-12"><a href="#sparse_var-12"><span class="linenos">12</span></a><span class="sd">    Parameters</span>
@@ -407,7 +407,7 @@
 </span><span id="sparse_var-22"><a href="#sparse_var-22"><span class="linenos">22</span></a><span class="sd">    -------</span>
 </span><span id="sparse_var-23"><a href="#sparse_var-23"><span class="linenos">23</span></a><span class="sd">    var : np.ndarray | float</span>
 </span><span id="sparse_var-24"><a href="#sparse_var-24"><span class="linenos">24</span></a><span class="sd">        Variance values calculated over the given axis.</span>
-</span><span id="sparse_var-25"><a href="#sparse_var-25"><span class="linenos">25</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="sparse_var-25"><a href="#sparse_var-25"><span class="linenos">25</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="sparse_var-26"><a href="#sparse_var-26"><span class="linenos">26</span></a>    <span class="c1"># E[X^2] - E[X]^2</span>
 </span><span id="sparse_var-27"><a href="#sparse_var-27"><span class="linenos">27</span></a>    <span class="k">if</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">issparse</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
 </span><span id="sparse_var-28"><a href="#sparse_var-28"><span class="linenos">28</span></a>        <span class="n">exp_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span><span class="p">))</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
@@ -457,7 +457,7 @@ Variance values calculated over the given axis.</li>
 </span><span id="process_data-38"><a href="#process_data-38"><span class="linenos"> 38</span></a>                 <span class="n">X_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">_csc</span><span class="o">.</span><span class="n">csc_matrix</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 </span><span id="process_data-39"><a href="#process_data-39"><span class="linenos"> 39</span></a>                 <span class="n">scale_data</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
 </span><span id="process_data-40"><a href="#process_data-40"><span class="linenos"> 40</span></a>                 <span class="n">return_dense</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-</span><span id="process_data-41"><a href="#process_data-41"><span class="linenos"> 41</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="process_data-41"><a href="#process_data-41"><span class="linenos"> 41</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="process_data-42"><a href="#process_data-42"><span class="linenos"> 42</span></a><span class="sd">    Function to preprocess data matrix according to type of data </span>
 </span><span id="process_data-43"><a href="#process_data-43"><span class="linenos"> 43</span></a><span class="sd">    (e.g. counts/rna, or binary/atac). Will process test data </span>
 </span><span id="process_data-44"><a href="#process_data-44"><span class="linenos"> 44</span></a><span class="sd">    according to parameters calculated from test data.</span>
@@ -485,7 +485,7 @@ Variance values calculated over the given axis.</li>
 </span><span id="process_data-66"><a href="#process_data-66"><span class="linenos"> 66</span></a><span class="sd">    X_train, X_test : np.ndarray, np.ndarray</span>
 </span><span id="process_data-67"><a href="#process_data-67"><span class="linenos"> 67</span></a><span class="sd">        Numpy arrays with the process train/test data </span>
 </span><span id="process_data-68"><a href="#process_data-68"><span class="linenos"> 68</span></a><span class="sd">        respectively. If X_test is `None`, only X_train is returned.</span>
-</span><span id="process_data-69"><a href="#process_data-69"><span class="linenos"> 69</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="process_data-69"><a href="#process_data-69"><span class="linenos"> 69</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="process_data-70"><a href="#process_data-70"><span class="linenos"> 70</span></a>    <span class="k">if</span> <span class="n">X_test</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="process_data-71"><a href="#process_data-71"><span class="linenos"> 71</span></a>        <span class="c1"># Creates dummy matrix to for the sake of calculation without </span>
 </span><span id="process_data-72"><a href="#process_data-72"><span class="linenos"> 72</span></a>        <span class="c1"># increasing computational time</span>
@@ -580,7 +580,7 @@ respectively. If X_test is <code>None</code>, only X_train is returned.</li>
             <div class="pdoc-code codehilite"><pre><span></span><span id="svd_transformation-117"><a href="#svd_transformation-117"><span class="linenos">117</span></a><span class="k">def</span><span class="w"> </span><span class="nf">svd_transformation</span><span class="p">(</span><span class="n">X_train</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">_csc</span><span class="o">.</span><span class="n">csc_matrix</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 </span><span id="svd_transformation-118"><a href="#svd_transformation-118"><span class="linenos">118</span></a>                       <span class="n">X_test</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">_csc</span><span class="o">.</span><span class="n">csc_matrix</span> <span class="o">|</span> 
 </span><span id="svd_transformation-119"><a href="#svd_transformation-119"><span class="linenos">119</span></a>                       <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="svd_transformation-120"><a href="#svd_transformation-120"><span class="linenos">120</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="svd_transformation-120"><a href="#svd_transformation-120"><span class="linenos">120</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="svd_transformation-121"><a href="#svd_transformation-121"><span class="linenos">121</span></a><span class="sd">    Returns matrices with SVD reduction. If `X_test is None`, only </span>
 </span><span id="svd_transformation-122"><a href="#svd_transformation-122"><span class="linenos">122</span></a><span class="sd">    X_train is returned.</span>
 </span><span id="svd_transformation-123"><a href="#svd_transformation-123"><span class="linenos">123</span></a>
@@ -599,7 +599,7 @@ respectively. If X_test is <code>None</code>, only X_train is returned.</li>
 </span><span id="svd_transformation-136"><a href="#svd_transformation-136"><span class="linenos">136</span></a><span class="sd">    X_train, X_test : np.ndarray, np.ndarray</span>
 </span><span id="svd_transformation-137"><a href="#svd_transformation-137"><span class="linenos">137</span></a><span class="sd">        Transformed matrices. Only X_train is returned if </span>
 </span><span id="svd_transformation-138"><a href="#svd_transformation-138"><span class="linenos">138</span></a><span class="sd">        `X_test is None`.</span>
-</span><span id="svd_transformation-139"><a href="#svd_transformation-139"><span class="linenos">139</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="svd_transformation-139"><a href="#svd_transformation-139"><span class="linenos">139</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="svd_transformation-140"><a href="#svd_transformation-140"><span class="linenos">140</span></a>    <span class="n">n_components</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="mi">50</span><span class="p">,</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
 </span><span id="svd_transformation-141"><a href="#svd_transformation-141"><span class="linenos">141</span></a>    <span class="n">SVD_func</span> <span class="o">=</span> <span class="n">TruncatedSVD</span><span class="p">(</span><span class="n">n_components</span> <span class="o">=</span> <span class="n">n_components</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
 </span><span id="svd_transformation-142"><a href="#svd_transformation-142"><span class="linenos">142</span></a>    
@@ -654,7 +654,7 @@ Transformed matrices. Only X_train is returned if
             <div class="pdoc-code codehilite"><pre><span></span><span id="sample_cells-154"><a href="#sample_cells-154"><span class="linenos">154</span></a><span class="k">def</span><span class="w"> </span><span class="nf">sample_cells</span><span class="p">(</span><span class="n">train_indices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 </span><span id="sample_cells-155"><a href="#sample_cells-155"><span class="linenos">155</span></a>                 <span class="n">sample_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 </span><span id="sample_cells-156"><a href="#sample_cells-156"><span class="linenos">156</span></a>                 <span class="n">seed_obj</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">_generator</span><span class="o">.</span><span class="n">Generator</span><span class="p">):</span>
-</span><span id="sample_cells-157"><a href="#sample_cells-157"><span class="linenos">157</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="sample_cells-157"><a href="#sample_cells-157"><span class="linenos">157</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="sample_cells-158"><a href="#sample_cells-158"><span class="linenos">158</span></a><span class="sd">    Samples cells indices from training indices for calculations.</span>
 </span><span id="sample_cells-159"><a href="#sample_cells-159"><span class="linenos">159</span></a>
 </span><span id="sample_cells-160"><a href="#sample_cells-160"><span class="linenos">160</span></a><span class="sd">    Parameters</span>
@@ -670,7 +670,7 @@ Transformed matrices. Only X_train is returned if
 </span><span id="sample_cells-170"><a href="#sample_cells-170"><span class="linenos">170</span></a><span class="sd">    -------</span>
 </span><span id="sample_cells-171"><a href="#sample_cells-171"><span class="linenos">171</span></a><span class="sd">    indices : np.ndarray</span>
 </span><span id="sample_cells-172"><a href="#sample_cells-172"><span class="linenos">172</span></a><span class="sd">        The sampled indices from `train_indices`.</span>
-</span><span id="sample_cells-173"><a href="#sample_cells-173"><span class="linenos">173</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="sample_cells-173"><a href="#sample_cells-173"><span class="linenos">173</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="sample_cells-174"><a href="#sample_cells-174"><span class="linenos">174</span></a>    <span class="n">n_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">((</span><span class="n">train_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sample_size</span><span class="p">))</span>
 </span><span id="sample_cells-175"><a href="#sample_cells-175"><span class="linenos">175</span></a>    <span class="n">indices</span> <span class="o">=</span> <span class="n">seed_obj</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">train_indices</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="n">replace</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
 </span><span id="sample_cells-176"><a href="#sample_cells-176"><span class="linenos">176</span></a>
@@ -713,7 +713,7 @@ The sampled indices from <code>train_indices</code>.</li>
     <a class="headerlink" href="#pca_transformation"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="pca_transformation-180"><a href="#pca_transformation-180"><span class="linenos">180</span></a><span class="k">def</span><span class="w"> </span><span class="nf">pca_transformation</span><span class="p">(</span><span class="n">X_train</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">_csc</span><span class="o">.</span><span class="n">csc_matrix</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 </span><span id="pca_transformation-181"><a href="#pca_transformation-181"><span class="linenos">181</span></a>                       <span class="n">X_test</span><span class="p">:</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">_csc</span><span class="o">.</span><span class="n">csc_matrix</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="pca_transformation-182"><a href="#pca_transformation-182"><span class="linenos">182</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="pca_transformation-182"><a href="#pca_transformation-182"><span class="linenos">182</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="pca_transformation-183"><a href="#pca_transformation-183"><span class="linenos">183</span></a><span class="sd">    Returns matrices with PCA reduction. If `X_test is None`, only </span>
 </span><span id="pca_transformation-184"><a href="#pca_transformation-184"><span class="linenos">184</span></a><span class="sd">    X_train is returned.</span>
 </span><span id="pca_transformation-185"><a href="#pca_transformation-185"><span class="linenos">185</span></a>
@@ -732,7 +732,7 @@ The sampled indices from <code>train_indices</code>.</li>
 </span><span id="pca_transformation-198"><a href="#pca_transformation-198"><span class="linenos">198</span></a><span class="sd">    X_train, X_test : np.ndarray, np.ndarray</span>
 </span><span id="pca_transformation-199"><a href="#pca_transformation-199"><span class="linenos">199</span></a><span class="sd">        Transformed matrices. Only X_train is returned if </span>
 </span><span id="pca_transformation-200"><a href="#pca_transformation-200"><span class="linenos">200</span></a><span class="sd">        `X_test is None`.</span>
-</span><span id="pca_transformation-201"><a href="#pca_transformation-201"><span class="linenos">201</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="pca_transformation-201"><a href="#pca_transformation-201"><span class="linenos">201</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="pca_transformation-202"><a href="#pca_transformation-202"><span class="linenos">202</span></a>    <span class="n">n_components</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="mi">50</span><span class="p">,</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
 </span><span id="pca_transformation-203"><a href="#pca_transformation-203"><span class="linenos">203</span></a>    <span class="n">PCA_func</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span> <span class="o">=</span> <span class="n">n_components</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
 </span><span id="pca_transformation-204"><a href="#pca_transformation-204"><span class="linenos">204</span></a>
@@ -782,7 +782,7 @@ Transformed matrices. Only X_train is returned if
     </div>
     <a class="headerlink" href="#get_reduction"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="get_reduction-221"><a href="#get_reduction-221"><span class="linenos">221</span></a><span class="k">def</span><span class="w"> </span><span class="nf">get_reduction</span><span class="p">(</span><span class="n">reduction</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="get_reduction-222"><a href="#get_reduction-222"><span class="linenos">222</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="get_reduction-222"><a href="#get_reduction-222"><span class="linenos">222</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="get_reduction-223"><a href="#get_reduction-223"><span class="linenos">223</span></a><span class="sd">    Function used to identify reduction type and return function to </span>
 </span><span id="get_reduction-224"><a href="#get_reduction-224"><span class="linenos">224</span></a><span class="sd">    apply to data matrices.</span>
 </span><span id="get_reduction-225"><a href="#get_reduction-225"><span class="linenos">225</span></a>
@@ -796,7 +796,7 @@ Transformed matrices. Only X_train is returned if
 </span><span id="get_reduction-233"><a href="#get_reduction-233"><span class="linenos">233</span></a><span class="sd">    -------</span>
 </span><span id="get_reduction-234"><a href="#get_reduction-234"><span class="linenos">234</span></a><span class="sd">    red_func : function</span>
 </span><span id="get_reduction-235"><a href="#get_reduction-235"><span class="linenos">235</span></a><span class="sd">        The function to reduce the data.</span>
-</span><span id="get_reduction-236"><a href="#get_reduction-236"><span class="linenos">236</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="get_reduction-236"><a href="#get_reduction-236"><span class="linenos">236</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="get_reduction-237"><a href="#get_reduction-237"><span class="linenos">237</span></a>    <span class="k">match</span> <span class="n">reduction</span><span class="p">:</span>
 </span><span id="get_reduction-238"><a href="#get_reduction-238"><span class="linenos">238</span></a>        <span class="k">case</span> <span class="s1">&#39;pca&#39;</span><span class="p">:</span>
 </span><span id="get_reduction-239"><a href="#get_reduction-239"><span class="linenos">239</span></a>            <span class="n">red_func</span> <span class="o">=</span> <span class="n">pca_transformation</span>
@@ -845,7 +845,7 @@ The function to reduce the data.</li>
 </span><span id="get_group_mat-249"><a href="#get_group_mat-249"><span class="linenos">249</span></a>                  <span class="n">group_features</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 </span><span id="get_group_mat-250"><a href="#get_group_mat-250"><span class="linenos">250</span></a>                  <span class="n">n_group_features</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> 
 </span><span id="get_group_mat-251"><a href="#get_group_mat-251"><span class="linenos">251</span></a>                  <span class="n">process_test</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="get_group_mat-252"><a href="#get_group_mat-252"><span class="linenos">252</span></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+</span><span id="get_group_mat-252"><a href="#get_group_mat-252"><span class="linenos">252</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="get_group_mat-253"><a href="#get_group_mat-253"><span class="linenos">253</span></a><span class="sd">    Filters to only features in group. Will sample features if </span>
 </span><span id="get_group_mat-254"><a href="#get_group_mat-254"><span class="linenos">254</span></a><span class="sd">    `n_features &lt; n_group_features`.</span>
 </span><span id="get_group_mat-255"><a href="#get_group_mat-255"><span class="linenos">255</span></a>
@@ -874,7 +874,7 @@ The function to reduce the data.</li>
 </span><span id="get_group_mat-278"><a href="#get_group_mat-278"><span class="linenos">278</span></a><span class="sd">        Filtered matrices. If `n_samples` is provided, only `X_train` </span>
 </span><span id="get_group_mat-279"><a href="#get_group_mat-279"><span class="linenos">279</span></a><span class="sd">        is returned. If `adata.uns[&#39;reduction&#39;]` is `&#39;pca&#39;` or </span>
 </span><span id="get_group_mat-280"><a href="#get_group_mat-280"><span class="linenos">280</span></a><span class="sd">        `&#39;svd&#39;` the matrices are transformed before being returned.</span>
-</span><span id="get_group_mat-281"><a href="#get_group_mat-281"><span class="linenos">281</span></a><span class="sd">    &#39;&#39;&#39;</span>
+</span><span id="get_group_mat-281"><a href="#get_group_mat-281"><span class="linenos">281</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="get_group_mat-282"><a href="#get_group_mat-282"><span class="linenos">282</span></a>    <span class="c1"># Getting reduction function</span>
 </span><span id="get_group_mat-283"><a href="#get_group_mat-283"><span class="linenos">283</span></a>    <span class="n">reduction_func</span> <span class="o">=</span> <span class="n">get_reduction</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s1">&#39;reduction&#39;</span><span class="p">])</span>
 </span><span id="get_group_mat-284"><a href="#get_group_mat-284"><span class="linenos">284</span></a>

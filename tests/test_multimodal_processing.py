@@ -5,20 +5,20 @@ from test_calculate_z import create_test_adata
 
 
 class TestMultimodalProcessing(unittest.TestCase):
-    '''
+    """
     This unittest class is used to ensure 
     scmkl.multimodal_processing() is working properly.
-    '''
+    """
 
     def test_multimodal_processing(self):
-        '''
+        """
         To test whether or not scmkl.multimodal_processing() is 
         working as expected, two adatas will be created and processed. 
         Then, the new dictionary names will be check along with the 
         length of group dict. Then, the dimensions of the resulting 
         adata is checked to ensure the correct number of samples and 
         combined features are present.  
-        '''
+        """
         # Creating adatas
         rna_adata = create_test_adata('RNA')
         atac_adata = create_test_adata('ATAC')
@@ -29,7 +29,9 @@ class TestMultimodalProcessing(unittest.TestCase):
         tfidf_list = [False, False]
 
         # Combining adatas
-        adata = scmkl.multimodal_processing(adatas, names, tfidf_list)
+        adata = scmkl.multimodal_processing(adatas, names, 
+                                            tfidf_list, 
+                                            batch_size=80)
 
         # Capturing prepended names in group_dict
         prep_names = {gname.split('-')[0] 

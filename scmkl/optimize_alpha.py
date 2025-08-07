@@ -16,7 +16,7 @@ def multimodal_optimize_alpha(adatas: list[ad.AnnData], group_size: int,
                               alpha_array: np.ndarray=np.round(np.linspace(1.9,0.1, 10),2), 
                               k: int=4, metric: str='AUROC',
                               batches: int=10, batch_size: int=100):
-    '''
+    """
     Iteratively train a grouplasso model and update alpha to find the 
     parameter yielding the desired sparsity. Meant to find a good 
     starting point for your model, and the alpha may need further fine 
@@ -67,8 +67,7 @@ def multimodal_optimize_alpha(adatas: list[ad.AnnData], group_size: int,
     alpha_star : float
         The alpha value yielding the best performing model from cross 
         validation.
-    '''
-
+    """
     assert isinstance(k, int) and k > 0, 'Must be a positive integer number of folds'
 
     import warnings 
@@ -97,11 +96,11 @@ def multimodal_optimize_alpha(adatas: list[ad.AnnData], group_size: int,
     gc.collect()
 
     for fold in np.arange(k):
-        
-        print(f'Fold {fold + 1}:\n Memory Usage: {[mem / 1e9 for mem in tracemalloc.get_traced_memory()]} GB')
 
-        fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], negative_indices[np.where(negative_annotations != fold)[0]]))
-        fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], negative_indices[np.where(negative_annotations == fold)[0]]))
+        fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], 
+                                     negative_indices[np.where(negative_annotations != fold)[0]]))
+        fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], 
+                                    negative_indices[np.where(negative_annotations == fold)[0]]))
 
         for i in range(len(cv_adatas)):
             cv_adatas[i].uns['train_indices'] = fold_train
@@ -112,8 +111,11 @@ def multimodal_optimize_alpha(adatas: list[ad.AnnData], group_size: int,
         dummy_names = [f'adata {i}' for i in range(len(cv_adatas))]
 
         # Calculate the Z's for each modality independently
-        fold_cv_adata = multimodal_processing(adatas = cv_adatas, names = dummy_names, tfidf = tfidf_list, 
-                                              batch_size= batch_size, batches = batches)
+        fold_cv_adata = multimodal_processing(adatas = cv_adatas, 
+                                              names = dummy_names, 
+                                              tfidf = tfidf_list, 
+                                              batch_size= batch_size, 
+                                              batches = batches)
 
         fold_cv_adata.uns['seed_obj'] = cv_adatas[0].uns['seed_obj']
 
@@ -150,7 +152,7 @@ def optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
                    alpha_array: np.ndarray=np.round(np.linspace(1.9,0.1, 10),2), 
                    k: int=4, metric: str='AUROC', 
                    batches: int=10, batch_size: int=100):
-    '''
+    """
     Iteratively train a grouplasso model and update alpha to find the 
     parameter yielding best performing sparsity. This function 
     currently only works for binary experiments.
@@ -208,8 +210,7 @@ def optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
     >>> alpha_star = scmkl.optimize_alpha(adata)
     >>> alpha_star
     0.1
-    '''
-    
+    """    
     assert isinstance(k, int) and k > 0, "'k' must be positive"
 
     import warnings 

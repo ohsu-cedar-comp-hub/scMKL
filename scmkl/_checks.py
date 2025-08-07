@@ -4,7 +4,7 @@ import numpy as np
 
 def _check_adatas(adatas : list, check_uns : bool = False, 
                   check_obs : bool = False) -> None:
-    '''
+    """
     Takes a list of AnnData objects and checks that all training and
     testing indices stored in adata.uns and cell labels stored in 
     adata.obs are the same. Ensures that all objects are of type 
@@ -23,7 +23,7 @@ def _check_adatas(adatas : list, check_uns : bool = False,
     Returns:
         Returns None. Will throw an error if not all of the criteria
         listed above are met by adatas.
-    '''
+    """
     for i, adata in enumerate(adatas):
         # Ensuring all elements are type AnnData
         if type(adata) != ad.AnnData: 

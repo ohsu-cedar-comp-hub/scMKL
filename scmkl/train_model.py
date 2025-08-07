@@ -4,7 +4,7 @@ import anndata as ad
 
 
 def train_model(adata: ad.AnnData, group_size: int | None=None, alpha:float=0.9):
-    '''
+    """
     Fit a grouplasso model to the provided data.
 
     Parameters
@@ -46,7 +46,7 @@ def train_model(adata: ad.AnnData, group_size: int | None=None, alpha:float=0.9)
     --------
     celer :
         https://mathurinm.github.io/celer/generated/celer.GroupLasso.html
-    '''
+    """
     assert alpha > 0, 'Alpha must be positive'
 
     if group_size is None:

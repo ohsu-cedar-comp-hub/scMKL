@@ -7,7 +7,7 @@ from scmkl.test import find_selected_groups
 
 def optimize_sparsity(adata: ad.AnnData, group_size: int | None=None, starting_alpha = 1.9, 
                       increment = 0.2, target = 1, n_iter = 10):
-    '''
+    """
     Iteratively train a grouplasso model and update alpha to find the 
     parameter yielding the desired sparsity.
     
@@ -56,7 +56,7 @@ def optimize_sparsity(adata: ad.AnnData, group_size: int | None=None, starting_a
     See Also
     --------
     celer.GroupLasso : https://mathurinm.github.io/celer/
-    '''
+    """
     assert increment > 0 and increment < starting_alpha, ("Choose a positive "
                                                           "increment less "
                                                           "than alpha")

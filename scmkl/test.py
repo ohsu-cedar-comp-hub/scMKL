@@ -5,7 +5,7 @@ import anndata as ad
 
 def predict(adata: ad.AnnData, metrics: list | None=None,
             return_probs: bool=False):
-    '''
+    """
     Function to return predicted labels and calculate any of AUROC, 
     Accuracy, F1 Score, Precision, Recall for a classification. 
 
@@ -50,7 +50,7 @@ def predict(adata: ad.AnnData, metrics: list | None=None,
     >>> metrics_dict = scmkl.predict(adata)
     >>> metrics_dict.keys()
     dict_keys(['AUROC', 'Accuracy', 'F1-Score', 'Precision', 'Recall'])
-    '''
+    """
     X_test = adata.uns['Z_test']
 
     allowed_mets = ['AUROC', 'Accuracy', 'F1-Score', 'Precision', 'Recall']
@@ -126,7 +126,7 @@ def predict(adata: ad.AnnData, metrics: list | None=None,
 
 
 def find_selected_groups(adata: ad.AnnData) -> np.ndarray:
-    '''
+    """
     Find feature groups selected by the model during training. If 
     feature weight assigned by the model is non-0, then the group 
     containing that feature is selected.
@@ -152,7 +152,7 @@ def find_selected_groups(adata: ad.AnnData) -> np.ndarray:
     >>> selected_groups
     np.ndarray(['HALLMARK_ESTROGEN_RESPONSE_EARLY', 
                 'HALLMARK_HYPOXIA'])
-    '''
+    """
 
     selected_groups = []
     coefficients = adata.uns['model'].coef_
