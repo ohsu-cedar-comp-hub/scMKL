@@ -4,26 +4,45 @@ import numpy as np
 import pandas as pd
 
 
-def _parse_result_type(results: dict | None, rfiles: dict | None) -> bool:
+def _parse_result_type(results: dict):
     """
-    This function simply returns a bool for whether or not there are 
-    multiple runs present while checking that There is one dict and 
-    one Nonetype between `results` and `rfiles`.
+    Returns whether or not there are multiple results per class.
+
+    Parameters
+    ----------
+    results : dict
+        Either the output of `scmkl.run()` or `scmkl.one_v_rest()` or 
+        a dictionary of those results.
+
+    Returns
+    -------
+    is_mult, is_many : bool, bool
+        If `is_mult` is `True`, then results are multiclass. If 
+        `is_many` is `True`, results contain multiple outputs.
+
     """
-    dtypes = (type(results), type(rfiles))
-    none_in_dtypes = type(None) in dtypes
-    dict_in_dtypes = dict in dtypes
-    both_in_dtypes = none_in_dtypes and dict_in_dtypes
+    # Single result cases
+    if 'Classes' in results.keys():
+        is_mult = True
+        is_many = False
+        return is_mult, is_many
+    elif 'Norms' in results.keys():
+        is_mult = False
+        is_many = False
+        return is_mult, is_many
 
-    # Ensuring that at least one of dtypes is None
-    assert both_in_dtypes, "Only `rfiles` or `results` can be provided"
-
-    if type(rfiles) is dict:
-        mult_files = True
+    # Multiresult cases
+    keys = list(results.keys())
+    if 'Classes' in results[keys[0]].keys():
+        is_mult = True
+        is_many = True
+        return is_mult, is_many
+    elif 'Norms' in results[keys[0]].keys():
+        is_mult = False
+        is_many = True
+        return is_mult, is_many
     else:
-        mult_files = False
-
-    return mult_files
+        print("Unknown result structure", flush=True)
 
 
 def parse_metrics(results: dict, key: str | None=None, 
@@ -51,25 +70,39 @@ def parse_metrics(results: dict, key: str | None=None,
         A dataframe with columns `['Alpha', 'Metric', 'Value']`. 
         `'Key'` col only added if `key` is not `None`.
     """
-    alpha_vals = []
-    met_names = []
-    met_vals = []
+    df = {
+        'Alpha' : list(),
+        'Metric' : list(),
+        'Value' : list()
+    }
 
-    # If statement ensuring results is a scMKL results with metrics
+    # Check if is a multiclass result
+    is_mult, _ = _parse_result_type(results)
+
+    if is_mult:
+        df['Class'] = list()
+
+    # Ensuring results is a scMKL result and checking multiclass
     if 'Metrics' in results.keys():
         for alpha in results['Metrics'].keys():
             for metric, value in results['Metrics'][alpha].items():
-                alpha_vals.append(alpha)
-                met_names.append(metric)
-                met_vals.append(value)
+                df['Alpha'].append(alpha)
+                df['Metric'].append(metric)
+                df['Value'].append(value)
 
-    # Fix this for include_as parameter
+    elif 'Classes' in results.keys():
+        for ct in results['Classes']:
+            for alpha in results[ct]['Metrics'].keys():
+                for metric, value in results[ct]['Metrics'][alpha].items():
+                    df['Alpha'].append(alpha)
+                    df['Metric'].append(metric)
+                    df['Value'].append(value)
+                    df['Class'].append(ct)
+
     else:
         print(f"{key} is not a scMKL result and will be ignored.")
             
-    df = pd.DataFrame({'Alpha' : alpha_vals,
-                       'Metric' : met_names,
-                       'Value' : met_vals})
+    df = pd.DataFrame(df)
     
     if include_as:
         assert 'Alpha_star' in results.keys(), "'Alpha_star' not in results"
@@ -107,18 +140,34 @@ def parse_weights(results: dict, include_as: bool=False,
         'Kernel Weight']`. `'Key'` col only added if `key` is not 
         `None`.
     """
-    alpha_vals = []
-    group_names = []
-    kernel_weights = []
+    df = {
+        'Alpha' : list(),
+        'Group' : list(),
+        'Kernel Weight' : list()
+    }
 
-    for alpha in results['Norms'].keys():
-        alpha_vals.extend([alpha] * len(results['Norms'][alpha]))
-        group_names.extend(results['Group_names'])
-        kernel_weights.extend(results['Norms'][alpha])
+    # Check if is a multiclass result
+    is_mult, _ = _parse_result_type(results)
 
-    df = pd.DataFrame({'Alpha' : alpha_vals, 
-                       'Group' : group_names, 
-                       'Kernel Weight' : kernel_weights})
+    if is_mult:
+        df['Class'] = list()
+
+    # Ensuring results is a scMKL result and checking multiclass
+    if 'Norms' in results.keys():
+        for alpha in results['Norms'].keys():
+            df['Alpha'].extend([alpha]*len(results['Norms'][alpha]))
+            df['Group'].extend(results['Group_names'])
+            df['Kernel Weight'].extend(results['Norms'][alpha])
+
+    elif 'Classes' in results.keys():
+        for ct in results['Classes']:
+            for alpha in results[ct]['Norms'].keys():
+                df['Alpha'].extend([alpha] * len(results[ct]['Norms'][alpha]))
+                df['Group'].extend(results[ct]['Group_names'])
+                df['Kernel Weight'].extend(results[ct]['Norms'][alpha])
+                df['Class'].extend([ct]*len(results[ct]['Norms'][alpha]))
+
+    df = pd.DataFrame(df)
     
     if include_as:
         df['Alpha Star'] = df['Alpha'] == results['Alpha_star'] 
@@ -241,8 +290,7 @@ def read_files(dir: str, pattern: str | None=None) -> dict:
     return data
 
 
-def get_metrics(results: dict | None=None, rfiles: dict | None=None, 
-                include_as: bool=False) -> pd.DataFrame:
+def get_metrics(results: dict, include_as: bool=False) -> pd.DataFrame:
     """
     Takes either a single scMKL result or a dictionary where each 
     entry cooresponds to one result. Returns a dataframe with cols 
@@ -286,21 +334,23 @@ def get_metrics(results: dict | None=None, rfiles: dict | None=None,
     >>> metrics = scmkl.get_metrics(rfiles=rfiles)
     """
     # Checking which data is being worked with 
-    multi_results = _parse_result_type(results = results, rfiles = rfiles)
+    is_mult, is_many = _parse_result_type(results)
 
     # Initiating col list with minimal columns
     cols = ['Alpha', 'Metric', 'Value']
 
     if include_as:
         cols.append('Alpha Star')
+    if is_mult:
+        cols.append('Class')
 
-    if multi_results:
+    if is_many:
         cols.append('Key')
         df = pd.DataFrame(columns = cols)
-        for key, result in rfiles.items():
-            cur_df = parse_metrics(results = result, key = key, 
-                                     include_as = include_as)
-            df = pd.concat([df, cur_df.copy()])
+        for key, result in results.items():
+                cur_df = parse_metrics(results = result, key = key, 
+                                        include_as = include_as)
+                df = pd.concat([df, cur_df.copy()])
             
     else:
         df = parse_metrics(results = results, include_as = include_as)
@@ -308,8 +358,7 @@ def get_metrics(results: dict | None=None, rfiles: dict | None=None,
     return df
 
 
-def get_weights(results : dict | None = None, rfiles : dict | None = None, 
-                include_as : bool = False) -> pd.DataFrame:
+def get_weights(results : dict, include_as : bool = False) -> pd.DataFrame:
     """
     Takes either a single scMKL result or dictionary of results and 
     returns a pd.DataFrame with cols ['Alpha', 'Group', 
@@ -350,18 +399,20 @@ def get_weights(results : dict | None = None, rfiles : dict | None = None,
     >>> weights = scmkl.get_weights(rfiles=rfiles)
     """
     # Checking which data is being worked with 
-    multi_results = _parse_result_type(results = results, rfiles = rfiles)
+    is_mult, is_many = _parse_result_type(results)
 
     # Initiating col list with minimal columns
     cols = ['Alpha', 'Group', 'Kernel Weight']
 
     if include_as:
         cols.append('Alpha Star')
+    if is_mult:
+        cols.append('Class')
 
-    if multi_results:
+    if is_many:
         cols.append('Key')
         df = pd.DataFrame(columns = cols)
-        for key, result in rfiles.items():
+        for key, result in results.items():
             cur_df = parse_weights(results = result, key = key, 
                                      include_as = include_as)
             df = pd.concat([df, cur_df.copy()])

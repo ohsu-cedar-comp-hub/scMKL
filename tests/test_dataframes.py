@@ -79,7 +79,7 @@ class TestDataframes(unittest.TestCase):
 
         # Creating results to run with rfiles
         rfiles = {'rep_1' : results, 'rep_2' : results}
-        metrics = scmkl.get_metrics(rfiles=rfiles, include_as=True)
+        metrics = scmkl.get_metrics(rfiles, include_as=True)
         
         # Ensuring there are only five rows with Alpha Star == True
         num_opt = np.sum(metrics['Alpha Star'])
@@ -109,7 +109,7 @@ class TestDataframes(unittest.TestCase):
 
         # Creating results to run with rfiles
         rfiles = {'rep_1' : results, 'rep_2' : results}
-        weights = scmkl.get_weights(rfiles=rfiles, include_as=True)
+        weights = scmkl.get_weights(rfiles, include_as=True)
         
         # Ensuring there are only five rows with Alpha Star == True
         num_opt = np.sum(weights['Alpha Star'])
@@ -130,7 +130,7 @@ class TestDataframes(unittest.TestCase):
         
         # Creating results to run with rfiles
         rfiles = {'rep_1' : results, 'rep_2' : results}
-        weights = scmkl.get_weights(rfiles=rfiles, include_as=True)
+        weights = scmkl.get_weights(rfiles, include_as=True)
         
         selection = scmkl.get_selection(weights, order_groups=True)
         

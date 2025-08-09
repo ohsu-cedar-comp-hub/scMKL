@@ -3,9 +3,44 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
 from sklearn import metrics
-from plotnine import (ggplot, aes, theme_classic, ylim, 
-                      geom_point, scale_x_reverse, annotate)
+from plotnine import (ggplot, aes, theme_classic, ylim, element_text, theme,
+                      geom_point, scale_x_reverse, annotate, geom_bar)
 
+from scmkl.dataframes import _parse_result_type, get_weights
+
+
+def _get_alpha(alpha: None | float, result: dict, is_multiclass: bool):
+    """
+    Gets the smallest alpha from a results file. Works for both binary 
+    and multiclass results.
+    """
+    if type(alpha) == float:
+        return alpha
+    
+    if is_multiclass:
+        classes = list(result['Classes'])
+        alpha_list = list(result[classes[0]]['Norms'].keys())
+        alpha = np.min(alpha_list)
+
+    else:
+        alpha_list = list(result[classes[0]]['Norms'].keys())
+        alpha = np.min(alpha_list)
+
+    return alpha
+
+
+def filter_groups(df: pd.DataFrame, n_groups):
+    """
+    Used for filtering plotting data. Takes weights df and only 
+    retains rows of the top `n_groups`. For example, if `n_groups` is 
+    five, the five groups with the highest weights will be retained.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        A dataframe from 
+    """
+    pass
 
 def plot_conf_mat(results, title = '', cmap = None, normalize = True,
                           alpha = None, save = None) -> None:
@@ -140,7 +175,7 @@ def plot_metric(summary_df : pd.DataFrame, alpha_star = None, color = 'red'):
 
     Returns
     -------
-    metric_plot : plotnine.ggplot
+    metric_plot : plotnine.ggplot.ggplot
         A plot with alpha values on x-axis and metric on y-axis.
 
     Examples
@@ -180,3 +215,67 @@ def plot_metric(summary_df : pd.DataFrame, alpha_star = None, color = 'red'):
                 + scale_x_reverse(breaks = alpha_list))
         
     return metric_plot
+
+
+def plot_weights(result, n_groups: int=1, alpha: None | float=None):
+    """
+    Plots the top weighted groups for each cell class. 
+
+    Parameters
+    ----------
+    result : dict
+        The output of `scmkl.run()`.
+
+    n_groups : int
+        The number of top groups to plot for each cell class.
+
+    alpha : None | float
+        The alpha parameter to create figure for. If `None`, the 
+        smallest alpha is used.
+
+    Returns
+    -------
+    plot : plotnine.ggplot.ggplot
+        A barplot of weights.
+
+    Examples
+    --------
+    >>> result = scmkl.run(adata, alpha_list)
+    >>> plot = scmkl.plot_weights(result)
+    """
+    df = {
+        'Class' : list(),
+        'Group' : list(),
+        'Norm' : list()
+    }
+
+    is_multi = _parse_result_type(result)
+    alpha = _get_alpha(alpha, result, is_multi)
+
+    if is_multi:
+        df = get_weights(rfiles=result)
+    else:
+        df = get_weights(results=result)
+
+    # Subsetting to only alpha
+    df = df[df['Alpha'] == alpha]
+
+    plot = (ggplot(df)
+            + theme_classic()
+            + theme(
+                axis_text=element_text(weight='bold', size=10),
+                axis_title_y=element_text(weight='bold', size=12)
+            )
+            )
+    
+    if is_multi:
+        plot += geom_bar(aes(x='Class', y='Norm'), stat='identity')
+    else:
+        plot += geom_bar(aes(x='Group', y='Norm'))
+
+    return plot
+
+
+
+
+
