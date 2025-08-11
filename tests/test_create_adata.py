@@ -26,6 +26,7 @@ class TestCreateAdata(unittest.TestCase):
     function. It creates an anndata.AnnData object and checks the 
     attributes required for scmkl to run.
     """
+
     def test_create_adata(self):
         """
         This function creates a scmkl AnnData object and checks the 
@@ -71,6 +72,7 @@ class TestCreateAdata(unittest.TestCase):
         
         self.assertTrue(train_bool, "Train indices incorrect")
         self.assertTrue(test_bool, "Test indices incorrect")
+
 
     def test_obs_retention(self):
         """
@@ -164,6 +166,7 @@ class TestCreateAdata(unittest.TestCase):
         eq_mats = np.all(adata.X.toarray() == new_adata.X.toarray())
         eq_var_names = np.all(adata.var_names == new_adata.var_names)
         eq_obs_names = np.all(adata.obs_names == new_adata.obs_names)
+        eq_labs = np.all(adata.obs['labels'] == new_adata.obs['labels'])
 
         self.assertTrue(eq_mats, 
                          "`.X` does not match between adatas.")
@@ -171,6 +174,8 @@ class TestCreateAdata(unittest.TestCase):
                          "`.var_names` do not match between adatas.")
         self.assertTrue(eq_obs_names, 
                         "`.obs_names` do not match between adatas.")
+        self.assertTrue(eq_labs, 
+                        "`.obs['labels']` do not match between adatas.")
         self.assertEqual(adata.uns['D'], new_adata.uns['D'],
                          "`.uns['D']` does not match between adatas.")
         self.assertEqual(adata.uns['kernel_type'], 

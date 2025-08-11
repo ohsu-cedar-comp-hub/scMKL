@@ -142,6 +142,18 @@ class TestDataframes(unittest.TestCase):
         num_rows = len(rfiles)*50
         self.assertEqual(num_rows, len(selection), 
                          "Incorrect number of rows in selection df.")
+        
+        # Checking multiclass output
+        results = {'B' : results, 'T' : results, 'Mono' : results, 
+                   'Classes' : ['B', 'T', 'Mono']}
+        
+        weights = scmkl.get_weights(results, include_as=False)
+        selection = scmkl.get_selection(weights, False)
+        
+        self.assertIn('Class', selection.columns,
+                      "`'Class'` column missing from df.")
+        self.assertEqual(selection.shape[0], 300, 
+                         "df is wrong len for 2 alphas, 50 groups, 3 classes.")
 
 
     def test_read_gtf(self):

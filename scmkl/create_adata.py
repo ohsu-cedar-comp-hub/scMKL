@@ -292,6 +292,10 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
         `{geneset1: np.array([gene_1, gene_2, ..., gene_n]), geneset2: 
         np.array([...]), ...}`.
 
+    obs_names : None | np.ndarray
+        The cell names corresponding to `X` to be assigned to output 
+        object `.obs_names` attribute.
+
     scale_data : bool  
         If `True`, data matrix is log transformed and standard 
         scaled. 
@@ -527,28 +531,32 @@ def format_adata(adata: ad.AnnData, cell_labels: np.ndarray | str,
                  class_threshold: str | int = 'median',
                  reduction: str | None = None, tfidf: bool = False):
     """
-    Function to format an AnnData object to carry all relevant 
-    information going forward.
+    Function to format an `ad.AnnData` object to carry all relevant 
+    information going forward. `adata.obs_names` will be retained.
 
     **NOTE: Information not needed for running `scmkl` will be 
-    removed included `.obs_names`.**
+    removed.**
 
     Parameters
     ----------
     adata : ad.AnnData
         Object with data for `scmkl` to be applied to. Only requirment 
-        is that var_names are correct and data matrix is in `adata.X` 
+        is that `.var_names` is correct and data matrix is in `adata.X` 
         or `adata.raw.X`.
 
     cell_labels : np.ndarray | str
         If type `str`, the labels for `scmkl` to learn are captured 
-        from `adata.obs['cell_labels']`. Else, a numpy array of cell 
+        from `adata.obs['cell_labels']`. Else, a `np.ndarray` of cell 
         phenotypes corresponding with the cells in `adata.X`.
 
     group_dict : dict 
         Dictionary containing feature grouping information (i.e. 
         `{geneset1: np.array([gene_1, gene_2, ..., gene_n]), geneset2: 
         np.array([...]), ...}`.
+
+    obs_names : None | np.ndarray
+        The cell names corresponding to `X` to be assigned to output 
+        object `.obs_names` attribute.
 
     use_raw : bool
         If `False`, will use `adata.X` to create new `adata`. Else, 
@@ -666,8 +674,9 @@ def format_adata(adata: ad.AnnData, cell_labels: np.ndarray | str,
     >>>                      allow_pickle = True)
     >>> 
     >>> 
-    >>> adata = scmkl.format_adata(adata, group_dict, 
-    ...                            cell_labels='labels')
+    >>> # The labels in adata.obs we want to learn are 'celltypes'
+    >>> adata = scmkl.format_adata(adata, 'celltypes', 
+    ...                            group_dict)
     >>> adata
     AnnData object with n_obs × n_vars = 1000 × 4341
     obs: 'labels'

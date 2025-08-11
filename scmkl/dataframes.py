@@ -423,7 +423,8 @@ def get_weights(results : dict, include_as : bool = False) -> pd.DataFrame:
     return df
 
 
-def get_selection(weights_df: pd.DataFrame, order_groups: bool) -> pd.DataFrame:
+def get_selection(weights_df: pd.DataFrame, 
+                  order_groups: bool=False) -> pd.DataFrame:
     """
     This function takes a pd.DataFrame created by 
     `scmkl.get_weights()` and returns a selection table. Selection 
@@ -431,13 +432,16 @@ def get_selection(weights_df: pd.DataFrame, order_groups: bool) -> pd.DataFrame:
     calculate this, a col is added indicating whether the group was 
     selected. Then, the dataframe is grouped by alpha and group. 
     Selection can then be summed returning a dataframe with cols 
-    `['Alpha', 'Group', Selection]`.
+    `['Alpha', 'Group', Selection]`. If is the result of multiclass 
+    run(s), `'Class'` column must be present and will be in resulting 
+    df as well.
 
     Parameters
     ----------
     weights_df : pd.DataFrame
         A dataframe output by `scmkl.get_weights()` with cols
-        `['Alpha', 'Group', 'Kernel Weight']`.
+        `['Alpha', 'Group', 'Kernel Weight']`. If is the result of 
+        multiclass run(s), `'Class'` column must be present as well.
 
     order_groups : bool
         If `True`, the `'Group'` col of the output dataframe will be 
@@ -447,7 +451,8 @@ def get_selection(weights_df: pd.DataFrame, order_groups: bool) -> pd.DataFrame:
     Returns
     -------
     df : pd.DataFrame
-        A dataframe with cols `['Alpha', 'Group', Selection]`.
+        A dataframe with cols `['Alpha', 'Group', Selection]`. Also, 
+        `'Class'` column if multiclass result.
 
     Example
     -------
@@ -467,11 +472,15 @@ def get_selection(weights_df: pd.DataFrame, order_groups: bool) -> pd.DataFrame:
     weights_df['Selection'] = selection
 
     # Summing selection across replications to get selection
-    df = weights_df.groupby(['Alpha', 'Group'])['Selection'].sum()
+    is_mult = 'Class' in weights_df.columns
+    if is_mult:
+        df = weights_df.groupby(['Alpha', 'Group', 'Class'])['Selection'].sum()
+    else:
+        df = weights_df.groupby(['Alpha', 'Group'])['Selection'].sum()
     df = df.reset_index()
 
     # Getting group order
-    if order_groups:
+    if order_groups and not is_mult:
         order = df.groupby('Group')['Selection'].sum()
         order = order.reset_index().sort_values(by = 'Selection', 
                                                 ascending = False)
