@@ -261,11 +261,12 @@ def sort_samples(train_indices, test_indices):
 
 def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame, 
                  feature_names: np.ndarray, cell_labels: np.ndarray, 
-                 group_dict: dict, scale_data: bool=True, 
-                 split_data: np.ndarray | None=None, D: int | None=None, 
-                 remove_features: bool=True, train_ratio: float=0.8,
-                 distance_metric: str='euclidean', kernel_type: str='Gaussian', 
-                 random_state: int=1, allow_multiclass: bool = False, 
+                 group_dict: dict, obs_names: None | np.ndarray=None, 
+                 scale_data: bool=True, split_data: np.ndarray | None=None, 
+                 D: int | None=None, remove_features: bool=True, 
+                 train_ratio: float=0.8, distance_metric: str='euclidean', 
+                 kernel_type: str='Gaussian', random_state: int=1, 
+                 allow_multiclass: bool = False, 
                  class_threshold: str | int = 'median',
                  reduction: str | None = None, tfidf: bool = False):
     """
@@ -433,6 +434,9 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
     adata = ad.AnnData(X)
     adata.var_names = feature_names
 
+    if isinstance(obs_names, (np.ndarray)):
+        adata.obs_names = obs_names
+
     filtered_feature_names, group_dict = _filter_features(feature_names, 
                                                           group_dict)
 
@@ -497,10 +501,12 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
     # Ensuring all train samples are first in adata object followed by test
     sort_idx, train_indices, test_indices = sort_samples(train_indices, 
                                                          test_indices)
-    
+
     adata = adata[sort_idx]
-    adata.obs = adata.obs.reset_index(drop=True)
-    adata.obs.index = adata.obs.index.astype('O')
+
+    if not isinstance(obs_names, (np.ndarray)):
+        adata.obs = adata.obs.reset_index(drop=True)
+        adata.obs.index = adata.obs.index.astype('O')
 
     adata.uns['train_indices'] = train_indices
     adata.uns['test_indices'] = test_indices
@@ -508,5 +514,180 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
     if not scale_data:
         print("WARNING: Data will not be log transformed and scaled. "
               "To change this behavior, set scale_data to True")
+
+    return adata
+
+
+def format_adata(adata: ad.AnnData, cell_labels: np.ndarray | str, 
+                 group_dict: dict, use_raw: bool=False, scale_data: bool=True, 
+                 split_data: np.ndarray | None=None, D: int | None=None, 
+                 remove_features: bool=True, train_ratio: float=0.8,
+                 distance_metric: str='euclidean', kernel_type: str='Gaussian', 
+                 random_state: int=1, allow_multiclass: bool = False, 
+                 class_threshold: str | int = 'median',
+                 reduction: str | None = None, tfidf: bool = False):
+    """
+    Function to format an AnnData object to carry all relevant 
+    information going forward.
+
+    **NOTE: Information not needed for running `scmkl` will be 
+    removed included `.obs_names`.**
+
+    Parameters
+    ----------
+    adata : ad.AnnData
+        Object with data for `scmkl` to be applied to. Only requirment 
+        is that var_names are correct and data matrix is in `adata.X` 
+        or `adata.raw.X`.
+
+    cell_labels : np.ndarray | str
+        If type `str`, the labels for `scmkl` to learn are captured 
+        from `adata.obs['cell_labels']`. Else, a numpy array of cell 
+        phenotypes corresponding with the cells in `adata.X`.
+
+    group_dict : dict 
+        Dictionary containing feature grouping information (i.e. 
+        `{geneset1: np.array([gene_1, gene_2, ..., gene_n]), geneset2: 
+        np.array([...]), ...}`.
+
+    use_raw : bool
+        If `False`, will use `adata.X` to create new `adata`. Else, 
+        will use `adata.raw.X`.
+
+    scale_data : bool  
+        If `True`, data matrix is log transformed and standard 
+        scaled. 
+        
+    split_data : None | np.ndarray
+        If `None`, data will be split stratified by cell labels. 
+        Else, is an array of precalculated train/test split 
+        corresponding to samples. Can include labels for entire
+        dataset to benchmark performance or for only training
+        data to classify unknown cell types (i.e. `np.array(['train', 
+        'test', ..., 'train'])`.
+
+    D : int 
+        Number of Random Fourier Features used to calculate Z. 
+        Should be a positive integer. Higher values of D will 
+        increase classification accuracy at the cost of computation 
+        time. If set to `None`, will be calculated given number of 
+        samples. 
+    
+    remove_features : bool
+        If `True`, will remove features from `X` and `feature_names` 
+        not in `group_dict` and remove features from groupings not in 
+        `feature_names`.
+
+    train_ratio : float
+        Ratio of number of training samples to entire data set. Note:
+        if a threshold is applied, the ratio training samples may 
+        decrease depending on class balance and `class_threshold`
+        parameter if `allow_multiclass = True`.
+
+    distance_metric : str
+        The pairwise distance metric used to estimate sigma. Must
+        be one of the options used in `scipy.spatial.distance.cdist`.
+
+    kernel_type : str
+        The approximated kernel function used to calculate Zs.
+        Must be one of `'Gaussian'`, `'Laplacian'`, or `'Cauchy'`.
+
+    random_state : int
+        Integer random_state used to set the seed for 
+        reproducibilty.
+
+    allow_multiclass : bool
+        If `False`, will ensure that cell labels are binary.
+
+    class_threshold : str | int
+        Number of samples allowed in the training data for each cell
+        class in the training data. If `'median'`, the median number 
+        of cells per cell class will be the threshold for number of 
+        samples per class.
+
+    reduction: str | None
+        Choose which dimension reduction technique to perform on 
+        features within a group. 'svd' will run 
+        `sklearn.decomposition.TruncatedSVD`, 'linear' will multiply 
+        by an array of 1s down to 50 dimensions.
+        
+    tfidf: bool
+        Whether to calculate TFIDF transformation on peaks within 
+        groupings.
+        
+    Returns
+    -------
+    adata : ad.AnnData
+        AnnData with the following attributes and keys:
+
+        `adata.X` (array_like):
+            Data matrix.
+    
+        `adata.var_names` (array_like): 
+            Feature names corresponding to `adata.X`.
+
+        `adata.obs['labels']` (array_like):
+            cell classes/phenotypes from `cell_labels`.
+
+        `adata.uns['train_indices']` (array_like):
+            Indices for training data. 
+
+        `adata.uns['test_indices']` (array_like)
+            Indices for testing data.
+
+        `adata.uns['group_dict']` (dict):
+            Grouping information.
+
+        `adata.uns['seed_obj']` (np.random._generator.Generator): 
+            Seed object with seed equal to 100 * `random_state`.
+
+        `adata.uns['D']` (int):
+            Number of dimensions to scMKL with.
+
+        `adata.uns['scale_data']` (bool):
+            Whether or not data is log and z-score transformed.
+
+        `adata.uns['distance_metric']` (str): 
+            Distance metric as given.
+    
+        `adata.uns['kernel_type']` (str): 
+            Kernel function as given.
+
+        `adata.uns['svd']` (bool): 
+            Whether to calculate SVD reduction.
+
+        `adata.uns['tfidf']` (bool): 
+            Whether to calculate TF-IDF per grouping.
+
+    Examples
+    --------
+    >>> adata = ad.read_h5ad('MCF7_rna.h5ad')
+    >>> group_dict = np.load('hallmark_genesets.pkl', 
+    >>>                      allow_pickle = True)
+    >>> 
+    >>> 
+    >>> adata = scmkl.format_adata(adata, group_dict, 
+    ...                            cell_labels='labels')
+    >>> adata
+    AnnData object with n_obs × n_vars = 1000 × 4341
+    obs: 'labels'
+    uns: 'group_dict', 'seed_obj', 'scale_data', 'D', 'kernel_type', 
+    'distance_metric', 'train_indices', 'test_indices'
+    """
+    if str == type(cell_labels):
+        cell_labels = adata.obs[cell_labels].to_numpy()
+    
+    if use_raw:
+        assert adata.raw, "`adata.raw` is empty, set `use_raw` to `True`"
+        X = adata.raw.X
+    else:
+        X = adata.X
+
+    adata = create_adata(X, adata.var_names.to_numpy().copy(), cell_labels, 
+                         group_dict, adata.obs_names.to_numpy().copy(), 
+                         scale_data, split_data, D, remove_features, 
+                         train_ratio, distance_metric, kernel_type, 
+                         random_state, allow_multiclass, class_threshold, 
+                         reduction, tfidf)
 
     return adata
