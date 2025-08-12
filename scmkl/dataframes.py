@@ -45,6 +45,88 @@ def _parse_result_type(results: dict):
         print("Unknown result structure", flush=True)
 
 
+def sort_groups(df: pd.DataFrame, group_col: str='Group', 
+                norm_col: str='Kernel Weight'):
+    """
+    Takes a dataframe with `group_col` and returns sorted group list 
+    with groups in decending order by their weights. Assumes there is 
+    one instance of each group.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        A dataframe with `group_col` and `norm_col` to be sorted by.
+
+    group_col : str
+        The column containing the group names.
+
+    norm_col : str
+        The column containing the kernel weights.
+
+    Returns
+    -------
+    group_order : list
+        A list of groups in descending order according to their kernel 
+        weights.
+
+    Examples
+    --------
+    >>> result = scmkl.run(adata, alpha_list)
+    >>> weights = scmkl.get_weights(result)
+    >>> group_order = scmkl.sort_groups(weights, 'Group', 
+    ...                                 'Kernel Weight')
+    >>>
+    >>> group_order
+    ['HALLMARK_ESTROGEN_RESPONSE_EARLY', 'HALLM...', ...]
+    """
+    df = df.copy()
+    df = df.sort_values(norm_col, ascending=False)
+    group_order = list(df[group_col])
+
+    return group_order
+
+
+def format_group_names(group_names: list | pd.Series | np.ndarray, 
+                       rm_words: list=list()):
+    """
+    Takes an ArrayLike object of group names and formats them.
+
+    Parameters
+    ----------
+    group_names : array_like
+        An array of group names to format.
+
+    rm_words : list
+        Words to remove from all group names.
+
+    Returns
+    -------
+    new_group_names : list
+        Formatted version of the input group names.
+
+    Examples
+    --------
+    >>> groups = ['HALLMARK_E2F_TARGETS', 'HALLMARK_HYPOXIA']
+    >>> new_groups = scmkl.format_group_names(groups)
+    >>> new_groups
+    ['Hallmark E2F Targets', 'Hallmark Hypoxia']
+    """
+    new_group_names = list()
+    rm_words = [word.lower() for word in rm_words]
+
+    for name in group_names:
+        new_name = list()
+        for word in re.split(r'_|\s', name):
+            if word.isalpha() and (len(word) > 3):
+                word = word.capitalize()
+            if word.lower() not in rm_words:
+                new_name.append(word)
+        new_name = ' '.join(new_name)
+        new_group_names.append(new_name)
+
+    return new_group_names
+        
+
 def parse_metrics(results: dict, key: str | None=None, 
                    include_as: bool=False) -> pd.DataFrame:
     """
@@ -178,6 +260,33 @@ def parse_weights(results: dict, include_as: bool=False,
     return df
 
 
+def extract_results(results: dict, metric: str):
+    """
+    
+    """
+    summary = {'Alpha' : list(),
+               metric : list(),
+               'Number of Selected Groups' : list(),
+               'Top Group' : list()}
+    
+    alpha_list = list(results['Metrics'].keys())
+
+    # Creating summary DataFrame for each model
+    for alpha in alpha_list:
+        cur_alpha_rows = results['Norms'][alpha]
+        top_weight_rows = np.max(results['Norms'][alpha])
+        top_group_index = np.where(cur_alpha_rows == top_weight_rows)
+        num_selected = len(results['Selected_groups'][alpha])
+        top_group_names = np.array(results['Group_names'])[top_group_index]
+
+        summary['Alpha'].append(alpha)
+        summary[metric].append(results['Metrics'][alpha][metric])
+        summary['Number of Selected Groups'].append(num_selected)
+        summary['Top Group'].append(*top_group_names)
+    
+    return pd.DataFrame(summary)
+
+
 def get_summary(results: dict, metric: str='AUROC'):
     """
     Takes the results from `scmkl.run()` and generates a dataframe 
@@ -221,27 +330,19 @@ def get_summary(results: dict, metric: str='AUROC'):
     3   RNA-HALLMARK_ESTROGEN_RESPONSE_EARLY
     4   RNA-HALLMARK_ESTROGEN_RESPONSE_EARLY
     """
-    summary = {'Alpha' : [],
-                'AUROC' : [],
-                'Number of Selected Groups' : [],
-                'Top Group' : []}
+    is_multi, is_many = _parse_result_type(results)
+    assert not is_many, "This function only supports single results"
     
-    alpha_list = list(results['Metrics'].keys())
+    if is_multi:
+        summaries = list()
+        for ct in results['Classes']:
+            data = extract_results(results[ct], metric)
+            data['Class'] = [ct]*len(data)
+            summaries.append(data.copy())
+        summary = pd.concat(summaries)
 
-    # Creating summary DataFrame for each model
-    for alpha in alpha_list:
-        cur_alpha_rows = results['Norms'][alpha]
-        top_weight_rows = np.max(results['Norms'][alpha])
-        top_group_index = np.where(cur_alpha_rows == top_weight_rows)
-        num_selected = len(results['Selected_groups'][alpha])
-        top_group_names = np.array(results['Group_names'])[top_group_index]
-
-        summary['Alpha'].append(alpha)
-        summary[metric].append(results['Metrics'][alpha][metric])
-        summary['Number of Selected Groups'].append(num_selected)
-        summary['Top Group'].append(*top_group_names)
-    
-    summary = pd.DataFrame(summary)
+    else:
+        summary = extract_results(results, metric)
 
     return summary
 
@@ -452,7 +553,7 @@ def get_selection(weights_df: pd.DataFrame,
     -------
     df : pd.DataFrame
         A dataframe with cols `['Alpha', 'Group', Selection]`. Also, 
-        `'Class'` column if multiclass result.
+        `'Class'` column if is a multiclass result.
 
     Example
     -------
@@ -491,7 +592,7 @@ def get_selection(weights_df: pd.DataFrame,
     return df
 
 
-def mean_groups_per_alpha(selection_df: pd.DataFrame) -> dict:
+def groups_per_alpha(selection_df: pd.DataFrame) -> dict:
     """
     This function takes a pd.DataFrame from `scmkl.get_selection()` 
     generated from multiple scMKL results and returns a dictionary 

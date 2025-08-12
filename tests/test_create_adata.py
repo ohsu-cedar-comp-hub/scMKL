@@ -47,14 +47,15 @@ class TestCreateAdata(unittest.TestCase):
                                    split_data = train_test)
 
         # Ensuring group dict is intact after object creation
+        err_str = ("Genes present in 'adata' group_dict "
+                           "not in original grouping.")
         for group in adata.uns['group_dict'].keys():
             for gene in adata.uns['group_dict'][group]:
-                err_str = (f"Genes present in 'adata' group_dict "
-                           "not in original grouping.")
+                
                 self.assertIn(gene, grouping[group], err_str)
         
         # Checking that the number of dimensions for n = 1000 is correct
-        self.assertEqual(adata.uns['D'], 61, "Incorrect optimal D calculated")
+        self.assertEqual(adata.uns['D'], 100, "Incorrect optimal D calculated")
 
         # Checking default kernel function
         self.assertEqual(adata.uns['kernel_type'].lower(), 'gaussian', 

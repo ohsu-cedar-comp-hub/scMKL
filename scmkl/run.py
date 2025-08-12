@@ -107,6 +107,7 @@ def run(adata: ad.AnnData, alpha_list: np.ndarray,
     D = adata.uns['D']
 
     # Generating models for each alpha and outputs
+    tracemalloc.start()
     for alpha in alpha_list:
         
         print(f'  Evaluating model. Alpha: {alpha}', flush = True)

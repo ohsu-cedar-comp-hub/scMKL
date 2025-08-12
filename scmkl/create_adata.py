@@ -222,7 +222,8 @@ def calculate_d(num_samples : int):
     161
     """
     d = int(np.sqrt(num_samples)*np.log(np.log(num_samples)))
-    return d
+
+    return int(np.max([d, 100]))
 
 
 def sort_samples(train_indices, test_indices):

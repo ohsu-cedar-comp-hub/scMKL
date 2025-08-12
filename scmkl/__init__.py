@@ -23,7 +23,8 @@ __all__ = ['calculate_z',
            'run',
            'test',
            'tfidf_normalize',
-           'train_model'
+           'train_model',
+           'weights_barplot'
            ]
 
 from scmkl._checks import *
