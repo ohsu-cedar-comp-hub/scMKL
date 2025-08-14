@@ -523,13 +523,14 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
     return adata
 
 
-def format_adata(adata: ad.AnnData, cell_labels: np.ndarray | str, 
-                 group_dict: dict, use_raw: bool=False, scale_data: bool=True, 
-                 split_data: np.ndarray | None=None, D: int | None=None, 
-                 remove_features: bool=True, train_ratio: float=0.8,
-                 distance_metric: str='euclidean', kernel_type: str='Gaussian', 
-                 random_state: int=1, allow_multiclass: bool = False, 
-                 class_threshold: str | int = 'median',
+def format_adata(adata: ad.AnnData | str, cell_labels: np.ndarray | str, 
+                 group_dict: dict | str, use_raw: bool=False, 
+                 scale_data: bool=True, split_data: np.ndarray | None=None, 
+                 D: int | None=None, remove_features: bool=True, 
+                 train_ratio: float=0.8, distance_metric: str='euclidean', 
+                 kernel_type: str='Gaussian', random_state: int=1, 
+                 allow_multiclass: bool = False, 
+                 class_threshold: str | int = 'median', 
                  reduction: str | None = None, tfidf: bool = False):
     """
     Function to format an `ad.AnnData` object to carry all relevant 
@@ -543,17 +544,19 @@ def format_adata(adata: ad.AnnData, cell_labels: np.ndarray | str,
     adata : ad.AnnData
         Object with data for `scmkl` to be applied to. Only requirment 
         is that `.var_names` is correct and data matrix is in `adata.X` 
-        or `adata.raw.X`.
+        or `adata.raw.X`. A h5ad file can be provided as a `str` and it 
+        will be read in.
 
     cell_labels : np.ndarray | str
         If type `str`, the labels for `scmkl` to learn are captured 
         from `adata.obs['cell_labels']`. Else, a `np.ndarray` of cell 
         phenotypes corresponding with the cells in `adata.X`.
 
-    group_dict : dict 
+    group_dict : dict | str
         Dictionary containing feature grouping information (i.e. 
         `{geneset1: np.array([gene_1, gene_2, ..., gene_n]), geneset2: 
-        np.array([...]), ...}`.
+        np.array([...]), ...}`. A pickle file can be provided as a `str` 
+        and it will be read in.
 
     obs_names : None | np.ndarray
         The cell names corresponding to `X` to be assigned to output 
@@ -684,11 +687,19 @@ def format_adata(adata: ad.AnnData, cell_labels: np.ndarray | str,
     uns: 'group_dict', 'seed_obj', 'scale_data', 'D', 'kernel_type', 
     'distance_metric', 'train_indices', 'test_indices'
     """
+    if str == type(adata):
+        adata = ad.read_h5ad(adata)
+
+    if str == type(group_dict):
+        group_dict = np.load(group_dict, allow_pickle=True)
+        
     if str == type(cell_labels):
+        err_msg = f"{cell_labels} is not in `adata.obs`"
+        assert cell_labels in adata.obs.keys(), err_msg
         cell_labels = adata.obs[cell_labels].to_numpy()
     
     if use_raw:
-        assert adata.raw, "`adata.raw` is empty, set `use_raw` to `True`"
+        assert adata.raw, "`adata.raw` is empty, set `use_raw` to `False`"
         X = adata.raw.X
     else:
         X = adata.X

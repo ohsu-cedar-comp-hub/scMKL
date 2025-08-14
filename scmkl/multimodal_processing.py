@@ -53,7 +53,7 @@ def combine_modalities(adatas: list[ad.AnnData], names: list[str],
                                                           "objects")
 
     # Conserving labels from adatas
-    combined_adata.obs = adatas[0].obs
+    combined_adata.obs = adatas[0].obs.copy()
 
     # Creating a single dictionary with all of the groups across modalities 
     group_dict = {}

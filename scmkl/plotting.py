@@ -1,6 +1,10 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import scanpy as sc
+import anndata as ad
+import muon
+from muon import atac as ac
 import itertools
 from math import ceil
 from sklearn import metrics
@@ -8,10 +12,10 @@ from plotnine import (ggplot, aes, theme_classic, ylim, element_text, theme,
                       geom_point, scale_x_reverse, annotate, geom_bar, 
                       coord_flip, element_blank, labs, geom_tile, 
                       scale_fill_gradient, facet_wrap, 
-                      scale_color_manual)
+                      scale_color_manual, scale_color_gradient)
 
 from scmkl.dataframes import (_parse_result_type, get_weights, sort_groups, 
-                              format_group_names, groups_per_alpha)
+                              format_group_names)
 
 
 def _get_alpha(alpha: None | float, result: dict, is_multiclass: bool):
@@ -166,7 +170,8 @@ def plot_conf_mat(results, title = '', cmap = None, normalize = True,
     return None
 
 
-def plot_metric(summary_df : pd.DataFrame, alpha_star = None, x_axis: str='Alpha', color = 'red'):
+def plot_metric(summary_df : pd.DataFrame, alpha_star = None, 
+                x_axis: str='Alpha', color = 'red'):
     """
     Takes a data frame of model metrics and optionally alpha star and
     creates a scatter plot given metrics against alpha values. For 
@@ -179,10 +184,15 @@ def plot_metric(summary_df : pd.DataFrame, alpha_star = None, x_axis: str='Alpha
         Dataframe created by `scmkl.get_summary()`.
 
     alpha_star : None | float
-        > If `not None`, a label will be added for tuned `alpha_star` 
+        If `not None`, a label will be added for tuned `alpha_star` 
         being optimal model parameter for performance from cross 
         validation on the training data. Can be calculated with 
-        `scmkl.optimize_alpha()`. 
+        `scmkl.optimize_alpha()`. Is ignored if `summary_df` is from a 
+        multiclass result.
+
+    x_axis : str
+        Must be either `'Alpha'` or `'Number of Selected Groups'`. Is 
+        the variable that will be plotted on the x-axis.
 
     color : str
         Color to make points on plot.
@@ -243,7 +253,8 @@ def plot_metric(summary_df : pd.DataFrame, alpha_star = None, x_axis: str='Alpha
 def weights_barplot(result, n_groups: int=1, alpha: None | float=None, 
                  color: str='red'):
     """
-    Plots the top weighted groups for each cell class. 
+    Plots the top `n_groups` weighted groups for each cell class. Works 
+    for a single scmkl result (either multiclass or binary).
 
     Parameters
     ----------
@@ -332,12 +343,14 @@ def weights_barplot(result, n_groups: int=1, alpha: None | float=None,
     return plot
 
 
-def weights_heatmap(result, n_groups: None | int=None, class_lab: str | None=None, 
-                    low: str='white', high: str='red', alpha: float | None=None,
+def weights_heatmap(result, n_groups: None | int=None, 
+                    class_lab: str | None=None, low: str='white', 
+                    high: str='red', alpha: float | None=None,
                     scale_weights: bool=False):
     """
     Plots a heatmap of kernel weights with groups on the y-axis and 
-    alpha on the x-axis.
+    alpha on the x-axis if binary result. If a multiclass result, one 
+    alpha is used per class and the x-axis is class.
 
     Parameters
     ----------
@@ -363,13 +376,13 @@ def weights_heatmap(result, n_groups: None | int=None, class_lab: str | None=Non
         smallest alpha is used.
 
     scale_weights : bool
-        If `True`, the the kernel weights will be scaled for each 
+        If `True`, the the kernel weights will be scaled for each group 
         within each class.
 
     Returns
     -------
     plot : plotnine.ggplot.ggplot
-        A barplot of weights.
+        A heatmap of weights.
 
     Examples
     --------
@@ -383,7 +396,7 @@ def weights_heatmap(result, n_groups: None | int=None, class_lab: str | None=Non
         result = result[class_lab]
 
     df = get_weights(result)
-    df['Group'] = format_group_names(df['Group'])
+    df['Group'] = format_group_names(df['Group'], ['Markers'])
 
     # Filtering and sorting values
     sum_df = df.groupby('Group')['Kernel Weight'].sum()
@@ -446,3 +459,204 @@ def weights_heatmap(result, n_groups: None | int=None, class_lab: str | None=Non
     return plot
 
 
+def weights_dotplot(result, n_groups: None | int=None, 
+                    class_lab: str | None=None, low: str='white', 
+                    high: str='red', alpha: float | None=None, 
+                    scale_weights: bool=False):
+    """
+    Plots a dotplot of kernel weights with groups on the y-axis and 
+    alpha on the x-axis if binary result. If a multiclass result, one 
+    alpha is used per class and the x-axis is class.
+
+    Parameters
+    ----------
+    result : dict
+        The output of `scmkl.run()`.
+
+    n_groups : int
+        The number of top groups to plot. Not recommended for 
+        multiclass results.
+
+    class_lab : str | None
+        For multiclass results, if `not None`, will only plot group 
+        weights for `class_lab`.
+
+    low : str
+        The color for low kernel weight.
+
+    high : str
+        The color for high kernel weight.
+
+    alpha : None | float
+        The alpha parameter to create figure for. If `None`, the 
+        smallest alpha is used.
+
+    scale_weights : bool
+        If `True`, the the kernel weights will be scaled for each 
+        within each class.
+
+    Returns
+    -------
+    plot : plotnine.ggplot.ggplot
+        A barplot of weights.
+
+    Examples
+    --------
+    >>> result = scmkl.run(adata, alpha_list)
+    >>> plot = scmkl.plot_weights(result)
+    """
+    is_multi, is_many = _parse_result_type(result)
+    assert not is_many, "This function only supports single results"
+
+    if type(class_lab) is str:
+        result = result[class_lab]
+
+    df = get_weights(result)
+    df['Group'] = format_group_names(df['Group'], ['Markers'])
+
+    # Filtering and sorting values
+    sum_df = df.groupby('Group')['Kernel Weight'].sum()
+    sum_df = sum_df.reset_index()
+    order = sort_groups(sum_df)[::-1]
+    df['Group'] = pd.Categorical(df['Group'], categories=order)
+
+    if type(n_groups) is int:
+        sum_df = sum_df.sort_values(by='Kernel Weight', ascending=False)
+        top_groups = sum_df.iloc[0:n_groups]['Group'].to_numpy()
+        df = df[np.isin(df['Group'], top_groups)]
+    else:
+        n_groups = len(set(df['Group']))
+
+    df['Alpha'] = pd.Categorical(df['Alpha'], np.unique(df['Alpha']))
+
+    if n_groups > 40:
+        fig_size = (7,8)
+    elif n_groups < 25:
+        fig_size = (7,6)
+    else: 
+        fig_size = (7,8)
+
+    if 'Class' in df.columns:
+        alpha = _get_alpha(alpha, result, is_multi)
+        df = df[df['Alpha'] == alpha]
+        x_lab = 'Class'
+    else:
+        x_lab = 'Alpha'
+
+    if scale_weights:
+        max_norms = dict()
+        for ct in set(df['Class']):
+            g_rows = df['Class'] == ct
+            max_norms[ct] = np.max(df[g_rows]['Kernel Weight'])
+            scale_cols = ['Class', 'Kernel Weight']
+
+        new = df[scale_cols].apply(lambda x: x[1] / max_norms[x[0]], axis=1)
+        df['Kernel Weight'] = new
+
+        l_title = 'Scaled\nKernel Weight'
+
+    else:
+        l_title = 'Kernel Weight'
+
+
+    plot = (ggplot(df, aes(x=x_lab, y='Group', fill='Kernel Weight', color='Kernel Weight'))
+            + geom_point(size=5)
+            + scale_fill_gradient(high=high, low=low)
+            + scale_color_gradient(high=high, low=low)
+            + theme_classic()
+            + theme(
+                figure_size=fig_size,
+                axis_text=element_text(weight='bold', size=10),
+                axis_text_x=element_text(rotation=90),
+                axis_title=element_text(weight='bold', size=12),
+                axis_title_y=element_blank(),
+                legend_title=element_text(text=l_title, weight='bold', size=12),
+                legend_text=element_text(weight='bold', size=10)
+            ))
+
+    return plot
+
+
+def group_umap(adata: ad.AnnData, g_name: str | list, is_binary: bool=False, 
+               labels: None | np.ndarray | list=None, save: str=''):
+    """
+    Uses a scmkl formatted `ad.AnnData` object to show sample 
+    separation using scmkl discovered groupings.
+
+    Parameters
+    ----------
+    adata : ad.AnnData
+        A scmkl formatted `ad.AnnData` object with `'group_dict'` in 
+        `.uns`.
+
+    g_name : str | list
+        The groups who's features should be used to filter `adata`. If 
+        is a list, features from multiple groups will be used.
+    
+    is_binary : bool
+        If `True`, data will be processed using `muon` which includes 
+        TF-IDF normalization and LSI.
+
+    labels : None | np.ndarray | list
+        If `None`, labels in `adata.obs['labels']` will be used to 
+        color umap points. Else, provided labels will be used to color 
+        points.
+
+    save : str
+        If provided, plot will be saved using `scanpy`'s `save` 
+        argument. Should be the desired file name. Output will be 
+        `<cwd>/figures/<save>`.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    >>> adata_fp = 'data/_pbmc_rna.h5ad'
+    >>> group_fp = 'data/_RNA_azimuth_pbmc_groupings.pkl'
+    >>> adata = scmkl.format_adata(adata_fp, 'celltypes', group_fp, 
+    ...                            allow_multiclass=True)
+    >>> scmkl.group_umap(adata, 'CD16+ Monocyte Markers')
+    """
+    if list == type(g_name):
+        feats = {feature 
+                 for group in g_name 
+                 for feature in adata.uns['group_dict'][group]}
+        feats = np.array(list(feats))
+    else:
+        feats = np.array(list(adata.uns['group_dict'][g_name]))
+
+    if labels:
+        assert len(labels) == adata.shape[0], "`labels` do not match `adata`"
+        adata.obs['labels'] = labels
+
+    var_names = adata.var_names.to_numpy()
+
+    col_filter = np.isin(var_names, feats)
+    adata = adata[:, col_filter].copy()
+
+    if not is_binary:
+        sc.pp.normalize_total(adata)
+        sc.pp.log1p(adata)
+        sc.tl.pca(adata)
+        sc.pp.neighbors(adata)
+        sc.tl.umap(adata)
+
+    else:
+        ac.pp.tfidf(adata, scale_factor=1e4)
+        sc.pp.normalize_per_cell(adata, counts_per_cell_after=1e4)
+        sc.pp.log1p(adata)
+        ac.tl.lsi(adata)
+        sc.pp.scale(adata)
+        sc.tl.pca(adata)
+        sc.pp.neighbors(adata, n_neighbors=10, n_pcs=30)
+        sc.tl.umap(adata, spread=1.5, min_dist=.5, random_state=20)
+
+    if save:
+        sc.pl.umap(adata, color='labels', save=save)
+
+    else:
+        sc.pl.umap(adata, color='labels')
+
+    return None

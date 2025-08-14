@@ -1,4 +1,7 @@
-*.pyc
-multiclass_analysis.ipynb
-*.h5ad
 __pycache__/
+*.pyc
+*.h5ad
+testing_plots.ipynb
+multiclass_analysis.ipynb
+
+

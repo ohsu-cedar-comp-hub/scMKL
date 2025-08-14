@@ -280,6 +280,7 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
     # AnnData objects and train/test indices are all the same
     _check_adatas(adatas, check_obs = True, check_uns = True)
 
+
     # Extracting train and test indices
     train_indices = adatas[0].uns['train_indices']
     test_indices = adatas[0].uns['test_indices']
@@ -310,7 +311,7 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
     results = dict()
 
     # Capturing cell labels before overwriting
-    cell_labels = np.array(adata.obs['labels'])
+    cell_labels = np.array(adata.obs['labels'].copy())
 
     # Capturing perfect train/test splits for each class
     if force_balance:
