@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 *.h5ad
+figures/
 testing_plots.ipynb
 multiclass_analysis.ipynb
 

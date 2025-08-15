@@ -277,12 +277,15 @@ def extract_results(results: dict, metric: str):
         top_weight_rows = np.max(results['Norms'][alpha])
         top_group_index = np.where(cur_alpha_rows == top_weight_rows)
         num_selected = len(results['Selected_groups'][alpha])
-        top_group_names = np.array(results['Group_names'])[top_group_index]
+        top_group_name = np.array(results['Group_names'])[top_group_index]
+        
+        if 0 == num_selected:
+            top_group_name = ["No groups selected"]
 
         summary['Alpha'].append(alpha)
         summary[metric].append(results['Metrics'][alpha][metric])
         summary['Number of Selected Groups'].append(num_selected)
-        summary['Top Group'].append(*top_group_names)
+        summary['Top Group'].append(*top_group_name)
     
     return pd.DataFrame(summary)
 

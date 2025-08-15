@@ -648,23 +648,20 @@ def group_umap(adata: ad.AnnData, g_name: str | list, is_binary: bool=False,
         sc.pp.log1p(adata)
         sc.tl.pca(adata)
         sc.pp.neighbors(adata)
-        sc.tl.umap(adata)
+        sc.tl.umap(adata, random_state=1)
 
     else:
-        print(adata)
         ac.pp.tfidf(adata, scale_factor=1e4)
-        print(adata)
         sc.pp.normalize_total(adata)
-        print(adata)
         sc.pp.log1p(adata)
         ac.tl.lsi(adata)
         sc.pp.scale(adata)
         sc.tl.pca(adata)
         sc.pp.neighbors(adata, n_neighbors=10, n_pcs=30)
-        sc.tl.umap(adata, spread=1.5, min_dist=.5, random_state=20)
+        sc.tl.umap(adata, random_state=1)
 
     if save:
-        sc.pl.umap(adata, title=title, color='labels', save=save)
+        sc.pl.umap(adata, title=title, color='labels', save=save, show=False)
 
     else:
         sc.pl.umap(adata, title=title, color='labels')

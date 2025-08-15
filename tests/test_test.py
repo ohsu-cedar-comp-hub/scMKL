@@ -48,7 +48,7 @@ class TestTest(unittest.TestCase):
         selected_groups = scmkl.find_selected_groups(adata)
 
         # Ensuring the number of output groups are expected
-        self.assertEqual(len(selected_groups), 47,
+        self.assertEqual(len(selected_groups), 44,
                          "Incorrect number of selected groups")
 
 

@@ -27,7 +27,8 @@ setup(
         'plotnine==0.14.3',
         'matplotlib==3.9.3',
         'scanpy==1.11.4',
-        'muon==0.1.6'
+        'muon==0.1.6',
+        'gseapy==1.1.9'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
