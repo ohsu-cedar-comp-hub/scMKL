@@ -1,7 +1,11 @@
 import pickle
 import numpy as np
+import pandas as pd
 import gseapy as gp
 
+
+# Prevent iteration of all availible gene sets for human and mouse
+global_lib_orgs = ['human', 'mouse']
 
 human_genesets = [
     'Azimuth_2023', 
@@ -21,19 +25,76 @@ human_genesets = [
 ]
 
 
-def check_libs(libs, tissue, key_types):
+def check_organism(organism: str):
     """
-    Checks libraries for desired `tissues` or `key_types`.
+    Makes sure that organism is in availible organisms from `gseapy`.
+
+    Parameters
+    ----------
+    organism : str
+        The organsim to check.
+
+    Returns
+    -------
+    is_in : bool
+        `True` if the organism is valid. `False` if organism is not an 
+        option.
     """
-    tally = dict()
-    for library, groups in libs.items():
-        tally[library] = {'tissue_in' : list(), 'key_types_in' : list()}
-        for group_name in groups:
-            if list == type(tissue):
-                tissue_in = any([t.lower() in group_name.lower() 
-                                 for t in tissue])
-            else:
-                tissue_in = tissue in group_name.lower()
+    org_opts = {'human', 'mouse', 'yeast', 'fly', 'fish', 'worm'}
+    org_err = f"Invalid `organism`, choose from {org_opts}"
+    assert organism.lower() in org_opts, org_err
+
+    return None
+
+
+def check_groups(groups: list, key_types: str | list='', 
+                 blacklist: str | list | bool=False, other_org: str=''):
+    """
+    Takes a list of groups from a gene set library and checks the names 
+    for the desired gene sets. Returns a dictionary with keys 
+    `'key_types_in'` that is `list` of `bool`s corresponding to 
+    `names`. `'num_groups'` value is an int for how many groups are in 
+    the library.
+
+    Parameters
+    ----------
+    groups : list
+        The names of groups for a given library.
+
+    key_types : str | list
+        The types of cells or other specifiers the gene set is for 
+        (example: 'CD4 T', 'kidney', ect...).
+
+    other_org : str
+        Either `'human'` or `'mouse'`. The organsim to ignore when 
+        checking groups. Should be empty if target organism is not 
+        `'human'` or `'mouse'`.
+
+    Returns
+    -------
+    result : dict
+        A dictionary with the following keys and values:
+
+        `'name'` : list
+            The names of each group in input `'groups'` if the name 
+            does not contain `'other_org'`.
+    
+        `'key_types_in'` : list
+            A boolean list repective to `'name'` indicating if at 
+            least one key word from `'key_type'` is present in the group name.
+
+        `'num_groups'` : int
+            The length of `result['name']`.
+    """
+    result = {
+        'key_types_in' : list(),
+        'blacklist_in' : list(),
+        'name' : list(),
+    }
+
+    for group_name in groups:
+            
+        if not other_org in group_name.lower():
 
             if list == type(key_types):
                 key_types_in = any([k.lower() in group_name.lower() 
@@ -41,29 +102,121 @@ def check_libs(libs, tissue, key_types):
             else:
                 key_types_in = key_types.lower() in group_name.lower()
 
-            tally[library]['tissue_in'].append(tissue_in)
-            tally[library]['key_types_in'].append(key_types_in)
+            if list == type(blacklist):
+                blacklist_in = any([bl.lower() in group_name.lower() 
+                                    for bl in blacklist])
+            elif str == type(blacklist):
+                blacklist_in = blacklist.lower() in group_name.lower()
+            else:
+                blacklist_in = False
+                
+            result['key_types_in'].append(key_types_in)
+            result['blacklist_in'].append(blacklist_in)
+            result['name'].append(group_name)
+
+    result['num_groups'] = len(result['name'])
+
+    return result
 
 
-
-
-def find_candidates(organism, tissue: str | list='', key_types: str | list=''):
+def check_libs(libs, key_types: str | list='', 
+               blacklist: str | list | bool=False, other_org: str=''):
     """
-    Given `species`, `tissue`, and `key_types`, will search for gene 
-    groupings that could fit the datasets/classification task.
+    Checks libraries for desired `key_types` in groups.
 
     Parameters
     ----------
-    species : str
+    libs : dict
+        A dictionary as `libs[library_name] = library_groups`.
+
+    key_types : str | list
+        A `str` or `list` of `str`s to seach for in `libs` group names.
+
+    other_org : str
+        Only applicable when desired organism is `'human'` or 
+        `'mouse'`. If desired organism is `'human'`, `other_org` 
+        should be `'mouse'` and vice-versa.
+
+    Returns
+    -------
+    summary, tally : pd.DataFrame | pd.DataFrame
+        `summary` has cols `['Library', 'No. Gene Sets', 
+        'No. Key Type Matching']` where `'Library'` is the library from 
+        `gseapy` with `'No. Gene Sets'` and `'No. Key Type Matching'` 
+        corresponding. `'No. Key Type Matching'` only included if 
+        `key_types` argument is provided. `tally` has cols `['library', 
+        'key_types_in', 'name']` 
+    """
+    num_groups = dict()
+    
+    tally = {
+        'library' : list(), 
+        'key_types_in' : list(), 
+        'blacklist_in' : list(),
+        'name' : list()
+    }
+    
+    for library, groups in libs.items():
+        res = check_groups(list(groups.keys()), key_types, 
+                           blacklist, other_org)
+
+        lib_repeats = [library]*len(res['name'])
+
+        tally['library'].extend(lib_repeats)
+        tally['key_types_in'].extend(res['key_types_in'])
+        tally['blacklist_in'].extend(res['blacklist_in'])
+        tally['name'].extend(res['name'])
+
+        num_groups[library] = res['num_groups']
+
+    tally = pd.DataFrame(tally)
+
+    key_dict = tally.copy()
+    key_dict = key_dict.groupby('library')['key_types_in'].sum().reset_index()
+    key_dict = dict(zip(key_dict['library'], key_dict['key_types_in']))
+
+    bl_dict = tally.copy()
+    bl_dict = tally.groupby('library')['blacklist_in'].sum().reset_index()
+    bl_dict = dict(zip(bl_dict['library'], bl_dict['blacklist_in']))
+
+    lib_names = np.unique(tally['library'])
+    key_counts = [key_dict[l] for l in lib_names]
+    bl_counts = [bl_dict[l] for l in lib_names]
+    n_groups = [num_groups[l] for l in lib_names]
+
+    summary = {
+        'Library' : lib_names,
+        'No. Gene Sets' : n_groups
+    }
+
+    if key_types:
+        summary['No. Key Type Matching'] = key_counts
+    if blacklist:
+        summary['No. Black List Matching'] = bl_counts
+
+    summary = pd.DataFrame(summary)
+
+    return summary, tally
+
+
+def find_candidates(organism: str='human', key_types: str | list='', blacklist: str | list | bool=False):
+    """
+    Given `organism` and `key_types`, will search for gene 
+    groupings that could fit the datasets/classification task. 
+    `blacklist` terms undesired in group names.
+
+    Parameters
+    ----------
+    organism : str
         The species the gene grouping is for. Options are 
         `{'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm'}`
-
-    tissue : str | list
-        The tissue the gene set is for. If `None`, will be ignored.
 
     key_types : str | list
         The types of cells or other specifiers the gene set is for 
         (example: 'CD4 T').
+
+    blacklist : str | list | bool
+        Term(s) undesired in group names. Ignored unless provided.
 
     Returns
     -------
@@ -73,37 +226,141 @@ def find_candidates(organism, tissue: str | list='', key_types: str | list=''):
 
     Examples
     --------
-    >>>
+    >>> scmkl.find_candidates('human', key_types=' b ')
+                                Library  No. Gene Sets
+    0                    Azimuth_2023           1241
+    1         Azimuth_Cell_Types_2021            341
+    2   Cancer_Cell_Line_Encyclopedia            967
+    3                 CellMarker_2024           1134
+    No. Key Type Matching
+    9
+    9
+    0
+    21
     """
-    org_opts = {'human', 'mouse', 'yeast', 'fly', 'fish', 'worm'}
-    org_err = f"Invalid `organism`, choose from {org_opts}"
-    assert organism.lower() in org_opts, org_err
-
-    global_lib_orgs = ['human', 'mouse']
+    check_organism(organism)
 
     if organism.lower() in global_lib_orgs:
-        global_lib_orgs.remove(organism)
-        other_org = global_lib_orgs[0]
+        glo = global_lib_orgs.copy()
+        glo.remove(organism)
+        other_org = glo[0]
         libs = human_genesets
         libs = [name for name in libs if not other_org in name.lower()]
     else:
         libs = gp.get_library_name(organism)
+        other_org = ''
 
-    if tissue or key_types:
-        check_libs()
-
-    # libs = {name : gp.get_library(name, organism)
-    #         for name in libs}
+    libs = {name : gp.get_library(name, organism)
+            for name in libs}
     
-    return libs
+    libs_df, _ = check_libs(libs, key_types, blacklist, other_org)
+
+    return libs_df
 
 
-
-
-def get_gene_grouping(species, tissue, key_types):
+def get_gene_groupings(lib_name: str, organism: str='human', key_types: str | list='', 
+                       blacklist: str | list | bool=False, min_overlap: int=2,
+                      genes: list | tuple | pd.Series | np.ndarray | set=[]):
     """
+    Takes a gene set library name and filters to groups containing 
+    element(s) in `key_types`. If genes is provided, will 
+    ensure that there are at least `min_overlap` number of genes in 
+    each group. Resulting groups will meet all of the before-mentioned 
+    criteria if `isin_logic` is `'and'` | `'or'`.
+
+    Parameters
+    ----------
+    lib_name : str
+        The desired library name.
+
+    organism : str
+        The species the gene grouping is for. Options are 
+        `{'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm'}`.
+
+    key_types : str | list
+        The types of cells or other specifiers the gene set is for 
+        (example: 'CD4 T').
+
+    genes : array_like
+        A vector of genes from the reference/query datasets. If not 
+        assigned, function will not filter groups based on feature 
+        overlap.
+
+    min_overlap : int
+        The minimum number of genes that must be present in a group 
+        for it to be kept. If `genes` is not given, ignored.
+
+    Returns
+    -------
+    lib : dict
+        The filtered library as a `dict` where keys are group names 
+        and keys are features.
+
+    Examples
+    --------
+    >>> dataset_feats = [
+    ...    'FUCA1', 'CLIC4', 'STMN1', 'SYF2', 'TAS1R1', 
+    ...    'NOL9', 'TAS1R3', 'SLC2A5', 'THAP3', 'IGHM', 
+    ...    'MARCKS', 'BANK1', 'TNFRSF13B', 'IGKC', 'IGHD', 
+    ...    'LINC01857', 'CD24', 'CD37', 'IGHD', 'RALGPS2'
+    ...    ]
+    >>> rna_grouping = scmkl.get_gene_groupings(
+    ...   'Azimuth_2023', key_types=[' b ', 'b cell', 'b '], 
+    ...   genes=dataset_feats)
+    >>>
+    >>> rna_groupings.keys()
+    dict_keys(['PBMC-L1-B Cell', 'PBMC-L2-Intermediate B Cell', ...])
+    """
+    check_organism(organism)
     
-    """
-    pass
+    lib = gp.get_library(lib_name, organism)
 
-print(find_candidates('human'))
+    if organism.lower() in global_lib_orgs:
+        glo = global_lib_orgs.copy()
+        glo.remove(organism)
+        other_org = glo[0]
+    else:
+        other_org = ''
+
+    group_names = list(lib.keys())
+    res = check_groups(group_names, key_types, blacklist, other_org)
+    del res['num_groups']
+
+    # Finding groups where group name matches key_types
+    g_summary = pd.DataFrame(res)
+
+    if key_types:
+        kept = g_summary['key_types_in']
+        kept_groups = g_summary['name'][kept].to_numpy()
+        g_summary = g_summary[kept]
+    else:
+        print("Not filtering with `key_types` parameter.")
+        kept_groups = g_summary['name'].to_numpy()
+
+    if blacklist:
+        kept = ~g_summary['blacklist_in']
+        kept_groups = g_summary['name'][kept].to_numpy()
+    else:
+        print("Not filtering with `blacklist` parameter.")
+    
+    # Filtering library
+    lib = {group : lib[group] for group in kept_groups}
+
+    if 0 < len(genes):
+        del_groups = list()
+        genes = list(set(genes.copy()))
+        for group, features in lib.items():
+            overlap = np.isin(features, genes)
+            overlap = np.sum(overlap)
+            if overlap < min_overlap:
+                print(overlap, flush=True)
+                del_groups.append(group)
+
+        # Removing genes without enough overlap
+        for group in del_groups:
+            del lib[group]
+
+    else:
+        print("Not checking overlap between group and dataset features.")
+
+    return lib
