@@ -33,6 +33,7 @@ tests/test_get_region_grouping.py
 tests/test_multimodal_processing.py
 tests/test_one_v_rest.py
 tests/test_optimize_alpha.py
+tests/test_plotting.py
 tests/test_run.py
 tests/test_test.py
 tests/test_train_model.py

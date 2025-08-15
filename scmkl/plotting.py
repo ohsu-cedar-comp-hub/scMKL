@@ -162,10 +162,12 @@ def plot_conf_mat(results, title = '', cmap = None, normalize = True,
     plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel(acc_label)
-    plt.show()
 
     if save != None:
         plt.savefig(save)
+        plt.clf()
+    else:
+        plt.show()
 
     return None
 
@@ -330,7 +332,7 @@ def weights_barplot(result, n_groups: int=1, alpha: None | float=None,
 
     # This needs to be reworked for multiclass runs
     if is_multi:
-        height = (2 * ceil((len(set(df['Class'])) / 3)))
+        height = (3*ceil((len(set(df['Class'])) / 3)))
         print(height)
         plot += geom_bar(aes(x='Group', y='Kernel Weight'), 
                          stat='identity', fill=color)
@@ -339,6 +341,7 @@ def weights_barplot(result, n_groups: int=1, alpha: None | float=None,
     else:
         plot += geom_bar(aes(x='Group', y='Kernel Weight'), 
                          stat='identity', fill=color)
+        plot += theme(figure_size=(7, 9))
 
     return plot
 
@@ -377,7 +380,7 @@ def weights_heatmap(result, n_groups: None | int=None,
 
     scale_weights : bool
         If `True`, the the kernel weights will be scaled for each group 
-        within each class.
+        within each class. Ignored if result is from a binary classification.
 
     Returns
     -------
@@ -427,7 +430,7 @@ def weights_heatmap(result, n_groups: None | int=None,
     else:
         x_lab = 'Alpha'
 
-    if scale_weights:
+    if scale_weights and is_multi:
         max_norms = dict()
         for ct in set(df['Class']):
             g_rows = df['Class'] == ct
@@ -578,7 +581,8 @@ def weights_dotplot(result, n_groups: None | int=None,
 
 
 def group_umap(adata: ad.AnnData, g_name: str | list, is_binary: bool=False, 
-               labels: None | np.ndarray | list=None, save: str=''):
+               labels: None | np.ndarray | list=None, title: str='', 
+               save: str=''):
     """
     Uses a scmkl formatted `ad.AnnData` object to show sample 
     separation using scmkl discovered groupings.
@@ -601,6 +605,9 @@ def group_umap(adata: ad.AnnData, g_name: str | list, is_binary: bool=False,
         If `None`, labels in `adata.obs['labels']` will be used to 
         color umap points. Else, provided labels will be used to color 
         points.
+
+    title : str
+        The title of the plot.
 
     save : str
         If provided, plot will be saved using `scanpy`'s `save` 
@@ -644,8 +651,11 @@ def group_umap(adata: ad.AnnData, g_name: str | list, is_binary: bool=False,
         sc.tl.umap(adata)
 
     else:
+        print(adata)
         ac.pp.tfidf(adata, scale_factor=1e4)
-        sc.pp.normalize_per_cell(adata, counts_per_cell_after=1e4)
+        print(adata)
+        sc.pp.normalize_total(adata)
+        print(adata)
         sc.pp.log1p(adata)
         ac.tl.lsi(adata)
         sc.pp.scale(adata)
@@ -654,9 +664,9 @@ def group_umap(adata: ad.AnnData, g_name: str | list, is_binary: bool=False,
         sc.tl.umap(adata, spread=1.5, min_dist=.5, random_state=20)
 
     if save:
-        sc.pl.umap(adata, color='labels', save=save)
+        sc.pl.umap(adata, title=title, color='labels', save=save)
 
     else:
-        sc.pl.umap(adata, color='labels')
+        sc.pl.umap(adata, title=title, color='labels')
 
     return None
