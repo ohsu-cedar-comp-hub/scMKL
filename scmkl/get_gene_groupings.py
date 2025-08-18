@@ -358,6 +358,7 @@ def get_gene_groupings(lib_name: str, organism: str='human', key_types: str | li
 
         # Removing genes without enough overlap
         for group in del_groups:
+            print(f'Removing {group} from grouping.')
             del lib[group]
 
     else:
