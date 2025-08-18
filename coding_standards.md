@@ -10,6 +10,7 @@ code.
 3) Function parameters and arguments
 4) Doc-strings
 5) Module Structure
+6) Package imports
 
 
 ### Module Layout and Formatting
@@ -19,7 +20,7 @@ No lines of code should exceed 79 characters for readability.
 Doc-strings should not exceed 72 characters.
 
 Every module should start with external package imports followed by a line 
-and local package imports, then two lines:
+and local module imports, then two lines:
 
 ```python
 import scipy
@@ -149,7 +150,7 @@ Doc-strings should include the following separated by a space:
 
 Doc-string lines should not exceed 72 characters. When using a variable's 
 name, the name should be surrounded by backticks (i.e. `my_variable`). All 
-parameters should be listed with types and definitions. Return values should 
+parameters should be listed with types and descriptions. Return values should 
 be listed the same as parameters. If the function is designed to be called by 
 external users, examples must be included.
 
@@ -163,31 +164,42 @@ def my_func(a, b):
     result = a + b
     return result
 ```
+
 Well written and formatted doc-string:
 ```python
-def my_func(a, b):
+def my_func(a: int | float, b: int | float):
     """
     Returns the sum of a and b.
 
     Parameters
     ----------
     a : int | float
-        > A number to sum with `b`.
+        A number to sum with `b`.
 
     b : int | float
-        > A number to sum with `a`.
+        A number to sum with `a`.
 
     Returns
     -------
     result : int | float
-        > The sum of `a` and `b`.
+        The sum of `a` and `b`.
 
     Examples
     --------
-    >>> a = 5
-    >>> b = 7
-    >>>
-    >>> my_func(a, b)
+    >>> my_func(7, 5)
     12
     """
+```
+
+
+### Package imports
+
+To keep track of imported code, the `*` should be avoided in import 
+statements. In cases where you do not want to use a package alias such as: 
+```python
+import numpy as np
+```
+explicitly importing the required functions is preferred. For example:
+```python
+from scipy.sparse import load_npz, csc_matrix
 ```

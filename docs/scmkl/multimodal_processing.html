@@ -113,7 +113,7 @@
 </span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a>                                                          <span class="s2">&quot;objects&quot;</span><span class="p">)</span>
 </span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>
 </span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a>    <span class="c1"># Conserving labels from adatas</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a>    <span class="n">combined_adata</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span>
+</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a>    <span class="n">combined_adata</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 </span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a>
 </span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a>    <span class="c1"># Creating a single dictionary with all of the groups across modalities </span>
 </span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a>    <span class="n">group_dict</span> <span class="o">=</span> <span class="p">{}</span>
@@ -354,7 +354,7 @@
 </span><span id="combine_modalities-54"><a href="#combine_modalities-54"><span class="linenos">54</span></a>                                                          <span class="s2">&quot;objects&quot;</span><span class="p">)</span>
 </span><span id="combine_modalities-55"><a href="#combine_modalities-55"><span class="linenos">55</span></a>
 </span><span id="combine_modalities-56"><a href="#combine_modalities-56"><span class="linenos">56</span></a>    <span class="c1"># Conserving labels from adatas</span>
-</span><span id="combine_modalities-57"><a href="#combine_modalities-57"><span class="linenos">57</span></a>    <span class="n">combined_adata</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span>
+</span><span id="combine_modalities-57"><a href="#combine_modalities-57"><span class="linenos">57</span></a>    <span class="n">combined_adata</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">adatas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 </span><span id="combine_modalities-58"><a href="#combine_modalities-58"><span class="linenos">58</span></a>
 </span><span id="combine_modalities-59"><a href="#combine_modalities-59"><span class="linenos">59</span></a>    <span class="c1"># Creating a single dictionary with all of the groups across modalities </span>
 </span><span id="combine_modalities-60"><a href="#combine_modalities-60"><span class="linenos">60</span></a>    <span class="n">group_dict</span> <span class="o">=</span> <span class="p">{}</span>

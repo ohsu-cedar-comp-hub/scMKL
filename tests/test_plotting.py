@@ -47,7 +47,7 @@ class TestPlotting(unittest.TestCase):
         multi = read_results('multiclass')
 
         binary_summary = scmkl.get_summary(binary)
-        plot = scmkl.plot_metric(binary_summary, alpha_star=0.05)
+        plot = scmkl.plot_metric(binary_summary, alpha_star=0.29)
         plot.save('figures/plot_metric_binary.png')
 
         multi_summary = scmkl.get_summary(multi)

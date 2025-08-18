@@ -45,7 +45,25 @@ def color_alpha_star(alphas, alpha_star, color):
     """
     Takes an array of alphas and returns a list of the same size where 
     each element is `'black'` except where 
-    `alpha_star == alphas`, which will say `'gold'`.
+    `alpha_star == alphas`, which will be `'gold'`.
+
+    Parameters
+    ----------
+    alphas : list | tuple | np.ndarray
+        The 1D array of alphas.
+
+    alpha_star: float
+        The best performing alpha from cross-validation.
+
+    color : str
+        The color of all alphas other than `alpha_star`.
+
+    Returns
+    -------
+    c_array, c_dict : np.ndarray, dict
+        `c_array` is the array of colors corresponding to alphas. 
+        `c_dict` is the color dict with alphas as keys and color as 
+        values.
     """
     c_array = np.array([color] * len(alphas), dtype='<U15')
     as_pos = np.where(alphas == alpha_star)[0]
@@ -101,6 +119,8 @@ def plot_conf_mat(results, title = '', cmap = None, normalize = True,
     >>> from matplotlib.pyplot import get_cmap
     >>> 
     >>> scmkl.plot_conf_mat(results, title = '', cmap = get_cmap('Blues'))
+
+    ![conf_mat](../tests/figures/plot_conf_mat_binary.png)
 
     Citiation
     ---------
@@ -211,6 +231,8 @@ def plot_metric(summary_df : pd.DataFrame, alpha_star = None,
     >>> metric_plot = plot_metric(results)
     >>>
     >>> metric_plot.save('scMKL_performance.png')
+
+    ![metric_plot](../tests/figures/plot_metric_binary.png)
     """
     # Capturing metric from summary_df
     metric_options = ['AUROC', 'Accuracy', 'F1-Score', 'Precision', 'Recall']
@@ -282,6 +304,8 @@ def weights_barplot(result, n_groups: int=1, alpha: None | float=None,
     --------
     >>> result = scmkl.run(adata, alpha_list)
     >>> plot = scmkl.plot_weights(result)
+
+    ![weights_barplot](../tests/figures/weights_barplot_binary.png)
     """
     is_multi, is_many = _parse_result_type(result)
     assert not is_many, "This function only supports single results"
@@ -380,7 +404,8 @@ def weights_heatmap(result, n_groups: None | int=None,
 
     scale_weights : bool
         If `True`, the the kernel weights will be scaled for each group 
-        within each class. Ignored if result is from a binary classification.
+        within each class. Ignored if result is from a binary 
+        classification.
 
     Returns
     -------
@@ -391,6 +416,8 @@ def weights_heatmap(result, n_groups: None | int=None,
     --------
     >>> result = scmkl.run(adata, alpha_list)
     >>> plot = scmkl.plot_weights(result)
+
+    ![weights_heatmap](../tests/figures/weights_heatmap_binary.png)
     """
     is_multi, is_many = _parse_result_type(result)
     assert not is_many, "This function only supports single results"
@@ -507,6 +534,8 @@ def weights_dotplot(result, n_groups: None | int=None,
     --------
     >>> result = scmkl.run(adata, alpha_list)
     >>> plot = scmkl.plot_weights(result)
+
+    ![weights_dotplot](../tests/figures/weights_dotplot_binary.png)
     """
     is_multi, is_many = _parse_result_type(result)
     assert not is_many, "This function only supports single results"
@@ -625,6 +654,8 @@ def group_umap(adata: ad.AnnData, g_name: str | list, is_binary: bool=False,
     >>> adata = scmkl.format_adata(adata_fp, 'celltypes', group_fp, 
     ...                            allow_multiclass=True)
     >>> scmkl.group_umap(adata, 'CD16+ Monocyte Markers')
+
+    ![group_umap](../tests/figures/umap_group_rna.png)
     """
     if list == type(g_name):
         feats = {feature 

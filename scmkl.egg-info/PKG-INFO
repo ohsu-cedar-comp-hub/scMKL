@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: scmkl
-Version: 0.3.1a4
+Version: 0.3.1a5
 Summary: Single-cell analysis using Multiple Kernel Learning
 Home-page: https://github.com/ohsu-cedar-comp-hub/scMKL/tree/main
 Author: Sam Kupp, Ian VanGordon, Cigdem Ak
@@ -23,6 +23,7 @@ Requires-Dist: plotnine==0.14.3
 Requires-Dist: matplotlib==3.9.3
 Requires-Dist: scanpy==1.11.4
 Requires-Dist: muon==0.1.6
+Requires-Dist: gseapy==1.1.9
 Dynamic: author
 Dynamic: author-email
 Dynamic: classifier
@@ -82,7 +83,7 @@ scMKL takes advantage of AnnData objects and can be implemented with just four p
 
 4) A grouping dictionary where {'group_1' : [feature_5, feature_16], 'group_2' : [feature_1, feature_4, feature_9]}
 
-For more information on formatting/creating the grouping dictionaries, see our example for creating an [RNA grouping](https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/example/getting_RNA_groupings.ipynb) or [ATAC grouping](https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/example/getting_ATAC_groupings.ipynb).
+For more information on formatting/creating the grouping dictionaries, see our example for creating a [gene grouping](https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/example/getting_gene_groupings.ipynb) or [region grouping](https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/example/getting_region_groupings.ipynb).
 
 For implementing scMKL, see our examples for your use case in [examples](https://github.com/ohsu-cedar-comp-hub/scMKL/tree/main/example).
 

@@ -47,12 +47,12 @@ def check_organism(organism: str):
     return None
 
 
-def check_groups(groups: list, key_types: str | list='', 
+def check_groups(groups: list, key_terms: str | list='', 
                  blacklist: str | list | bool=False, other_org: str=''):
     """
     Takes a list of groups from a gene set library and checks the names 
     for the desired gene sets. Returns a dictionary with keys 
-    `'key_types_in'` that is `list` of `bool`s corresponding to 
+    `'key_terms_in'` that is `list` of `bool`s corresponding to 
     `names`. `'num_groups'` value is an int for how many groups are in 
     the library.
 
@@ -61,7 +61,7 @@ def check_groups(groups: list, key_types: str | list='',
     groups : list
         The names of groups for a given library.
 
-    key_types : str | list
+    key_terms : str | list
         The types of cells or other specifiers the gene set is for 
         (example: 'CD4 T', 'kidney', ect...).
 
@@ -79,15 +79,15 @@ def check_groups(groups: list, key_types: str | list='',
             The names of each group in input `'groups'` if the name 
             does not contain `'other_org'`.
     
-        `'key_types_in'` : list
+        `'key_terms_in'` : list
             A boolean list repective to `'name'` indicating if at 
-            least one key word from `'key_type'` is present in the group name.
+            least one key word from `'key_terms'` is present in the group name.
 
         `'num_groups'` : int
             The length of `result['name']`.
     """
     result = {
-        'key_types_in' : list(),
+        'key_terms_in' : list(),
         'blacklist_in' : list(),
         'name' : list(),
     }
@@ -96,11 +96,11 @@ def check_groups(groups: list, key_types: str | list='',
             
         if not other_org in group_name.lower():
 
-            if list == type(key_types):
-                key_types_in = any([k.lower() in group_name.lower() 
-                                    for k in key_types])
+            if list == type(key_terms):
+                key_terms_in = any([k.lower() in group_name.lower() 
+                                    for k in key_terms])
             else:
-                key_types_in = key_types.lower() in group_name.lower()
+                key_terms_in = key_terms.lower() in group_name.lower()
 
             if list == type(blacklist):
                 blacklist_in = any([bl.lower() in group_name.lower() 
@@ -110,7 +110,7 @@ def check_groups(groups: list, key_types: str | list='',
             else:
                 blacklist_in = False
                 
-            result['key_types_in'].append(key_types_in)
+            result['key_terms_in'].append(key_terms_in)
             result['blacklist_in'].append(blacklist_in)
             result['name'].append(group_name)
 
@@ -119,17 +119,17 @@ def check_groups(groups: list, key_types: str | list='',
     return result
 
 
-def check_libs(libs, key_types: str | list='', 
+def check_libs(libs, key_terms: str | list='', 
                blacklist: str | list | bool=False, other_org: str=''):
     """
-    Checks libraries for desired `key_types` in groups.
+    Checks libraries for desired `key_terms` in groups.
 
     Parameters
     ----------
     libs : dict
         A dictionary as `libs[library_name] = library_groups`.
 
-    key_types : str | list
+    key_terms : str | list
         A `str` or `list` of `str`s to seach for in `libs` group names.
 
     other_org : str
@@ -141,29 +141,29 @@ def check_libs(libs, key_types: str | list='',
     -------
     summary, tally : pd.DataFrame | pd.DataFrame
         `summary` has cols `['Library', 'No. Gene Sets', 
-        'No. Key Type Matching']` where `'Library'` is the library from 
-        `gseapy` with `'No. Gene Sets'` and `'No. Key Type Matching'` 
-        corresponding. `'No. Key Type Matching'` only included if 
-        `key_types` argument is provided. `tally` has cols `['library', 
-        'key_types_in', 'name']` 
+        'No. Key Terms Matching']` where `'Library'` is the library from 
+        `gseapy` with `'No. Gene Sets'` and `'No. Key Terms Matching'` 
+        corresponding. `'No. Key Terms Matching'` only included if 
+        `key_terms` argument is provided. `tally` has cols `['library', 
+        'key_terms_in', 'name']` 
     """
     num_groups = dict()
     
     tally = {
         'library' : list(), 
-        'key_types_in' : list(), 
+        'key_terms_in' : list(), 
         'blacklist_in' : list(),
         'name' : list()
     }
     
     for library, groups in libs.items():
-        res = check_groups(list(groups.keys()), key_types, 
+        res = check_groups(list(groups.keys()), key_terms, 
                            blacklist, other_org)
 
         lib_repeats = [library]*len(res['name'])
 
         tally['library'].extend(lib_repeats)
-        tally['key_types_in'].extend(res['key_types_in'])
+        tally['key_terms_in'].extend(res['key_terms_in'])
         tally['blacklist_in'].extend(res['blacklist_in'])
         tally['name'].extend(res['name'])
 
@@ -172,8 +172,8 @@ def check_libs(libs, key_types: str | list='',
     tally = pd.DataFrame(tally)
 
     key_dict = tally.copy()
-    key_dict = key_dict.groupby('library')['key_types_in'].sum().reset_index()
-    key_dict = dict(zip(key_dict['library'], key_dict['key_types_in']))
+    key_dict = key_dict.groupby('library')['key_terms_in'].sum().reset_index()
+    key_dict = dict(zip(key_dict['library'], key_dict['key_terms_in']))
 
     bl_dict = tally.copy()
     bl_dict = tally.groupby('library')['blacklist_in'].sum().reset_index()
@@ -189,19 +189,19 @@ def check_libs(libs, key_types: str | list='',
         'No. Gene Sets' : n_groups
     }
 
-    if key_types:
-        summary['No. Key Type Matching'] = key_counts
+    if key_terms:
+        summary['No. Key Terms Matching'] = key_counts
     if blacklist:
-        summary['No. Black List Matching'] = bl_counts
+        summary['No. Blacklist Matching'] = bl_counts
 
     summary = pd.DataFrame(summary)
 
     return summary, tally
 
 
-def find_candidates(organism: str='human', key_types: str | list='', blacklist: str | list | bool=False):
+def find_candidates(organism: str='human', key_terms: str | list='', blacklist: str | list | bool=False):
     """
-    Given `organism` and `key_types`, will search for gene 
+    Given `organism` and `key_terms`, will search for gene 
     groupings that could fit the datasets/classification task. 
     `blacklist` terms undesired in group names.
 
@@ -211,7 +211,7 @@ def find_candidates(organism: str='human', key_types: str | list='', blacklist: 
         The species the gene grouping is for. Options are 
         `{'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm'}`
 
-    key_types : str | list
+    key_terms : str | list
         The types of cells or other specifiers the gene set is for 
         (example: 'CD4 T').
 
@@ -226,7 +226,7 @@ def find_candidates(organism: str='human', key_types: str | list='', blacklist: 
 
     Examples
     --------
-    >>> scmkl.find_candidates('human', key_types=' b ')
+    >>> scmkl.find_candidates('human', key_terms=' b ')
                                 Library  No. Gene Sets
     0                    Azimuth_2023           1241
     1         Azimuth_Cell_Types_2021            341
@@ -253,17 +253,17 @@ def find_candidates(organism: str='human', key_types: str | list='', blacklist: 
     libs = {name : gp.get_library(name, organism)
             for name in libs}
     
-    libs_df, _ = check_libs(libs, key_types, blacklist, other_org)
+    libs_df, _ = check_libs(libs, key_terms, blacklist, other_org)
 
     return libs_df
 
 
-def get_gene_groupings(lib_name: str, organism: str='human', key_types: str | list='', 
+def get_gene_groupings(lib_name: str, organism: str='human', key_terms: str | list='', 
                        blacklist: str | list | bool=False, min_overlap: int=2,
                       genes: list | tuple | pd.Series | np.ndarray | set=[]):
     """
     Takes a gene set library name and filters to groups containing 
-    element(s) in `key_types`. If genes is provided, will 
+    element(s) in `key_terms`. If genes is provided, will 
     ensure that there are at least `min_overlap` number of genes in 
     each group. Resulting groups will meet all of the before-mentioned 
     criteria if `isin_logic` is `'and'` | `'or'`.
@@ -277,7 +277,7 @@ def get_gene_groupings(lib_name: str, organism: str='human', key_types: str | li
         The species the gene grouping is for. Options are 
         `{'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm'}`.
 
-    key_types : str | list
+    key_terms : str | list
         The types of cells or other specifiers the gene set is for 
         (example: 'CD4 T').
 
@@ -305,7 +305,7 @@ def get_gene_groupings(lib_name: str, organism: str='human', key_types: str | li
     ...    'LINC01857', 'CD24', 'CD37', 'IGHD', 'RALGPS2'
     ...    ]
     >>> rna_grouping = scmkl.get_gene_groupings(
-    ...   'Azimuth_2023', key_types=[' b ', 'b cell', 'b '], 
+    ...   'Azimuth_2023', key_terms=[' b ', 'b cell', 'b '], 
     ...   genes=dataset_feats)
     >>>
     >>> rna_groupings.keys()
@@ -323,18 +323,18 @@ def get_gene_groupings(lib_name: str, organism: str='human', key_types: str | li
         other_org = ''
 
     group_names = list(lib.keys())
-    res = check_groups(group_names, key_types, blacklist, other_org)
+    res = check_groups(group_names, key_terms, blacklist, other_org)
     del res['num_groups']
 
-    # Finding groups where group name matches key_types
+    # Finding groups where group name matches key_terms
     g_summary = pd.DataFrame(res)
 
-    if key_types:
-        kept = g_summary['key_types_in']
+    if key_terms:
+        kept = g_summary['key_terms_in']
         kept_groups = g_summary['name'][kept].to_numpy()
         g_summary = g_summary[kept]
     else:
-        print("Not filtering with `key_types` parameter.")
+        print("Not filtering with `key_terms` parameter.")
         kept_groups = g_summary['name'].to_numpy()
 
     if blacklist:
