@@ -46,9 +46,7 @@ scMKL takes advantage of AnnData objects and can be implemented with just four p
 
 4) A grouping dictionary where {'group_1' : [feature_5, feature_16], 'group_2' : [feature_1, feature_4, feature_9]}
 
-For more information on formatting/creating the grouping dictionaries, see our example for creating a [gene grouping](https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/example/getting_gene_groupings.ipynb) or [region grouping](https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/example/getting_region_groupings.ipynb).
-
-For implementing scMKL, see our examples for your use case in [examples](https://github.com/ohsu-cedar-comp-hub/scMKL/tree/main/example).
+For implementing scMKL and learning how to get meaningful feature groupings, see our examples for your use case in [examples](https://github.com/ohsu-cedar-comp-hub/scMKL/tree/main/example/README.md).
 
 
 ## Links
@@ -69,3 +67,8 @@ Interpretable and integrative analysis of single-cell multiomics with scMKL. *Co
 https://doi.org/10.1038/s42003-025-08533-7
 
 Our Shiny for Python application for viewing data produced from this work can be found here: [scMKL_analysis](https://huggingface.co/spaces/scMKL-team/scMKL_analysis)
+
+
+## Issues
+
+Please report bugs [here](https://github.com/ohsu-cedar-comp-hub/scMKL/issues).
