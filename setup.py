@@ -27,6 +27,7 @@ setup(
         'plotnine==0.14.3',
         'matplotlib==3.9.3',
         'scanpy==1.11.4',
+        'umap-learn==0.5.7',
         'muon==0.1.6',
         'gseapy==1.1.9'
     ],
