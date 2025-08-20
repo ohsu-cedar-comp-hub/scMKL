@@ -5,9 +5,9 @@
 
 ![PyPI](https://img.shields.io/pypi/v/scmkl?label=pypi%20package)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/scmkl)
-[![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/version.svg)](https://anaconda.org/ivango17/scmkl)
-[![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/downloads.svg)](https://anaconda.org/ivango17/scmkl)
-[![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/latest_release_date.svg)](https://anaconda.org/ivango17/scmkl)
+[![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/version.svg?style=flat&cache-control=no-cache)](https://anaconda.org/ivango17/scmkl)
+[![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/downloads.svg?style=flat&cache-control=no-cache)](https://anaconda.org/ivango17/scmkl)
+[![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/latest_release_date.svg?style=flat&cache-control=no-cache)](https://anaconda.org/ivango17/scmkl)
 
 
 Single-cell analysis using Multiple Kernel Learning, scMKL, is a binary classification algorithm utilizing prior information to group features to enhance classification and aid understanding of distinguishing features in multi-omic data sets.
