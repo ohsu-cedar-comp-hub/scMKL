@@ -11,6 +11,7 @@ code.
 4) Doc-strings
 5) Module Structure
 6) Package imports
+7) Version convention
 
 
 ### Module Layout and Formatting

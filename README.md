@@ -71,4 +71,4 @@ Our Shiny for Python application for viewing data produced from this work can be
 
 ## Issues
 
-Please report bugs [here](https://github.com/ohsu-cedar-comp-hub/scMKL/issues).
+Please report bugs [here](https://github.com/ohsu-cedar-comp-hub/scMKL/issues). 
