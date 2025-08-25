@@ -4,19 +4,52 @@ import gc
 import tracemalloc
 
 from scmkl.tfidf_normalize import tfidf_normalize
-from scmkl.estimate_sigma import estimate_sigma
 from scmkl.calculate_z import calculate_z
 from scmkl.train_model import train_model
 from scmkl.multimodal_processing import multimodal_processing
 from scmkl.test import predict
+from scmkl.one_v_rest import get_class_train
+
+
+# Array of alphas to be used if not provided
+default_alphas = np.round(np.linspace(1.9, 0.05, 10),2)
+
+
+def stop_early(metric_array, alpha_idx, fold_idx):
+    """
+    Assumes smallest alpha comes first.
+    """
+    # Must be at least two metrics from two alphas to compare
+    if alpha_idx <= 0:
+        return False
+    
+    cur_met = metric_array[alpha_idx, fold_idx]
+    last_met = metric_array[alpha_idx - 1, fold_idx]
+
+    if cur_met < last_met:
+        return True
+    else:
+        return False
+
+
+def sort_alphas(alpha_array: np.ndarray):
+    """
+    Sorts alphas from smallest to largest.
+    """
+    order = np.argsort(alpha_array)
+    alpha_array = alpha_array[order]
+
+    return alpha_array
 
 
 def multimodal_optimize_alpha(adatas: list[ad.AnnData], group_size: int, 
                               tfidf_list: list | bool=False,
-                              alpha_array: np.ndarray=np.round(np.linspace(1.9,0.1, 10),2), 
-                              k: int=4, metric: str='AUROC',
+                              alpha_array: np.ndarray=default_alphas, 
+                              k: int=4, metric: str='AUROC', 
+                              early_stopping: bool=False,
                               batches: int=10, batch_size: int=100):
     """
+    binary multimodal optimize alpha
     Iteratively train a grouplasso model and update alpha to find the 
     parameter yielding the desired sparsity. Meant to find a good 
     starting point for your model, and the alpha may need further fine 
@@ -72,6 +105,9 @@ def multimodal_optimize_alpha(adatas: list[ad.AnnData], group_size: int,
 
     import warnings 
     warnings.filterwarnings('ignore')
+
+    # Sorting alphas smallest to largers
+    alpha_array = sort_alphas(alpha_array)
 
     if not tfidf_list:
         tfidf_list = [False]*len(adatas)
@@ -135,6 +171,11 @@ def multimodal_optimize_alpha(adatas: list[ad.AnnData], group_size: int,
             _, metrics = predict(fold_cv_adata, metrics = [metric])
             metric_array[j, fold] = metrics[metric]
 
+            # If metrics are decreasing, cv stopped and moving to next fold
+            end_fold = stop_early(metric_array, alpha_idx=j, fold_idx=fold)
+            if end_fold and early_stopping:
+                break
+
         del fold_cv_adata
         gc.collect()
 
@@ -146,13 +187,15 @@ def multimodal_optimize_alpha(adatas: list[ad.AnnData], group_size: int,
     return alpha_star
 
 
-def optimize_alpha(adata: ad.AnnData | list[ad.AnnData], 
-                   group_size: int | None=None, 
-                   tfidf: bool | list[bool]=False, 
-                   alpha_array: np.ndarray=np.round(np.linspace(1.9,0.1, 10),2), 
-                   k: int=4, metric: str='AUROC', 
-                   batches: int=10, batch_size: int=100):
+def bin_optimize_alpha(adata: ad.AnnData | list[ad.AnnData], 
+                       group_size: int | None=None, 
+                       tfidf: bool | list[bool]=False, 
+                       alpha_array: np.ndarray=default_alphas, 
+                       k: int=4, metric: str='AUROC', 
+                       early_stopping: bool=False,
+                       batches: int=10, batch_size: int=100):
     """
+    binary optimize_alpha
     Iteratively train a grouplasso model and update alpha to find the 
     parameter yielding best performing sparsity. This function 
     currently only works for binary experiments.
@@ -216,6 +259,9 @@ def optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
     import warnings 
     warnings.filterwarnings('ignore')
 
+    # Sorting alphas smallest to largers
+    alpha_array = sort_alphas(alpha_array)
+
     if group_size == None:
         group_size = adata.uns['D']*2
 
@@ -234,7 +280,7 @@ def optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
     # Splits the labels evenly between folds
     positive_indices = np.where(y == np.unique(y)[0])[0]
     negative_indices = np.setdiff1d(np.arange(len(y)), positive_indices)
-
+    
     positive_annotations = np.arange(len(positive_indices)) % k
     negative_annotations = np.arange(len(negative_indices)) % k
 
@@ -243,7 +289,6 @@ def optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
     gc.collect()
 
     for fold in np.arange(k):
-
         cv_adata = adata[adata.uns['train_indices'],:]
 
         if 'sigma' in cv_adata.uns_keys():
@@ -277,14 +322,123 @@ def optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
             _, metrics = predict(cv_adata, metrics = [metric])
             metric_array[i, fold] = metrics[metric]
 
+            # If metrics are decreasing, cv stopped and moving to next fold
+            end_fold = stop_early(metric_array, alpha_idx=i, fold_idx=fold)
+            if end_fold and early_stopping:
+                break
+
             gc.collect()
 
         del cv_adata
         gc.collect()
-        
+
     # Take AUROC mean across the k folds to find alpha yielding highest AUROC
     alpha_star = alpha_array[np.argmax(np.mean(metric_array, axis = 1))]
     gc.collect()
-    
 
+    return alpha_star
+
+
+def multiclass_optimize_alpha(adata: ad.AnnData | list[ad.AnnData], 
+                   group_size: int | None=None, 
+                   tfidf: bool | list[bool]=False, 
+                   alpha_array: np.ndarray=default_alphas, 
+                   k: int=4, metric: str='AUROC', early_stopping: bool=False,
+                   batches: int=10, batch_size: int=100):
+    """
+    
+    """
+    if isinstance(adata, ad.AnnData):
+        classes = np.unique(adata.obs['labels'])
+        orig_labels = adata.obs['labels'].to_numpy().copy()
+        orig_train = adata.uns['train_indices'].copy()
+        balanced_idcs = get_class_train(adata.uns['train_indices'], 
+                                    adata.obs['labels'], 
+                                    adata.uns['seed_obj'])
+    else:
+        classes = np.unique(adata[0].obs['labels'])
+        orig_labels = adata[0].obs['labels'].to_numpy().copy()
+        orig_train = adata[0].uns['train_indices'].copy()
+        balanced_idcs = get_class_train(adata[0].uns['train_indices'], 
+                                    adata[0].obs['labels'], 
+                                    adata[0].uns['seed_obj'])
+
+    opt_alpha_dict = dict()
+
+    for cl in classes:
+        temp_classes = orig_labels.copy()
+        temp_classes[temp_classes != cl] = 'other'
+
+        # Adding binarized labels and balanced test indices to adata(s)
+        if isinstance(adata, ad.AnnData):
+            adata.obs['labels'] = temp_classes.copy()
+            adata.uns['train_indices'] = balanced_idcs[cl]
+            
+            opt_alpha_dict[cl] = bin_optimize_alpha(adata, 
+                                                    group_size, 
+                                                    tfidf, 
+                                                    alpha_array, 
+                                                    k, 
+                                                    metric, 
+                                                    early_stopping,
+                                                    batches, 
+                                                    batch_size)     
+        else: 
+            for i in range(len(adata)):
+                adata[i].obs['labels'] = temp_classes.copy()
+                adata[i].uns['train_indices'] = balanced_idcs[cl]
+
+            opt_alpha_dict[cl] = multimodal_optimize_alpha(adata, 
+                                                            group_size, 
+                                                            tfidf, 
+                                                            alpha_array, 
+                                                            k, 
+                                                            metric, 
+                                                            early_stopping, 
+                                                            batches, 
+                                                            batch_size)
+        
+        
+        
+    # Global adata obj will be permanently changed if not reset
+    if isinstance(adata, ad.AnnData):
+            adata.obs['labels'] = orig_labels
+            adata.uns['train_indices'] = orig_train
+            
+    else: 
+        for i in range(len(adata)):
+            adata[i].obs['labels'] = orig_labels
+            adata[i].uns['train_indices'] = orig_train
+        
+    return opt_alpha_dict
+
+
+def optimize_alpha(adata: ad.AnnData | list[ad.AnnData], 
+                   group_size: int | None=None, 
+                   tfidf: bool | list[bool]=False, 
+                   alpha_array: np.ndarray=default_alphas, 
+                   k: int=4, metric: str='AUROC', early_stopping: bool=False,
+                   batches: int=10, batch_size: int=100):
+    """
+    
+    """
+    is_adata = isinstance(adata, ad.AnnData)
+    
+    if is_adata:
+        is_multi = len(set(adata.obs['labels'])) > 2
+    else:
+        is_multi = len(set(adata[0].obs['labels'])) > 2
+
+    if is_multi:
+        alpha_star = multiclass_optimize_alpha(adata, group_size, tfidf, 
+                                                alpha_array, k, metric, 
+                                                early_stopping, batches, 
+                                                batch_size)
+        
+    else:
+        alpha_star = bin_optimize_alpha(adata, group_size, tfidf, 
+                                        alpha_array, k, metric, 
+                                        early_stopping, batches, 
+                                        batch_size)
+        
     return alpha_star

@@ -52,7 +52,7 @@ def _eval_labels(cell_labels: np.ndarray, train_indices: np.ndarray,
     return uniq_labels
 
 
-def get_prob_table(results : dict, alpha: float):
+def get_prob_table(results : dict, alpha: float | dict):
     """
     Takes a results dictionary with class and probabilities keys and 
     returns a table of probabilities for each class and the most 
@@ -64,7 +64,7 @@ def get_prob_table(results : dict, alpha: float):
         A nested dictionary that contains a dictionary for each class 
         containing probabilities for each cell class.
 
-    alpha : float
+    alpha : float | dict
         A float for which model probabilities should be evaluated 
         for.
 
@@ -82,8 +82,16 @@ def get_prob_table(results : dict, alpha: float):
         A bool list where `True`, sample max probability is less than 
         0.5.
     """
-    prob_table = {class_ : results[class_]['Probabilities'][alpha][class_]
-                  for class_ in results.keys()}
+    if isinstance(alpha, float):
+        prob_table = {class_ : results[class_]['Probabilities'][alpha][class_]
+                    for class_ in results.keys()}
+    else:
+        prob_table = {class_ : list()
+                      for class_ in alpha.keys()}
+        for class_ in results.keys():
+            cur_alpha = alpha[class_]
+            prob_table[class_] = results[class_]['Probabilities'][cur_alpha][class_]
+
     prob_table = pd.DataFrame(prob_table)
 
     pred_class = []
@@ -123,7 +131,7 @@ def per_model_summary(results: dict, uniq_labels: np.ndarray | list | tuple,
     uniq_labels : array_like
         Unique cell classes from the runs.
 
-    alpha : float
+    alpha : float | dict
         The alpha for creating the summary from.
 
     Returns
@@ -132,7 +140,12 @@ def per_model_summary(results: dict, uniq_labels: np.ndarray | list | tuple,
         Dataframe with classes on rows and metrics as cols.
     """
     # Getting metrics availible in results
-    avail_mets = list(results[uniq_labels[0]]['Metrics'][alpha])
+    if isinstance(alpha, dict):
+        alpha_key = list(alpha.keys())[0]
+        alpha_key = alpha[alpha_key]
+        avail_mets = list(results[uniq_labels[0]]['Metrics'][alpha_key])
+    else:
+        avail_mets = list(results[uniq_labels[0]]['Metrics'][alpha])
 
     summary_df = {metric : list()
                   for metric in avail_mets}
@@ -140,7 +153,12 @@ def per_model_summary(results: dict, uniq_labels: np.ndarray | list | tuple,
 
     for lab in summary_df['Class']:
         for met in avail_mets:
-            val = results[lab]['Metrics'][alpha][met]
+            if isinstance(alpha, dict):
+                cur_alpha = alpha[lab]
+            else:
+                cur_alpha = alpha
+
+            val = results[lab]['Metrics'][cur_alpha][met]
             summary_df[met].append(val)
 
     return pd.DataFrame(summary_df)
@@ -179,7 +197,7 @@ def get_class_train(train_indices: np.ndarray,
         Keys are cell classes and values are the train indices to 
         train scmkl that include both target and non-target samples.
     """
-    uniq_labels = set(cell_labels)
+    uniq_labels = np.unique(cell_labels)
     train_idx = dict()
 
     for lab in uniq_labels:
@@ -204,7 +222,9 @@ def get_class_train(train_indices: np.ndarray,
 
 def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray, 
               tfidf : list, batches: int=10, batch_size: int=100, 
-              force_balance: bool=False, other_factor: float=1.0) -> dict:
+              force_balance: bool=False, other_factor: float=1.0,
+              only_tuned: bool=False, alpha_stars: dict | None=None
+              )-> dict:
     """
     For each cell class, creates model(s) comparing that class to all 
     others. Then, predicts on the training data using `scmkl.run()`.
@@ -294,7 +314,7 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
     # Calculating Z matrices, method depends on whether there are multiple 
     # adatas (modalities)
     if (len(adatas) == 1) and ('Z_train' not in adatas[0].uns.keys()):
-        adata = calculate_z(adata, n_features = 5000, batches=batches, batch_size=batch_size)
+        adata = calculate_z(adatas[0], n_features = 5000, batches=batches, batch_size=batch_size)
     elif len(adatas) > 1:
         adata = multimodal_processing(adatas = adatas, 
                                       names = names, 
@@ -332,11 +352,20 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
         if force_balance:
             adata.uns['train_indices'] = train_idx[label]
 
+        # Will only run scMKL with tuned alphas
+        if only_tuned:
+            assert isinstance(alpha_stars, dict), "`alpha_stars` must be dict"
+            alpha_list = np.array([alpha_stars[label]])
+        
         # Running scMKL
         results[label] = run(adata, alpha_list, return_probs = True)
 
     # Getting final predictions
-    alpha = np.min(alpha_list)
+    if isinstance(alpha_stars, dict):
+        alpha = alpha_stars
+    else:
+        alpha = np.min(alpha_list)
+
     prob_table, pred_class, low_conf = get_prob_table(results, alpha)
     macro_f1 = f1_score(cell_labels[adata.uns['test_indices']], 
                         pred_class, average='macro')

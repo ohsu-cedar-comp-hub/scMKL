@@ -415,7 +415,7 @@ def weights_heatmap(result, n_groups: None | int=None,
     Examples
     --------
     >>> result = scmkl.run(adata, alpha_list)
-    >>> plot = scmkl.plot_weights(result)
+    >>> plot = scmkl.weights_heatmap(result)
 
     ![weights_heatmap](../tests/figures/weights_heatmap_binary.png)
     """

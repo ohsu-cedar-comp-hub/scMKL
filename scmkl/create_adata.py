@@ -444,6 +444,11 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
 
     filtered_feature_names, group_dict = _filter_features(feature_names, 
                                                           group_dict)
+    
+    # Ensuring that there are common features between feature_names and groups
+    overlap_err = ("No common features between feature names and grouping "
+                   "dict. Check grouping.")
+    assert len(filtered_feature_names) > 0, overlap_err
 
     if remove_features:
         warnings.filterwarnings('ignore', category = ad.ImplicitModificationWarning)
