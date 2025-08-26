@@ -642,7 +642,10 @@ def read_gtf(path: str, filter_to_coding: bool=False):
     """
     Reads and formats a gtf file. Adds colnames: `['chr', 'source', 
     'feature', 'start', 'end', 'score', 'strand', 'frame', 
-    'attribute']`.
+    'attribute']`. If `filter_to_coding == True`, `'gene_name'` col 
+    will be added with gene_name from attribute col if gene is protein 
+    coding. If `'gene_name'` is not in attribute for that row, 
+    `'gene_id'` will be used. 
 
     Parameters
     ----------
@@ -653,7 +656,8 @@ def read_gtf(path: str, filter_to_coding: bool=False):
     filter_to_coding : bool
         If `True`, will filter rows in gtf data frame to only 
         protein coding genes. Will add column `'gene_name'` containing 
-        the gene name for each row.
+        the gene name for each row. If gene name is missing in GTF 
+        gene_id will be used.
 
     Returns
     -------
@@ -693,8 +697,22 @@ def read_gtf(path: str, filter_to_coding: bool=False):
         df = df[df['feature'] == 'gene']
 
         # Capturing and adding gene name to df
-        df['gene_name'] = [re.findall(r'(?<=gene_name ")[A-z0-9]+', 
-                                      attr)[0] 
-                           for attr in df['attribute']]
+        gene_names = list()
+
+        for attr in df['attribute']:
+            gname = re.findall(r'(?<=gene_name ")[A-z0-9\-]+', attr)
+
+            if gname:
+                gene_names.append(gname[0])
+            else:
+                gid = re.findall(r'(?<=gene_id ")[A-z0-9\-]+', attr)
+                
+                if gid:
+                    gene_names.append(gid[0])
+                else:
+                    gene_names.append('NA')
+
+        df['gene_name'] = gene_names
+        df = df[df['gene_name'] != 'NA']
     
     return df
