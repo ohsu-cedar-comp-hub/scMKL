@@ -303,7 +303,7 @@ def weights_barplot(result, n_groups: int=1, alpha: None | float=None,
     Examples
     --------
     >>> result = scmkl.run(adata, alpha_list)
-    >>> plot = scmkl.plot_weights(result)
+    >>> plot = scmkl.weights_barplot(result)
 
     ![weights_barplot](../tests/figures/weights_barplot_binary.png)
     """
@@ -533,7 +533,7 @@ def weights_dotplot(result, n_groups: None | int=None,
     Examples
     --------
     >>> result = scmkl.run(adata, alpha_list)
-    >>> plot = scmkl.plot_weights(result)
+    >>> plot = scmkl.weights_dotplot(result)
 
     ![weights_dotplot](../tests/figures/weights_dotplot_binary.png)
     """

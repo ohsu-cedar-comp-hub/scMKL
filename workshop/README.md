@@ -50,12 +50,3 @@ If you have a `.h5ad` file with cell annotations, **ignore** the table below.
 If you do not have single-cell data that you want to run or is not formatted 
 correctly, we have provided a single-cell multiome lymphoma (SLL) data set that 
 you can run.
-
-
-## Workshop Directory
-| File | Purpose |
-| ---- | ------- |
-| [rna_classification.ipynb](rna_classification.ipynb) | Running scMKL on a gene expression dataset |
-| [atac_classification.ipynb](atac_classification.ipynb) | Running scMKL on a chromatin accessibility dataset |
-| [meth_classification.ipynb](meth_classification.ipynb) | Running scMKL on a methylation dataset |
-| [mulit_omic_classification.ipyng](mulit_omic_classification.ipyng) | Running scMKL on a multimodal data set |
