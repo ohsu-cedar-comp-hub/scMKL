@@ -23,6 +23,8 @@ conda create -n scMKL python=3.12
 conda activate scMKL
 conda install -c conda-forge ivango17::scmkl
 ```
+Ensure bioconda and conda-forge are in your available conda channels.
+
 
 ### Pip install
 First, create a virtual environment with `python>=3.11.1,<3.13`.
