@@ -1,6 +1,6 @@
 # scMKL Workshop, September 9th 2025
 
-Sam Kupp, Ian VanGordon, and Cigdem Ak will be giving an scMKL workshop 
+Ian VanGordon, Sam Kupp, and Cigdem Ak will be giving an scMKL workshop 
 covering the following topics:
 
 - How scMKL works
@@ -14,9 +14,10 @@ covering the following topics:
 Conda is the recommended method to install scMKL:
 
 ```bash
+# Ensure conda-forge and bioconda channels are available
 conda create -n scMKL python=3.12 
 conda activate scMKL
-conda install -c conda-forge ivango17::scmkl
+conda install ivango17::scmkl
 
 # install jupyter to run notebook
 conda install -c conda-forge jupyter
