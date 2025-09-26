@@ -1,4 +1,4 @@
-# scMKL Workshop, September 9th 2025
+# scMKL Workshop, September 30th 2025
 
 Ian VanGordon, Sam Kupp, and Cigdem Ak will be giving an scMKL workshop 
 covering the following topics:
