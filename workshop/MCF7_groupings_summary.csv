@@ -1,0 +1,13 @@
+,Library,No. Gene Sets,No. Key Terms Matching,No. Blacklist Matching
+0,Azimuth_2023,1241,1,811
+1,Azimuth_Cell_Types_2021,341,0,7
+2,Cancer_Cell_Line_Encyclopedia,967,58,482
+3,CellMarker_2024,1134,74,604
+4,CellMarker_Augmented_2021,1096,63,599
+5,GO_Biological_Process_2025,5341,27,256
+6,GO_Cellular_Component_2025,466,0,0
+7,GO_Molecular_Function_2025,1174,7,7
+8,KEGG_2021_Human,320,19,15
+9,MSigDB_Hallmark_2020,50,4,3
+10,NCI-60_Cancer_Cell_Lines,92,1,1
+11,WikiPathways_2024_Human,829,49,45
