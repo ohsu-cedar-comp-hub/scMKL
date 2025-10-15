@@ -188,10 +188,11 @@ def multimodal_processing(adatas : list[ad.AnnData], names : list[str],
     # Creates a boolean array for each modality of cells with non-empty rows
     non_empty_rows = [np.array(sparse_var(adata.X, axis = 1) != 0).ravel() 
                       for adata in adatas]
+    non_empty_rows = np.transpose(non_empty_rows)
 
-    # Returns a 1d array where sample feature sums
-    # across all modalities are more than 0
-    non_empty_rows = np.logical_and(*non_empty_rows).squeeze()
+    # Returns a 1D array where sample feature sums non-0 across all modalities
+    non_empty_rows = np.array([np.all(non_empty_rows[i])
+                              for i in range(non_empty_rows.shape[0])])
 
     # Initializing final train test split array
     train_test = np.repeat('train', adatas[0].shape[0])
