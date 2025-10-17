@@ -3,10 +3,10 @@ import anndata as ad
 import scipy
 import pandas as pd
 import gc
-import warnings 
+import warnings
 
 
-def _filter_features(feature_names: np.ndarray, group_dict: dict):
+def filter_features(feature_names: np.ndarray, group_dict: dict):
     """
     Function to remove features only in feature names or group_dict.
     Any features not included in group_dict will be removed from the
@@ -52,8 +52,9 @@ def _filter_features(feature_names: np.ndarray, group_dict: dict):
     return group_features, group_dict
 
 
-def _multi_class_split(y: np.ndarray, train_ratio: float=0.8, class_threshold: str | int='median', 
-                       seed_obj: np.random._generator.Generator=np.random.default_rng(100)):
+def multi_class_split(y: np.ndarray, seed_obj: np.random._generator.Generator, 
+                      class_threshold: str | int | None=None, 
+                      train_ratio: float=0.8):
     """
     Function for calculating the training and testing cell positions 
     for multiclass data sets.
@@ -107,20 +108,15 @@ def _multi_class_split(y: np.ndarray, train_ratio: float=0.8, class_threshold: s
     
     # Applying threshold for samples per class
     if class_threshold == 'median':
-        # I believe this does the same as the commented code below
-
         cells_per_class = [len(values) for values in train_samples.values()]
         class_threshold = int(np.median(cells_per_class))
-        # all_train = [idx for class_ in train_samples.keys()
-        #                  for idx in train_samples[class_]]
-        # _, class_threshold = np.unique(y[all_train], return_counts = True)
-        # class_threshold = int(np.median(class_threshold))
-    
-    # Down sample to class_threshold
-    for class_ in train_samples.keys():
-        if len(train_samples[class_]) > class_threshold:
-            train_samples[class_] = seed_obj.choice(train_samples[class_], 
-                                                       class_threshold)
+
+    if isinstance(class_threshold, int):
+        # Down sample to class_threshold
+        for class_ in train_samples.keys():
+            if len(train_samples[class_]) > class_threshold:
+                train_samples[class_] = seed_obj.choice(train_samples[class_], 
+                                                        class_threshold)
             
     train_indices = np.array([idx for class_ in train_samples.keys()
                                   for idx in train_samples[class_]])
@@ -131,7 +127,7 @@ def _multi_class_split(y: np.ndarray, train_ratio: float=0.8, class_threshold: s
     return train_indices, test_indices
 
 
-def _binary_split(y: np.ndarray, train_indices: np.ndarray | None=None, 
+def binary_split(y: np.ndarray, train_indices: np.ndarray | None=None, 
                   train_ratio: float=0.8,
                   seed_obj: np.random._generator.Generator=np.random.default_rng(100)):
     """
@@ -268,7 +264,7 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
                  train_ratio: float=0.8, distance_metric: str='euclidean', 
                  kernel_type: str='Gaussian', random_state: int=1, 
                  allow_multiclass: bool = False, 
-                 class_threshold: str | int = 'median',
+                 class_threshold: str | int | None = None,
                  reduction: str | None = None, tfidf: bool = False):
     """
     Function to create an AnnData object to carry all relevant 
@@ -442,7 +438,7 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
     if isinstance(obs_names, (np.ndarray)):
         adata.obs_names = obs_names
 
-    filtered_feature_names, group_dict = _filter_features(feature_names, 
+    filtered_feature_names, group_dict = filter_features(feature_names, 
                                                           group_dict)
     
     # Ensuring that there are common features between feature_names and groups
@@ -472,13 +468,13 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
         adata.obs['labels'] = cell_labels
 
         if (allow_multiclass == False):
-            split = _binary_split(cell_labels, 
+            split = binary_split(cell_labels, 
                                   seed_obj = adata.uns['seed_obj'],
                                   train_ratio = train_ratio)
             train_indices, test_indices = split
 
         elif (allow_multiclass == True):
-            split = _multi_class_split(cell_labels, 
+            split = multi_class_split(cell_labels, 
                                        seed_obj = adata.uns['seed_obj'], 
                                        class_threshold = class_threshold,
                                        train_ratio = train_ratio)
@@ -487,6 +483,8 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
         adata.uns['labeled_test'] = True
 
     else:
+        sd_err_message = "`split_data` argument must be of type np.ndarray"
+        assert isinstance(split_data, np.ndarray), sd_err_message
         x_eq_labs = X.shape[0] == len(cell_labels)
         train_eq_labs = X.shape[0] == len(cell_labels)
         assert x_eq_labs or train_eq_labs, ("Must give labels for all cells "
