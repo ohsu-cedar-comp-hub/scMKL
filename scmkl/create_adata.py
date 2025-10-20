@@ -348,7 +348,9 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
         Choose which dimension reduction technique to perform on 
         features within a group. 'svd' will run 
         `sklearn.decomposition.TruncatedSVD`, 'linear' will multiply 
-        by an array of 1s down to 50 dimensions.
+        by an array of 1s down to 50 dimensions. 'pca' will replace 
+        each group values with 50 PCs from principal component 
+        analysis.
         
     tfidf: bool
         Whether to calculate TFIDF transformation on peaks within 
