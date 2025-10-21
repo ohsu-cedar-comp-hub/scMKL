@@ -327,8 +327,6 @@ def bin_optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
             if end_fold and early_stopping:
                 break
 
-            gc.collect()
-
         del cv_adata
         gc.collect()
 
