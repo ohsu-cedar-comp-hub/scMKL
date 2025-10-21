@@ -535,7 +535,7 @@ def format_adata(adata: ad.AnnData | str, cell_labels: np.ndarray | str,
                  train_ratio: float=0.8, distance_metric: str='euclidean', 
                  kernel_type: str='Gaussian', random_state: int=1, 
                  allow_multiclass: bool = False, 
-                 class_threshold: str | int = 'median', 
+                 class_threshold: str | int | None= None, 
                  reduction: str | None = None, tfidf: bool = False):
     """
     Function to format an `ad.AnnData` object to carry all relevant 
