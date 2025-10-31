@@ -9,13 +9,15 @@ def create_test_adata(mod = 'RNA'):
     Create a anndata.AnnData object with default params for scmkl
     to run for testing.
     """
-    x, grouping, features, labels = read_data()
+    x, grouping, features, labels = read_data(mod)
     d = scmkl.calculate_d(len(labels))
+    scale_data = mod == 'RNA'
 
     adata = scmkl.create_adata(X = x, feature_names = features, 
                                    cell_labels = labels, D = d,
                                    group_dict = grouping, 
-                                   remove_features = False)
+                                   remove_features = False,
+                                   scale_data=scale_data)
 
     return adata
 

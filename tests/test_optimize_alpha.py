@@ -23,6 +23,7 @@ def read_h5ad(mod: str):
 
     return adata
 
+
 class TestOptimizeAlpha(unittest.TestCase):
     """
     This unittest class is used to ensure that scmkl.optimize_alpha() 
@@ -34,12 +35,13 @@ class TestOptimizeAlpha(unittest.TestCase):
         for unimodal test cases by checking that the output is what we 
         expect.
         """
-        # Creating adata and setting alphas to choose from 
         adata = create_test_adata()
         alpha_list = np.array([0.01, 0.05, 0.1])
 
         # Finding optimal alpha
-        alpha_star = scmkl.optimize_alpha(adata, alpha_array = alpha_list, batch_size=60)
+        alpha_star = scmkl.optimize_alpha(adata, 
+                                          alpha_array=alpha_list, 
+                                          batch_size=60)
 
         # Checking that optimal alpha is what we expect
         self.assertEqual(alpha_star, 0.1, 
@@ -53,21 +55,12 @@ class TestOptimizeAlpha(unittest.TestCase):
         for multimodal test cases by checking that the output is what 
         we expect.
         """
-        # Creating two adatas
-        rna_adata = create_test_adata('RNA')
-        atac_adata = create_test_adata('ATAC')
-
-        # Setting variables to run optimize_alpha
-        adatas = [rna_adata, atac_adata]
+        adatas = [create_test_adata('RNA'), create_test_adata('ATAC')]
         alpha_list = np.array([0.01, 0.05, 0.1])
-        tfidf_list = [False, False]
-        d = scmkl.calculate_d(rna_adata.shape[0])
-        group_size = 2 * d
 
         # Finding optimal alpha
-        alpha_star = scmkl.optimize_alpha(adatas, alpha_array = alpha_list, 
-                                          group_size = group_size, 
-                                          tfidf = tfidf_list, batch_size=60)
+        alpha_star = scmkl.optimize_alpha(adatas, alpha_array=alpha_list,
+                                          batch_size=60)
 
         # Checking that optimal_alpha is what we expect
         self.assertEqual(alpha_star, 0.1, 
@@ -81,24 +74,50 @@ class TestOptimizeAlpha(unittest.TestCase):
         performance via cross validation for multiclass runs is working 
         properly.
         """
-        alphas = np.array([0.05, 0.1, 0.3, 0.5])
         adata = read_h5ad('RNA')
+        alphas = np.array([0.01, 0.05, 0.1, 0.3])
 
         alpha_dict = scmkl.optimize_alpha(adata, 
                                           alpha_array=alphas, 
-                                          batch_size=26)
+                                          batch_size=26, 
+                                          force_balance=True)
 
         expected_alphas = {
-            'B': np.float64(0.5), 
-            'CD14+ Monocytes': np.float64(0.5), 
-            'CD16+ Monocytes': np.float64(0.5), 
-            'CD4 T': np.float64(0.3), 
-            'CD8 T': np.float64(0.3), 
-            'Dendritic': np.float64(0.3), 
-            'NK': np.float64(0.3)
+            'B': 0.01, 
+            'CD14+ Monocytes': 0.01, 
+            'CD16+ Monocytes': 0.05, 
+            'CD4 T': 0.01, 
+            'CD8 T': 0.01, 
+            'Dendritic': 0.05, 
+            'NK': 0.01
         }
 
         self.assertDictEqual(alpha_dict, expected_alphas, 
+                             ("scmkl.optimize_alpha() for multiclass "
+                              "runs returned incorrect values."))
+        
+
+    def test_multiview_multiclass_optimize_alpha(self):
+        """
+        This function ensures that in a multiview and multclass 
+        optimize alpha task, everything runs correctly.
+        """
+        adatas = [read_h5ad('RNA'), read_h5ad('ATAC')]
+
+        alphas = np.array([0.05, 0.1, 0.3, 0.5])
+        alpha_stars = scmkl.optimize_alpha(adatas, alpha_array=alphas)
+        
+        expected_alphas = {
+            'B': 0.05, 
+            'CD14+ Monocytes': 0.05, 
+            'CD16+ Monocytes': 0.05, 
+            'CD4 T': 0.5, 
+            'CD8 T': 0.05, 
+            'Dendritic': 0.05, 
+            'NK': 0.1
+        }
+
+        self.assertDictEqual(alpha_stars, expected_alphas, 
                              ("scmkl.optimize_alpha() for multiclass "
                               "runs returned incorrect values."))
         

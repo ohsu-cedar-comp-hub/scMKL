@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import anndata as ad
 from sklearn.metrics import f1_score
 import gc
 
@@ -220,11 +221,10 @@ def get_class_train(train_indices: np.ndarray,
     return train_idx
 
 
-def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray, 
-              tfidf : list, batches: int=10, batch_size: int=100, 
-              force_balance: bool=False, other_factor: float=1.0,
-              only_tuned: bool=False, alpha_stars: dict | None=None
-              )-> dict:
+def one_v_rest(adatas : list, names : list, alpha_params : np.ndarray, 
+              tfidf : list=None, batches: int=10, batch_size: int=100, 
+              train_dict: dict=None, force_balance: bool=False, 
+              other_factor: float=1.0)-> dict:
     """
     For each cell class, creates model(s) comparing that class to all 
     others. Then, predicts on the training data using `scmkl.run()`.
@@ -242,13 +242,15 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
         String variables that describe each modality respective to 
         `adatas` for labeling.
         
-    alpha_list : np.ndarray | float
-        An array of alpha values to create each model with or a float 
-        to run with a single alpha.
+    alpha_params : np.ndarray | float | dict
+        If is `dict`, expects keys to correspond to each unique label 
+        with float as key (ideally would be the output of 
+        scmkl.optimize_alpha). Else, array of alpha values to create 
+        each model with or a float to run with a single alpha.
 
     tfidf : list[bool]
         If element `i` is `True`, `adatas[i]` will be TF-IDF 
-        normalized.
+        normalized. If `None`, no views will be TF-IDF normalized.
 
     batches : int
         The number of batches to use for the distance calculation. 
@@ -296,49 +298,52 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
     >>> adata.keys()
     dict_keys(['B cells', 'Monocytes', 'Dendritic cells', ...])
     """
-    # Formatting checks ensuring all adata elements are 
-    # AnnData objects and train/test indices are all the same
+    if isinstance(adatas, ad.AnnData):
+        adatas = [adatas]
+    if isinstance(tfidf, type(None)):
+        tfidf = len(adatas)*[False]
+
     _check_adatas(adatas, check_obs = True, check_uns = True)
 
-
-    # Extracting train and test indices
+    # Want to retain all original train indices
     train_indices = adatas[0].uns['train_indices']
     test_indices = adatas[0].uns['test_indices']
 
-    # Checking and capturing cell labels
     uniq_labels = _eval_labels(cell_labels = adatas[0].obs['labels'], 
                                train_indices = train_indices,
                                test_indices = test_indices)
 
-
-    # Calculating Z matrices, method depends on whether there are multiple 
-    # adatas (modalities)
     if (len(adatas) == 1) and ('Z_train' not in adatas[0].uns.keys()):
-        adata = calculate_z(adatas[0], n_features = 5000, batches=batches, batch_size=batch_size)
+        adata = calculate_z(adatas[0], n_features = 5000, 
+                            batches=batches, batch_size=batch_size)
     elif len(adatas) > 1:
-        adata = multimodal_processing(adatas = adatas, 
-                                      names = names, 
-                                      tfidf = tfidf,
+        adata = multimodal_processing(adatas=adatas, 
+                                      names=names, 
+                                      tfidf=tfidf,
                                       batches=batches,
                                       batch_size=batch_size)
     else:
         adata = adatas[0].copy()
 
+    # Preventing multiple copies of adata(s) in memory
     del adatas
     gc.collect()
 
-    # Initializing for capturing model outputs
+    # Need obj for capturing results
     results = dict()
 
-    # Capturing cell labels before overwriting
+    # Capturing cell labels to regenerate at each comparison
     cell_labels = np.array(adata.obs['labels'].copy())
 
     # Capturing perfect train/test splits for each class
-    if force_balance:
-        train_idx = get_class_train(adata.uns['train_indices'], 
-                                    cell_labels, 
-                                    adata.uns['seed_obj'],
-                                    other_factor)
+    if train_dict:
+        train_idx = train_dict
+    else:
+        if force_balance:
+            train_idx = get_class_train(adata.uns['train_indices'], 
+                                        cell_labels, 
+                                        adata.uns['seed_obj'],
+                                        other_factor)
 
     for label in uniq_labels:
 
@@ -346,25 +351,28 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
         cur_labels = cell_labels.copy()
         cur_labels[cell_labels != label] = 'other'
 
-        # Replacing cell labels for current cell type vs rest
+        # Need cur_label vs rest to run model
         adata.obs['labels'] = cur_labels
 
-        if force_balance:
+        if force_balance or train_dict:
             adata.uns['train_indices'] = train_idx[label]
 
         # Will only run scMKL with tuned alphas
-        if only_tuned:
-            assert isinstance(alpha_stars, dict), "`alpha_stars` must be dict"
-            alpha_list = np.array([alpha_stars[label]])
+        if isinstance(alpha_params, dict):
+            alpha_list = np.array([alpha_params[label]])
+        elif isinstance(alpha_params, float):
+            alpha_list = np.array([alpha_params])
+        else:
+            alpha_list = alpha_params
         
         # Running scMKL
-        results[label] = run(adata, alpha_list, return_probs = True)
+        results[label] = run(adata, alpha_list, return_probs=True)
 
     # Getting final predictions
-    if isinstance(alpha_stars, dict):
-        alpha = alpha_stars
+    if isinstance(alpha_params, dict):
+        alpha = alpha_params
     else:
-        alpha = np.min(alpha_list)
+        alpha = np.min(alpha_params)
 
     prob_table, pred_class, low_conf = get_prob_table(results, alpha)
     macro_f1 = f1_score(cell_labels[adata.uns['test_indices']], 
@@ -372,6 +380,11 @@ def one_v_rest(adatas : list, names : list, alpha_list : np.ndarray,
 
     model_summary = per_model_summary(results, uniq_labels, alpha)
 
+    # Global adata obj will be permanently changed if not reset
+    adata.obs['labels'] = cell_labels
+    adata.uns['train_indices'] = train_indices
+
+    # Need to document vars, probs, and stats
     results['Per_model_summary'] = model_summary
     results['Classes'] = uniq_labels
     results['Probability_table'] = prob_table

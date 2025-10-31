@@ -32,7 +32,7 @@ class TestOneVRest(unittest.TestCase):
 
         adata = scmkl.calculate_z(adata, batch_size=80)
         results = scmkl.one_v_rest([adata], ['rna'], 
-                                   alpha_list=alpha_list, 
+                                   alpha_params=alpha_list, 
                                    tfidf=[False],
                                    batch_size=80)
 

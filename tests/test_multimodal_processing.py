@@ -50,7 +50,7 @@ class TestMultimodalProcessing(unittest.TestCase):
                          "Incorrect number of samples in final adata")
         
         # Ensuring features were combined correctly
-        self.assertEqual(adata.shape[1], 73202, 
+        self.assertEqual(adata.shape[1], 242768, 
                          "Incorrect number of features in final adata")
         
 

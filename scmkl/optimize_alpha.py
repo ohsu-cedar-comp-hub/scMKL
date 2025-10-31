@@ -42,158 +42,36 @@ def sort_alphas(alpha_array: np.ndarray):
     return alpha_array
 
 
-def multimodal_optimize_alpha(adatas: list[ad.AnnData], group_size: int, 
-                              tfidf_list: list | bool=False,
-                              alpha_array: np.ndarray=default_alphas, 
-                              k: int=4, metric: str='AUROC', 
-                              early_stopping: bool=False,
-                              batches: int=10, batch_size: int=100):
+def get_labels(adata: list | ad.AnnData):
+
+    train_indices = adata[0].uns['train_indices'].copy()
+    y = adata[0].obs['labels'].iloc[train_indices].to_numpy()
+
+    return train_indices, y
+
+
+def get_folds(y: np.array, k: int):
     """
-    binary multimodal optimize alpha
-    Iteratively train a grouplasso model and update alpha to find the 
-    parameter yielding the desired sparsity. Meant to find a good 
-    starting point for your model, and the alpha may need further fine 
-    tuning.
     
-    Parameters
-    ----------
-    adatas : list[ad.AnnData]
-        Objects of type `ad.AnnData` where each object is one modality 
-        and Z_train and Z_test are calculated
-
-    group_size : None | int
-        Argument describing how the features are grouped. If `None`, 
-        `2 * adata.uns['D']` will be used. For more information see 
-        [celer documentation](https://mathurinm.github.io/celer/
-        generated/celer.GroupLasso.html).
-
-    tfidf_list : list | None
-        A boolean mask where `tfidf_list[i]` is respective to 
-        `adatas[i]`. If `True`, TF-IDF normalization will be applied to 
-        the respective `ad.AnnData` during cross validation
-    
-    alpha_array : np.ndarray
-        All alpha values to be tested.
-
-    k : int
-        Number of folds to perform cross validation over.
-
-    metric : str
-        Which metric to use to optimize alpha. Options are `'AUROC'`, 
-        `'Accuracy'`, `'F1-Score'`, `'Precision'`, and `'Recall'`.
-
-    batches : int
-        The number of batches to use for the distance calculation.
-        This will average the result of `batches` distance calculations
-        of `batch_size` randomly sampled cells. More batches will converge
-        to population distance values at the cost of scalability.
-
-    batch_size : int
-        The number of cells to include per batch for distance
-        calculations. Higher batch size will converge to population
-        distance values at the cost of scalability. If 
-        `batches*batch_size > num_training_cells`, `batch_size` will be 
-        reduced to `int(num_training_cells/batches)`.
-            
-    Returns
-    -------
-    alpha_star : float
-        The alpha value yielding the best performing model from cross 
-        validation.
     """
-    assert isinstance(k, int) and k > 0, 'Must be a positive integer number of folds'
-
-    import warnings 
-    warnings.filterwarnings('ignore')
-
-    # Sorting alphas smallest to largers
-    alpha_array = sort_alphas(alpha_array)
-
-    if not tfidf_list:
-        tfidf_list = [False]*len(adatas)
-
-    y = adatas[0].obs['labels'].iloc[adatas[0].uns['train_indices']].to_numpy()
-    
     # Splits the labels evenly between folds
-    positive_indices = np.where(y == np.unique(y)[0])[0]
-    negative_indices = np.setdiff1d(np.arange(len(y)), positive_indices)
-
-    positive_annotations = np.arange(len(positive_indices)) % k
-    negative_annotations = np.arange(len(negative_indices)) % k
-
-    metric_array = np.zeros((len(alpha_array), k))
-
-    cv_adatas = []
-
-    for adata in adatas:
-        cv_adatas.append(adata[adata.uns['train_indices'],:].copy())
-
-    del adatas
-    gc.collect()
-
-    for fold in np.arange(k):
-
-        fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], 
-                                     negative_indices[np.where(negative_annotations != fold)[0]]))
-        fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], 
-                                    negative_indices[np.where(negative_annotations == fold)[0]]))
-
-        for i in range(len(cv_adatas)):
-            cv_adatas[i].uns['train_indices'] = fold_train
-            cv_adatas[i].uns['test_indices'] = fold_test
-
-        # Creating dummy names for cv. 
-        # Necessary for interpretability but not for AUROC cv
-        dummy_names = [f'adata {i}' for i in range(len(cv_adatas))]
-
-        # Calculate the Z's for each modality independently
-        fold_cv_adata = multimodal_processing(adatas = cv_adatas, 
-                                              names = dummy_names, 
-                                              tfidf = tfidf_list, 
-                                              batch_size= batch_size, 
-                                              batches = batches)
-
-        fold_cv_adata.uns['seed_obj'] = cv_adatas[0].uns['seed_obj']
-
-        if 'sigma' in fold_cv_adata.uns_keys():
-            del fold_cv_adata.uns['sigma']
-
-        # In train_model we index Z_train for balancing multiclass labels. We just recreate
-        # dummy indices here that are unused for use in the binary case
-        fold_cv_adata.uns['train_indices'] = np.arange(0, len(fold_train))
-
-        gc.collect()
-
-        for j, alpha in enumerate(alpha_array):
-
-            fold_cv_adata = train_model(fold_cv_adata, group_size, alpha = alpha)
-
-            _, metrics = predict(fold_cv_adata, metrics = [metric])
-            metric_array[j, fold] = metrics[metric]
-
-            # If metrics are decreasing, cv stopped and moving to next fold
-            end_fold = stop_early(metric_array, alpha_idx=j, fold_idx=fold)
-            if end_fold and early_stopping:
-                break
-
-        del fold_cv_adata
-        gc.collect()
-
-    # Take AUROC mean across the k folds and select the alpha resulting in highest AUROC
-    alpha_star = alpha_array[np.argmax(np.mean(metric_array, axis = 1))]
-    del cv_adatas
-    gc.collect()
+    pos_idcs = np.where(y == np.unique(y)[0])[0]
+    neg_idcs = np.setdiff1d(np.arange(len(y)), pos_idcs)
     
-    return alpha_star
+    pos_anno = np.arange(len(pos_idcs)) % k
+    neg_anno = np.arange(len(neg_idcs)) % k
+
+    return pos_idcs, neg_idcs, pos_anno, neg_anno
 
 
 def bin_optimize_alpha(adata: ad.AnnData | list[ad.AnnData], 
                        group_size: int | None=None, 
-                       tfidf: bool | list[bool]=False, 
+                       tfidf: list[bool]=False, 
                        alpha_array: np.ndarray=default_alphas, 
                        k: int=4, metric: str='AUROC', 
                        early_stopping: bool=False,
-                       batches: int=10, batch_size: int=100):
+                       batches: int=10, batch_size: int=100,
+                       combination: str='concatenate'):
     """
     binary optimize_alpha
     Iteratively train a grouplasso model and update alpha to find the 
@@ -261,55 +139,45 @@ def bin_optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
 
     # Sorting alphas smallest to largers
     alpha_array = sort_alphas(alpha_array)
+        
+    train_indices, y = get_labels(adata)
 
-    if group_size == None:
-        group_size = adata.uns['D']*2
-
-    if type(adata) == list:
-        alpha_star = multimodal_optimize_alpha(adatas = adata, 
-                                               group_size = group_size,
-                                               tfidf_list = tfidf, 
-                                               alpha_array = alpha_array, 
-                                               metric = metric,
-                                               batch_size = batch_size,
-                                               batches = batches)
-        return alpha_star
-
-    y = adata.obs['labels'].iloc[adata.uns['train_indices']].to_numpy()
-    
-    # Splits the labels evenly between folds
-    positive_indices = np.where(y == np.unique(y)[0])[0]
-    negative_indices = np.setdiff1d(np.arange(len(y)), positive_indices)
-    
-    positive_annotations = np.arange(len(positive_indices)) % k
-    negative_annotations = np.arange(len(negative_indices)) % k
+    pos_idcs, neg_idcs, pos_anno, neg_anno = get_folds(y, k)
 
     metric_array = np.zeros((len(alpha_array), k))
 
     gc.collect()
 
     for fold in np.arange(k):
-        cv_adata = adata[adata.uns['train_indices'],:]
-
-        if 'sigma' in cv_adata.uns_keys():
-            del cv_adata.uns['sigma']
+        cv_adata = [adata[i][train_indices, :] 
+                    for i in range(len(adata))]
+        
+        for i in range(len(cv_adata)):
+            if 'sigma' in cv_adata[i].uns_keys():
+                del cv_adata[i].uns['sigma']
 
         # Create CV train/test indices
-        fold_train = np.concatenate((positive_indices[np.where(positive_annotations != fold)[0]], 
-                                     negative_indices[np.where(negative_annotations != fold)[0]]))
-        fold_test = np.concatenate((positive_indices[np.where(positive_annotations == fold)[0]], 
-                                    negative_indices[np.where(negative_annotations == fold)[0]]))
+        fold_train = np.concatenate((pos_idcs[np.where(pos_anno != fold)[0]], 
+                                     neg_idcs[np.where(neg_anno != fold)[0]]))
+        fold_test = np.concatenate((pos_idcs[np.where(pos_anno == fold)[0]], 
+                                    neg_idcs[np.where(neg_anno == fold)[0]]))
 
-        cv_adata.uns['train_indices'] = fold_train
-        cv_adata.uns['test_indices'] = fold_test
 
-        if tfidf:
-            cv_adata = tfidf_normalize(cv_adata, binarize= True)
+        for i in range(len(cv_adata)):
+            cv_adata[i].uns['train_indices'] = fold_train
+            cv_adata[i].uns['test_indices'] = fold_test
+            if tfidf[i]:
+                cv_adata[i] = tfidf_normalize(cv_adata[i], binarize=True)
 
-        # Estimating kernel widths and calculating Zs
-        cv_adata = calculate_z(cv_adata, n_features= 5000, 
-                               batches = batches, batch_size = batch_size)
-
+            cv_adata[i] = calculate_z(cv_adata[i], n_features= 5000, 
+                            batches = batches, batch_size = batch_size)
+            
+        names = ['Adata ' + str(i + 1) for i in range(len(cv_adata))]
+        cv_adata = multimodal_processing(adata, names, tfidf, 
+                                            combination, batches, 
+                                            batch_size)
+                    
+            
         # In train_model we index Z_train for balancing multiclass labels. We just recreate
         # dummy indices here that are unused for use in the binary case
         cv_adata.uns['train_indices'] = np.arange(0, len(fold_train))
@@ -338,28 +206,30 @@ def bin_optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
 
 
 def multiclass_optimize_alpha(adata: ad.AnnData | list[ad.AnnData], 
-                   group_size: int | None=None, 
-                   tfidf: bool | list[bool]=False, 
+                   group_size: int, 
+                   tfidf: list[bool]=[False], 
                    alpha_array: np.ndarray=default_alphas, 
                    k: int=4, metric: str='AUROC', early_stopping: bool=False,
-                   batches: int=10, batch_size: int=100):
+                   batches: int=10, batch_size: int=100, 
+                   force_balance: bool=True, combination: str='concatenate',
+                   train_dict: dict=None):
     """
     
     """
-    if isinstance(adata, ad.AnnData):
-        classes = np.unique(adata.obs['labels'])
-        orig_labels = adata.obs['labels'].to_numpy().copy()
-        orig_train = adata.uns['train_indices'].copy()
-        balanced_idcs = get_class_train(adata.uns['train_indices'], 
-                                    adata.obs['labels'], 
-                                    adata.uns['seed_obj'])
+    classes = np.unique(adata[0].obs['labels'])
+    orig_labels = adata[0].obs['labels'].to_numpy().copy()
+    orig_train = adata[0].uns['train_indices'].copy()
+
+    if train_dict:
+        train_idcs = train_dict
     else:
-        classes = np.unique(adata[0].obs['labels'])
-        orig_labels = adata[0].obs['labels'].to_numpy().copy()
-        orig_train = adata[0].uns['train_indices'].copy()
-        balanced_idcs = get_class_train(adata[0].uns['train_indices'], 
-                                    adata[0].obs['labels'], 
-                                    adata[0].uns['seed_obj'])
+        if force_balance:
+            train_idcs = get_class_train(adata[0].uns['train_indices'], 
+                                         adata[0].obs['labels'], 
+                                         adata[0].uns['seed_obj'])
+        else:
+            train_idcs = {ct: adata[0].uns['train_indices'].copy()
+                          for ct in classes}
 
     opt_alpha_dict = dict()
 
@@ -367,76 +237,58 @@ def multiclass_optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
         temp_classes = orig_labels.copy()
         temp_classes[temp_classes != cl] = 'other'
 
-        # Adding binarized labels and balanced test indices to adata(s)
-        if isinstance(adata, ad.AnnData):
-            adata.obs['labels'] = temp_classes.copy()
-            adata.uns['train_indices'] = balanced_idcs[cl]
-            
-            opt_alpha_dict[cl] = bin_optimize_alpha(adata, 
-                                                    group_size, 
-                                                    tfidf, 
-                                                    alpha_array, 
-                                                    k, 
-                                                    metric, 
-                                                    early_stopping,
-                                                    batches, 
-                                                    batch_size)     
-        else: 
-            for i in range(len(adata)):
-                adata[i].obs['labels'] = temp_classes.copy()
-                adata[i].uns['train_indices'] = balanced_idcs[cl]
-
-            opt_alpha_dict[cl] = multimodal_optimize_alpha(adata, 
-                                                            group_size, 
-                                                            tfidf, 
-                                                            alpha_array, 
-                                                            k, 
-                                                            metric, 
-                                                            early_stopping, 
-                                                            batches, 
-                                                            batch_size)
-        
-        
-        
-    # Global adata obj will be permanently changed if not reset
-    if isinstance(adata, ad.AnnData):
-            adata.obs['labels'] = orig_labels
-            adata.uns['train_indices'] = orig_train
-            
-    else: 
         for i in range(len(adata)):
-            adata[i].obs['labels'] = orig_labels
-            adata[i].uns['train_indices'] = orig_train
-        
+            adata[i].obs['labels'] = temp_classes.copy()
+            adata[i].uns['train_indices'] = train_idcs[cl]
+
+        opt_alpha_dict[cl] = bin_optimize_alpha(adata, group_size, tfidf, 
+                                                alpha_array, k, metric, 
+                                                early_stopping, batches, 
+                                                batch_size, combination)     
+    
+    # Global adata obj will be permanently changed if not reset
+    for i in range(len(adata)):
+        adata[i].obs['labels'] = orig_labels
+        adata[i].uns['train_indices'] = orig_train
+
     return opt_alpha_dict
 
 
 def optimize_alpha(adata: ad.AnnData | list[ad.AnnData], 
                    group_size: int | None=None, 
-                   tfidf: bool | list[bool]=False, 
+                   tfidf: None | list[bool]=None, 
                    alpha_array: np.ndarray=default_alphas, 
                    k: int=4, metric: str='AUROC', early_stopping: bool=False,
-                   batches: int=10, batch_size: int=100):
+                   batches: int=10, batch_size: int=100, 
+                   combination: str='concatenate', force_balance: bool=True,
+                   train_dict: dict=None):
     """
     
     """
-    is_adata = isinstance(adata, ad.AnnData)
+    # Need singe-view runs to be iterable
+    if isinstance(adata, ad.AnnData):
+        adata = [adata.copy()]
+
+    if isinstance(tfidf, type(None)):
+        tfidf = len(adata)*[False]
+
+    is_multi = 2 < len(set(adata[0].obs['labels']))
     
-    if is_adata:
-        is_multi = len(set(adata.obs['labels'])) > 2
-    else:
-        is_multi = len(set(adata[0].obs['labels'])) > 2
+    if isinstance(group_size, type(None)):
+        group_size = 2*adata[0].uns['D']
+
 
     if is_multi:
         alpha_star = multiclass_optimize_alpha(adata, group_size, tfidf, 
                                                 alpha_array, k, metric, 
                                                 early_stopping, batches, 
-                                                batch_size)
+                                                batch_size, force_balance, 
+                                                combination, train_dict)
         
     else:
         alpha_star = bin_optimize_alpha(adata, group_size, tfidf, 
                                         alpha_array, k, metric, 
                                         early_stopping, batches, 
-                                        batch_size)
+                                        batch_size, combination)
         
     return alpha_star
