@@ -1,7 +1,6 @@
 import numpy as np
 import anndata as ad
 import gc
-import tracemalloc
 
 from scmkl.tfidf_normalize import tfidf_normalize
 from scmkl.calculate_z import calculate_z
@@ -43,7 +42,10 @@ def sort_alphas(alpha_array: np.ndarray):
 
 
 def get_labels(adata: list | ad.AnnData):
-
+    """
+    Copies labels and train indices from `ad.AnnData` object for k-fold 
+    cross validation. Mostly present for readability.
+    """
     train_indices = adata[0].uns['train_indices'].copy()
     y = adata[0].obs['labels'].iloc[train_indices].to_numpy()
 
@@ -52,7 +54,8 @@ def get_labels(adata: list | ad.AnnData):
 
 def get_folds(y: np.array, k: int):
     """
-    
+    With labels of training data and number of folds, returns the 
+    indices and label for each k-folds.
     """
     # Splits the labels evenly between folds
     pos_idcs = np.where(y == np.unique(y)[0])[0]
@@ -64,7 +67,7 @@ def get_folds(y: np.array, k: int):
     return pos_idcs, neg_idcs, pos_anno, neg_anno
 
 
-def bin_optimize_alpha(adata: ad.AnnData | list[ad.AnnData], 
+def bin_optimize_alpha(adata: list[ad.AnnData], 
                        group_size: int | None=None, 
                        tfidf: list[bool]=False, 
                        alpha_array: np.ndarray=default_alphas, 
@@ -73,15 +76,15 @@ def bin_optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
                        batches: int=10, batch_size: int=100,
                        combination: str='concatenate'):
     """
-    binary optimize_alpha
     Iteratively train a grouplasso model and update alpha to find the 
-    parameter yielding best performing sparsity. This function 
-    currently only works for binary experiments.
+    parameter yielding best performing sparsity via k-fold cross 
+    validation. This function currently only works for binary 
+    experiments. Called by `scmkl.optimize_alpha()`.
 
     Parameters
     ----------
-    adata : ad.AnnData | list[ad.AnnData]
-        `ad.AnnData`(s) with `'Z_train'` and `'Z_test'` in 
+    adata : list[ad.AnnData]
+        List of `ad.AnnData`(s) with `'Z_train'` and `'Z_test'` in 
         `adata.uns.keys()`.
 
     group_size : None | int
@@ -137,11 +140,10 @@ def bin_optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
     import warnings 
     warnings.filterwarnings('ignore')
 
-    # Sorting alphas smallest to largers
     alpha_array = sort_alphas(alpha_array)
-        
-    train_indices, y = get_labels(adata)
 
+    # Need even folds for cross validation 
+    train_indices, y = get_labels(adata)
     pos_idcs, neg_idcs, pos_anno, neg_anno = get_folds(y, k)
 
     metric_array = np.zeros((len(alpha_array), k))
@@ -205,16 +207,85 @@ def bin_optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
     return alpha_star
 
 
-def multiclass_optimize_alpha(adata: ad.AnnData | list[ad.AnnData], 
-                   group_size: int, 
-                   tfidf: list[bool]=[False], 
-                   alpha_array: np.ndarray=default_alphas, 
-                   k: int=4, metric: str='AUROC', early_stopping: bool=False,
-                   batches: int=10, batch_size: int=100, 
-                   force_balance: bool=True, combination: str='concatenate',
-                   train_dict: dict=None):
+def multi_optimize_alpha(adata: list[ad.AnnData], group_size: int, 
+                         tfidf: list[bool]=[False], 
+                         alpha_array: np.ndarray=default_alphas, k: int=4, 
+                         metric: str='AUROC', early_stopping: bool=False,
+                         batches: int=10, batch_size: int=100, 
+                         force_balance: bool=True, combination: str='concatenate',
+                         train_dict: dict=None):
     """
+    Wrapper function for running k-fold cross validation for every 
+    label in a multiclass experiment. Called by 
+    `scmkl.optimize_alpha()`. 
+
+    Parameters
+    ----------
+    adata : list[ad.AnnData]
+        List of `ad.AnnData`(s) with `'Z_train'` and `'Z_test'` in 
+        `adata.uns.keys()`.
+
+    group_size : None | int
+        Argument describing how the features are grouped. If `None`, 
+        `2 * adata.uns['D']` will be used. For more information see 
+        [celer documentation](https://mathurinm.github.io/celer/
+        generated/celer.GroupLasso.html).
+
+    tfidf : list[bool]
+        If `False`, no data will be TF-IDF transformed. If 
+        `type(adata) is list` and TF-IDF transformation is desired for 
+        all or some of the data, a bool list corresponding to `adata` 
+        must be provided. To simply TF-IDF transform `adata` when 
+        `type(adata) is ad.AnnData`, use `True`.
     
+    alpha_array : np.ndarray
+        Array of all alpha values to be tested.
+
+    k : int
+        Number of folds to perform cross validation over.
+            
+    metric : str
+        Which metric to use to optimize alpha. Options are `'AUROC'`, 
+        `'Accuracy'`, `'F1-Score'`, `'Precision'`, and `'Recall'`.
+
+    batches : int
+        The number of batches to use for the distance calculation.
+        This will average the result of `batches` distance calculations
+        of `batch_size` randomly sampled cells. More batches will converge
+        to population distance values at the cost of scalability.
+
+    batch_size : int
+        The number of cells to include per batch for distance
+        calculations. Higher batch size will converge to population
+        distance values at the cost of scalability. If 
+        `batches*batch_size > num_training_cells`, `batch_size` will be 
+        reduced to `int(num_training_cells/batches)`.
+
+    force_balance: bool
+        If `True`, training sets will be balanced to reduce class label 
+        imbalance for each iteration. Defaults to `False`.
+
+    other_factor : float
+        The ratio of cells to sample for the other class for each 
+        model. For example, if classifying B cells with 100 B cells in 
+        training, if `other_factor=1`, 100 cells that are not B cells 
+        will be trained on with the B cells. This will be done for each 
+        fold for each class if `force_balance` is `True`. 
+
+    combination: str
+        How should multiple views of data be combined. For more details 
+        see ad.concat.
+
+    train_dict: dict
+        A `dict` where each key is a class label and values are are the 
+        indices to be trained with for that class for class balance. 
+        All values must be present in each adata.uns['train_indices'].
+
+    Returns
+    -------
+    alpha_star : dict
+        A dictionary with keys being class labels and values being the 
+        best performing alpha parameter for that class as a float.
     """
     classes = np.unique(adata[0].obs['labels'])
     orig_labels = adata[0].obs['labels'].to_numpy().copy()
@@ -255,15 +326,85 @@ def multiclass_optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
 
 
 def optimize_alpha(adata: ad.AnnData | list[ad.AnnData], 
-                   group_size: int | None=None, 
-                   tfidf: None | list[bool]=None, 
-                   alpha_array: np.ndarray=default_alphas, 
-                   k: int=4, metric: str='AUROC', early_stopping: bool=False,
+                   group_size: int | None=None, tfidf: None | list[bool]=None, 
+                   alpha_array: np.ndarray=default_alphas, k: int=4, 
+                   metric: str='AUROC', early_stopping: bool=False,
                    batches: int=10, batch_size: int=100, 
                    combination: str='concatenate', force_balance: bool=True,
                    train_dict: dict=None):
     """
+    K-fold cross validation for optimizing alpha hyperparameter using 
+    training indices. 
+
+    Parameters
+    ----------
+    adata : list[ad.AnnData]
+        List of `ad.AnnData`(s) with `'Z_train'` and `'Z_test'` in 
+        `adata.uns.keys()`.
+
+    group_size : None | int
+        Argument describing how the features are grouped. If `None`, 
+        `2 * adata.uns['D']` will be used. For more information see 
+        [celer documentation](https://mathurinm.github.io/celer/
+        generated/celer.GroupLasso.html).
+
+    tfidf : list[bool]
+        If `False`, no data will be TF-IDF transformed. If 
+        `type(adata) is list` and TF-IDF transformation is desired for 
+        all or some of the data, a bool list corresponding to `adata` 
+        must be provided. To simply TF-IDF transform `adata` when 
+        `type(adata) is ad.AnnData`, use `True`.
     
+    alpha_array : np.ndarray
+        Array of all alpha values to be tested.
+
+    k : int
+        Number of folds to perform cross validation over.
+            
+    metric : str
+        Which metric to use to optimize alpha. Options are `'AUROC'`, 
+        `'Accuracy'`, `'F1-Score'`, `'Precision'`, and `'Recall'`.
+
+    batches : int
+        The number of batches to use for the distance calculation.
+        This will average the result of `batches` distance calculations
+        of `batch_size` randomly sampled cells. More batches will converge
+        to population distance values at the cost of scalability.
+
+    batch_size : int
+        The number of cells to include per batch for distance
+        calculations. Higher batch size will converge to population
+        distance values at the cost of scalability. If 
+        `batches*batch_size > num_training_cells`, `batch_size` will be 
+        reduced to `int(num_training_cells/batches)`.
+
+    force_balance: bool
+        If `True`, training sets will be balanced to reduce class label 
+        imbalance for each iteration. Defaults to `False`.
+
+    other_factor : float
+        The ratio of cells to sample for the other class for each 
+        model. For example, if classifying B cells with 100 B cells in 
+        training, if `other_factor=1`, 100 cells that are not B cells 
+        will be trained on with the B cells. This will be done for each 
+        fold for each class if `force_balance` is `True`. 
+
+    combination: str
+        How should multiple views of data be combined. For more details 
+        see ad.concat.
+
+    train_dict: dict
+        A `dict` where each key is a class label and values are are the 
+        indices to be trained with for that class for class balance. 
+        All values must be present in each adata.uns['train_indices'].
+
+    Returns
+    -------
+    alpha_star : float | dict
+        If number of classes is more than 2, a dictionary with keys 
+        being class labels and values being the best performing alpha 
+        parameter for that class as a float. Else, a float for 
+        comparing the two classes.
     """
     # Need singe-view runs to be iterable
     if isinstance(adata, ad.AnnData):
@@ -279,11 +420,11 @@ def optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
 
 
     if is_multi:
-        alpha_star = multiclass_optimize_alpha(adata, group_size, tfidf, 
-                                                alpha_array, k, metric, 
-                                                early_stopping, batches, 
-                                                batch_size, force_balance, 
-                                                combination, train_dict)
+        alpha_star = multi_optimize_alpha(adata, group_size, tfidf, 
+                                          alpha_array, k, metric, 
+                                          early_stopping, batches, 
+                                          batch_size, force_balance, 
+                                          combination, train_dict)
         
     else:
         alpha_star = bin_optimize_alpha(adata, group_size, tfidf, 

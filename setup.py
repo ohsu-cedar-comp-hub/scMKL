@@ -6,7 +6,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name = 'scmkl',
-    version = '0.3.3a1',
+    version = '0.3.3',
     description = "Single-cell analysis using Multiple Kernel Learning",
     long_description = long_description,
     long_description_content_type = 'text/markdown',
