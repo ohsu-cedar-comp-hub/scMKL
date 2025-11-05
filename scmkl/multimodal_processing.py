@@ -99,7 +99,8 @@ def combine_modalities(adatas: list[ad.AnnData], names: list[str],
 
 def multimodal_processing(adatas : list[ad.AnnData], names : list[str], 
                           tfidf: list[bool], combination: str='concatenate', 
-                          batches: int=10, batch_size: int=100) -> ad.AnnData:
+                          batches: int=10, batch_size: int=100, 
+                          verbose: bool=True) -> ad.AnnData:
     """
     Combines and processes a list of `ad.AnnData` objects.
 
@@ -209,11 +210,14 @@ def multimodal_processing(adatas : list[ad.AnnData], names : list[str],
         adatas[i].uns['train_indices'] = train_indices
         adatas[i].uns['test_indices'] = test_indices
         adatas[i] = adata[non_empty_rows, :]
+
         # tfidf normalizing if corresponding element in tfidf is True
         if tfidf[i]:
             adatas[i] = tfidf_normalize(adata)
-
-        print(f"Estimating sigma and calculating Z for {names[i]}", flush = True)
+        
+        if verbose:
+            print(f"Estimating sigma and calculating Z for {names[i]}", 
+                  flush = True)
         adatas[i] = calculate_z(adata, n_features = 5000, batches=batches, 
                                 batch_size=batch_size)
 

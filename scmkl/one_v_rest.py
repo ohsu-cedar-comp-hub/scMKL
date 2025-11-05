@@ -201,6 +201,11 @@ def get_class_train(train_indices: np.ndarray,
     uniq_labels = np.unique(cell_labels)
     train_idx = dict()
 
+    if isinstance(cell_labels, pd.Series):
+        cell_labels = cell_labels.to_numpy()
+    elif isinstance(cell_labels, list):
+        cell_labels = np.array(cell_labels)
+
     for lab in uniq_labels:
         target_pos = np.where(lab == cell_labels[train_indices])[0]
         overlap = np.isin(target_pos, train_indices)
@@ -221,10 +226,10 @@ def get_class_train(train_indices: np.ndarray,
     return train_idx
 
 
-def one_v_rest(adatas : list, names : list, alpha_params : np.ndarray, 
-              tfidf : list=None, batches: int=10, batch_size: int=100, 
-              train_dict: dict=None, force_balance: bool=False, 
-              other_factor: float=1.0)-> dict:
+def one_v_rest(adatas : list | ad.AnnData, names : list, 
+               alpha_params : np.ndarray, tfidf : list=None, batches: int=10, 
+               batch_size: int=100, train_dict: dict=None, 
+               force_balance: bool=False, other_factor: float=1.0)-> dict:
     """
     For each cell class, creates model(s) comparing that class to all 
     others. Then, predicts on the training data using `scmkl.run()`.
@@ -303,11 +308,11 @@ def one_v_rest(adatas : list, names : list, alpha_params : np.ndarray,
     if isinstance(tfidf, type(None)):
         tfidf = len(adatas)*[False]
 
-    _check_adatas(adatas, check_obs = True, check_uns = True)
+    _check_adatas(adatas, check_obs=True, check_uns=True)
 
     # Want to retain all original train indices
-    train_indices = adatas[0].uns['train_indices']
-    test_indices = adatas[0].uns['test_indices']
+    train_indices = adatas[0].uns['train_indices'].copy()
+    test_indices = adatas[0].uns['test_indices'].copy()
 
     uniq_labels = _eval_labels(cell_labels = adatas[0].obs['labels'], 
                                train_indices = train_indices,

@@ -59,7 +59,7 @@ Conda is the recommended method to install scMKL:
 ```bash
 conda create -n scMKL python=3.12 
 conda activate scMKL
-conda install -c conda-forge ivango17::scmkl
+conda install -c conda-forge -c bioconda ivango17::scmkl
 ```
 Ensure bioconda and conda-forge are in your available conda channels.
 

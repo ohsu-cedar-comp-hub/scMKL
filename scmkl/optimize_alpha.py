@@ -151,7 +151,7 @@ def bin_optimize_alpha(adata: list[ad.AnnData],
     gc.collect()
 
     for fold in np.arange(k):
-        cv_adata = [adata[i][train_indices, :] 
+        cv_adata = [adata[i][train_indices, :].copy()
                     for i in range(len(adata))]
         
         for i in range(len(cv_adata)):
@@ -168,16 +168,20 @@ def bin_optimize_alpha(adata: list[ad.AnnData],
         for i in range(len(cv_adata)):
             cv_adata[i].uns['train_indices'] = fold_train
             cv_adata[i].uns['test_indices'] = fold_test
-            if tfidf[i]:
-                cv_adata[i] = tfidf_normalize(cv_adata[i], binarize=True)
-
-            cv_adata[i] = calculate_z(cv_adata[i], n_features= 5000, 
-                            batches = batches, batch_size = batch_size)
             
         names = ['Adata ' + str(i + 1) for i in range(len(cv_adata))]
-        cv_adata = multimodal_processing(adata, names, tfidf, 
-                                            combination, batches, 
-                                            batch_size)
+
+        if 1 < len(cv_adata):
+            cv_adata = multimodal_processing(cv_adata, names, tfidf, 
+                                             combination, batches, 
+                                             batch_size, False)
+        else:
+            cv_adata = cv_adata[0]
+            if tfidf[0]:
+                cv_adata = tfidf_normalize(cv_adata, binarize=True)
+            cv_adata = calculate_z(cv_adata, n_features= 5000, 
+                                   batches=batches, batch_size=batch_size)
+            
                     
             
         # In train_model we index Z_train for balancing multiclass labels. We just recreate
@@ -311,7 +315,7 @@ def multi_optimize_alpha(adata: list[ad.AnnData], group_size: int,
         for i in range(len(adata)):
             adata[i].obs['labels'] = temp_classes.copy()
             adata[i].uns['train_indices'] = train_idcs[cl]
-
+        
         opt_alpha_dict[cl] = bin_optimize_alpha(adata, group_size, tfidf, 
                                                 alpha_array, k, metric, 
                                                 early_stopping, batches, 

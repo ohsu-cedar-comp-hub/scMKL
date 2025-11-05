@@ -107,7 +107,7 @@ When parameterizing a function there are two things that should be done:
         Parameters
         ----------
         array : np.ndarray
-            > An array where dimension 0 corresponds to samples.
+            An array where dimension 0 corresponds to samples.
         '''
         n_samples = array.shape[0]
         indices = np.arange(n_samples)

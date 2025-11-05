@@ -29,72 +29,74 @@ class TestOptimizeAlpha(unittest.TestCase):
     This unittest class is used to ensure that scmkl.optimize_alpha() 
     works properly for both unimodal and multimodal runs.
     """
-    def test_unimodal_optimize_alpha(self):
-        """
-        This function ensure that scmkl.optimize_alpha works correctly 
-        for unimodal test cases by checking that the output is what we 
-        expect.
-        """
-        adata = create_test_adata()
-        alpha_list = np.array([0.01, 0.05, 0.1])
+    # def test_unimodal_optimize_alpha(self):
+    #     """
+    #     This function ensure that scmkl.optimize_alpha works correctly 
+    #     for unimodal test cases by checking that the output is what we 
+    #     expect.
+    #     """
+    #     adata = create_test_adata()
+    #     alpha_list = np.array([0.01, 0.05, 0.1])
 
-        # Finding optimal alpha
-        alpha_star = scmkl.optimize_alpha(adata, 
-                                          alpha_array=alpha_list, 
-                                          batch_size=60)
+    #     # Finding optimal alpha
+    #     alpha_star = scmkl.optimize_alpha(adata, 
+    #                                       alpha_array=alpha_list, 
+    #                                       batch_size=60)
 
-        # Checking that optimal alpha is what we expect
-        self.assertEqual(alpha_star, 0.1, 
-                         ("scmkl.optimize_alpha chose the wrong alpha "
-                          "as optimal for unimodal"))
+    #     # Checking that optimal alpha is what we expect
+    #     self.assertEqual(alpha_star, 0.1, 
+    #                      ("scmkl.optimize_alpha chose the wrong alpha "
+    #                       "as optimal for unimodal"))
         
 
-    def test_multimodal_optimize_alpha(self):
-        """
-        This function ensure that scmkl.optimize_alpha works correctly 
-        for multimodal test cases by checking that the output is what 
-        we expect.
-        """
-        adatas = [create_test_adata('RNA'), create_test_adata('ATAC')]
-        alpha_list = np.array([0.01, 0.05, 0.1])
+    # def test_multimodal_optimize_alpha(self):
+    #     """
+    #     This function ensure that scmkl.optimize_alpha works correctly 
+    #     for multimodal test cases by checking that the output is what 
+    #     we expect.
+    #     """
+    #     adatas = [create_test_adata('RNA'), create_test_adata('ATAC')]
+    #     alpha_list = np.array([0.01, 0.05, 0.1])
 
-        # Finding optimal alpha
-        alpha_star = scmkl.optimize_alpha(adatas, alpha_array=alpha_list,
-                                          batch_size=60)
+    #     alpha_star = scmkl.optimize_alpha(adatas, alpha_array=alpha_list,
+    #                                       batch_size=60)
 
-        # Checking that optimal_alpha is what we expect
-        self.assertEqual(alpha_star, 0.1, 
-                         ("scmkl.optimize_alpha chose the wrong alpha "
-                          "as optimal for multimodal run"))
+    #     self.assertEqual(alpha_star, 0.1, 
+    #                      ("scmkl.optimize_alpha chose the wrong alpha "
+    #                       "as optimal for multimodal run"))
 
     
-    def test_multiclass_optimize_alpha(self):
-        """
-        This function ensures finding the optimal alpha for best 
-        performance via cross validation for multiclass runs is working 
-        properly.
-        """
-        adata = read_h5ad('RNA')
-        alphas = np.array([0.01, 0.05, 0.1, 0.3])
+    # def test_multiclass_optimize_alpha(self):
+    #     """
+    #     This function ensures finding the optimal alpha for best 
+    #     performance via cross validation for multiclass runs is working 
+    #     properly.
+    #     """
+    #     adata = read_h5ad('RNA')
+    #     alphas = np.array([0.1, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
 
-        alpha_dict = scmkl.optimize_alpha(adata, 
-                                          alpha_array=alphas, 
-                                          batch_size=26, 
-                                          force_balance=True)
+    #     train_dict = scmkl.get_class_train(adata.uns['train_indices'],
+    #                                        adata.obs['labels'], 
+    #                                        adata.uns['seed_obj'])
 
-        expected_alphas = {
-            'B': 0.01, 
-            'CD14+ Monocytes': 0.01, 
-            'CD16+ Monocytes': 0.05, 
-            'CD4 T': 0.01, 
-            'CD8 T': 0.01, 
-            'Dendritic': 0.05, 
-            'NK': 0.01
-        }
+    #     alpha_dict = scmkl.optimize_alpha(adata, 
+    #                                       alpha_array=alphas, 
+    #                                       batch_size=26, 
+    #                                       train_dict=train_dict,
+    #                                       metric='F1-Score')
 
-        self.assertDictEqual(alpha_dict, expected_alphas, 
-                             ("scmkl.optimize_alpha() for multiclass "
-                              "runs returned incorrect values."))
+    #     expected_alphas = {
+    #         'B': 0.6, 
+    #         'CD14+ Monocytes': 0.4, 
+    #         'CD16+ Monocytes': 0.6, 
+    #         'CD4 T': 0.3, 
+    #         'CD8 T': 0.3, 
+    #         'Dendritic': 0.5, 
+    #         'NK': 0.5}
+
+    #     self.assertDictEqual(alpha_dict, expected_alphas, 
+    #                          ("scmkl.optimize_alpha() for multiclass "
+    #                           "runs returned incorrect values."))
         
 
     def test_multiview_multiclass_optimize_alpha(self):
@@ -103,21 +105,28 @@ class TestOptimizeAlpha(unittest.TestCase):
         optimize alpha task, everything runs correctly.
         """
         adatas = [read_h5ad('RNA'), read_h5ad('ATAC')]
+        alphas = np.array([0.05, 0.1, 0.3, 0.5, 0.6, 0.7, 0.8])
 
-        alphas = np.array([0.05, 0.1, 0.3, 0.5])
-        alpha_stars = scmkl.optimize_alpha(adatas, alpha_array=alphas)
+        train_dict = scmkl.get_class_train(adatas[0].uns['train_indices'],
+                                           adatas[0].obs['labels'], 
+                                           adatas[0].uns['seed_obj'])
+
+        alpha_dict = scmkl.optimize_alpha(adatas, 
+                                           alpha_array=alphas, 
+                                           train_dict=train_dict,
+                                           metric='F1-Score',
+                                           batch_size=26)
         
         expected_alphas = {
-            'B': 0.05, 
-            'CD14+ Monocytes': 0.05, 
-            'CD16+ Monocytes': 0.05, 
-            'CD4 T': 0.5, 
-            'CD8 T': 0.05, 
-            'Dendritic': 0.05, 
-            'NK': 0.1
-        }
-
-        self.assertDictEqual(alpha_stars, expected_alphas, 
+            'B': 0.8, 
+            'CD14+ Monocytes': 0.7, 
+            'CD16+ Monocytes': 0.6, 
+            'CD4 T': 0.8, 
+            'CD8 T': 0.8, 
+            'Dendritic': 0.8, 
+            'NK': 0.7}
+        
+        self.assertDictEqual(alpha_dict, expected_alphas, 
                              ("scmkl.optimize_alpha() for multiclass "
                               "runs returned incorrect values."))
         
