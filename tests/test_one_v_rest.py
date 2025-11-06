@@ -9,7 +9,6 @@ class TestOneVRest(unittest.TestCase):
     This unittest class is used to ensure that scmkl.one_v_rest() 
     works properly for both unimodal and multimodal runs.
     """
-
     def test_unimodal_one_v_rest(self):
         """
         This function ensure that scmkl.one_v_rest() works correctly 
