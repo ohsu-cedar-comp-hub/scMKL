@@ -15,7 +15,6 @@ class TestOneVRest(unittest.TestCase):
         for unimodal test cases by checking that the output is what we 
         expect without failing.
         """
-        
         # Creating adata and setting alphas to choose from
         adata = create_test_adata('RNA')
         alpha_list = np.array([0.1, 0.2])

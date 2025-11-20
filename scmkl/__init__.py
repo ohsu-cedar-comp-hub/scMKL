@@ -7,7 +7,7 @@
 ## **scMKL Documentation**
 """
 
-__version__ = '0.3.3'
+__version__ = '0.4.0'
 
 __all__ = ['calculate_z', 
            'calculate_d',
@@ -19,6 +19,7 @@ __all__ = ['calculate_z',
            'find_candidates',
            'format_adata',
            'format_group_names',
+           'get_folds',
            'get_gene_groupings',
            'get_metrics',
            'get_region_groupings',
@@ -36,7 +37,9 @@ __all__ = ['calculate_z',
            'plotting',
            'plot_metric',
            'plot_conf_mat',
+           'prepare_fold',
            'projections',
+           'process_fold',
            'read_files',
            'read_gtf',
            'run',

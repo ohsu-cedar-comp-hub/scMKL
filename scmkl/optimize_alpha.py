@@ -1,6 +1,7 @@
 import numpy as np
 import anndata as ad
 import gc
+from sklearn.model_selection import StratifiedKFold
 
 from scmkl.tfidf_normalize import tfidf_normalize
 from scmkl.calculate_z import calculate_z
@@ -8,6 +9,7 @@ from scmkl.train_model import train_model
 from scmkl.multimodal_processing import multimodal_processing
 from scmkl.test import predict
 from scmkl.one_v_rest import get_class_train
+from scmkl.create_adata import sort_samples
 
 
 # Array of alphas to be used if not provided
@@ -41,30 +43,158 @@ def sort_alphas(alpha_array: np.ndarray):
     return alpha_array
 
 
-def get_labels(adata: list | ad.AnnData):
+def get_folds(adata: ad.AnnData, k: int):
     """
-    Copies labels and train indices from `ad.AnnData` object for k-fold 
-    cross validation. Mostly present for readability.
-    """
-    train_indices = adata[0].uns['train_indices'].copy()
-    y = adata[0].obs['labels'].iloc[train_indices].to_numpy()
+    With labels of samples for cross validation and number of folds, 
+    returns the indices and label for each k-folds.
 
-    return train_indices, y
+    Parameters
+    ----------
+    adata : ad.AnnData
+        `AnnData` object containing `'labels'` column in `.obs` and 
+        `'train_indices'` in `.uns`.
+
+    k : int
+        The number of folds to perform cross validation over.
+
+    Returns
+    -------
+    folds : dict
+        A dictionary with keys being [0, k) and values being a tuple 
+        with first element being training sample indices and the second 
+        being testing value indices.
+
+    Examples
+    --------
+    >>> adata = scmkl.create_adata(...)
+    >>> folds = scmkl.get_folds(adata, k=4)
+    >>>
+    >>> train_fold_0, test_fold_0 = folds[0]
+    >>>
+    >>> train_fold_0
+    array([  0,   3,   5,   6,   8,   9,  10,  11,  12,  13])
+    >>> test_fold_0
+    array([  1,   2,  4,  7])
+    """
+    y = adata.obs['labels'][adata.uns['train_indices']].copy()
+
+    # Creating dummy x prevents holding more views in memory
+    x = y.copy()
+
+    skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=100)
+
+    folds = dict()
+    for fold, (fold_train, fold_test) in enumerate(skf.split(x, y)):
+        folds[fold] = (fold_train, fold_test)
+
+    return folds
 
 
-def get_folds(y: np.array, k: int):
+def prepare_fold(fold_adata, sort_idcs, fold_train, fold_test):
     """
-    With labels of training data and number of folds, returns the 
-    indices and label for each k-folds.
+    Reorders adata samples, reassigns each `adata.uns['train_indices' & 
+    'test_indices']`, and removes sigmas if present.
+
+    Parameters
+    ----------
+    fold_adata : list[ad.AnnData]
+        A `list` of `AnnData` objects to be reordered based on fold 
+        indices.
+
+    sort_idcs: np.ndarray
+        The indices that will sort `AnnData`s as all train samples then 
+        all test.
+
+    fold_train : np.ndarray
+        The indices of training sample for respective fold.
+
+    fold_test : np.ndarray
+        The indices of testing samples for respective fold.
+
+    Returns
+    -------
+    fold_adata : list[ad.AnnData]
+        The `list` of `AnnData`s with each `AnnData` sorted as all 
+        training samples then all testing samples. 
+        `adata.uns['train_indices' & 'test_indices']` are also updated 
+        to reflect new sample positions.
+
+    Examples
+    --------
+    >>> adata = [scmkl.create_adata(...)]
+    >>> folds = scmkl.get_folds(adata[0], k=4)
+    >>> sort_idcs, fold_train, fold_test = sort_samples(fold_train, 
+    ...                                                 fold_test)
+    >>> fold_adata = scmkl.prepare_fold(adata, sort_idcs, 
+    ...                                 fold_train, fold_test)
     """
-    # Splits the labels evenly between folds
-    pos_idcs = np.where(y == np.unique(y)[0])[0]
-    neg_idcs = np.setdiff1d(np.arange(len(y)), pos_idcs)
+    for i in range(len(fold_adata)):
+        fold_adata[i] = fold_adata[i][sort_idcs]
+        fold_adata[i].uns['train_indices'] = fold_train
+        fold_adata[i].uns['test_indices'] = fold_test
     
-    pos_anno = np.arange(len(pos_idcs)) % k
-    neg_anno = np.arange(len(neg_idcs)) % k
+    # Need to recalculate sigmas for new fold train
+    for i in range(len(fold_adata)):
+        if 'sigma' in fold_adata[i].uns_keys():
+            del fold_adata[i].uns['sigma']
 
-    return pos_idcs, neg_idcs, pos_anno, neg_anno
+    return fold_adata
+
+
+def process_fold(fold_adata, names, tfidf, combination, batches, batch_size):
+    """
+    Combines adata if needed, estimates sigmas, and calculates kernels 
+    for model training and evaluation.
+
+    Parameters
+    ----------
+    fold_adata : list[ad.AnnData]
+        A `list` of `AnnData` objects to combine and calculate kernels 
+        for.
+
+    names : list
+        A list of names respective to each `AnnData` in `fold_adata` 
+        for verbose outputs.
+
+    tfidf : list[bool]
+        A boolean list indicating whether or not to perform TF-IDF 
+        transformation for each adata respective to `fold_adata`.
+
+    combination : str
+        The method of combining `AnnData` objects passed to 
+        `ad.concatenate()`. Ignored if `len(fold_adata) == 1`.
+
+    batches : int
+        The number of batches for kernel width (sigma) estimation.
+
+    batch_size : int
+        The number of samples to include in each batch of kernel width 
+        (sigma) estimation.
+
+    Examples
+    --------
+    >>> adata = [scmkl.create_adata(...)]
+    >>> tfidf = [False]
+    >>> names = ['adata1']
+    >>> folds = scmkl.get_folds(adata[0], k=4)
+    >>> sort_idcs, fold_train, fold_test = sort_samples(fold_train, 
+    ...                                                 fold_test)
+    >>> fold_adata = scmkl.prepare_fold(adata, sort_idcs, 
+    ...                                 fold_train, fold_test)
+    >>> fold_adata = scmkl.process_fold(fold_adata, names, tfidf)
+    """
+    if 1 < len(fold_adata):
+        fold_adata = multimodal_processing(fold_adata, names, tfidf, 
+                                           combination, batches, 
+                                           batch_size, False)
+    else:
+        fold_adata = fold_adata[0]
+        if tfidf[0]:
+            fold_adata = tfidf_normalize(fold_adata, binarize=True)
+        fold_adata = calculate_z(fold_adata, n_features= 5000, 
+                                 batches=batches, batch_size=batch_size)
+        
+    return fold_adata
 
 
 def bin_optimize_alpha(adata: list[ad.AnnData], 
@@ -142,58 +272,35 @@ def bin_optimize_alpha(adata: list[ad.AnnData],
 
     alpha_array = sort_alphas(alpha_array)
 
-    # Need even folds for cross validation 
-    train_indices, y = get_labels(adata)
-    pos_idcs, neg_idcs, pos_anno, neg_anno = get_folds(y, k)
+    # Only want folds for training samples
+    train_indices = adata[0].uns['train_indices'].copy()
+    cv_adata = [adata[i][train_indices, :].copy()
+                for i in range(len(adata))]
+
+    folds = get_folds(adata[0], k)
 
     metric_array = np.zeros((len(alpha_array), k))
 
-    gc.collect()
+    for fold in range(k):
 
-    for fold in np.arange(k):
-        cv_adata = [adata[i][train_indices, :].copy()
-                    for i in range(len(adata))]
-        
-        for i in range(len(cv_adata)):
-            if 'sigma' in cv_adata[i].uns_keys():
-                del cv_adata[i].uns['sigma']
+        fold_train, fold_test = folds[fold]
+        fold_adata = cv_adata.copy()
 
-        # Create CV train/test indices
-        fold_train = np.concatenate((pos_idcs[np.where(pos_anno != fold)[0]], 
-                                     neg_idcs[np.where(neg_anno != fold)[0]]))
-        fold_test = np.concatenate((pos_idcs[np.where(pos_anno == fold)[0]], 
-                                    neg_idcs[np.where(neg_anno == fold)[0]]))
-
-
-        for i in range(len(cv_adata)):
-            cv_adata[i].uns['train_indices'] = fold_train
-            cv_adata[i].uns['test_indices'] = fold_test
+        # Downstream functions expect train then test samples in adata(s)
+        sort_idcs, fold_train, fold_test = sort_samples(fold_train, fold_test)
+        fold_adata = prepare_fold(fold_adata, sort_idcs, 
+                                  fold_train, fold_test)
             
         names = ['Adata ' + str(i + 1) for i in range(len(cv_adata))]
 
-        if 1 < len(cv_adata):
-            cv_adata = multimodal_processing(cv_adata, names, tfidf, 
-                                             combination, batches, 
-                                             batch_size, False)
-        else:
-            cv_adata = cv_adata[0]
-            if tfidf[0]:
-                cv_adata = tfidf_normalize(cv_adata, binarize=True)
-            cv_adata = calculate_z(cv_adata, n_features= 5000, 
-                                   batches=batches, batch_size=batch_size)
-            
-                    
-            
-        # In train_model we index Z_train for balancing multiclass labels. We just recreate
-        # dummy indices here that are unused for use in the binary case
-        cv_adata.uns['train_indices'] = np.arange(0, len(fold_train))
-
-        gc.collect()
+        # Adatas need combined if applicable and kernels calculated 
+        fold_adata = process_fold(fold_adata, names, tfidf, combination, 
+                                  batches, batch_size)
 
         for i, alpha in enumerate(alpha_array):
 
-            cv_adata = train_model(cv_adata, group_size, alpha = alpha)
-            _, metrics = predict(cv_adata, metrics = [metric])
+            fold_adata = train_model(fold_adata, group_size, alpha=alpha)
+            _, metrics = predict(fold_adata, metrics=[metric])
             metric_array[i, fold] = metrics[metric]
 
             # If metrics are decreasing, cv stopped and moving to next fold
@@ -201,12 +308,14 @@ def bin_optimize_alpha(adata: list[ad.AnnData],
             if end_fold and early_stopping:
                 break
 
-        del cv_adata
+        del fold_adata
         gc.collect()
 
-    # Take AUROC mean across the k folds to find alpha yielding highest AUROC
-    alpha_star = alpha_array[np.argmax(np.mean(metric_array, axis = 1))]
+    del cv_adata
     gc.collect()
+
+    # Need highest performing alpha for given metric
+    alpha_star = alpha_array[np.argmax(np.mean(metric_array, axis = 1))]
 
     return alpha_star
 
