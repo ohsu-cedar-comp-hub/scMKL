@@ -173,9 +173,10 @@ def calculate_z(adata, n_features=5000, batches=10,
 
         # Data filtering, and transformation according to given data_type
         # Will remove low variance (< 1e5) features regardless of data_type
-        # If scale_data will log scale and z-score the data
+        # If scale/transform data depending on .uns values
         X_train, X_test = process_data(X_train=X_train, X_test=X_test, 
                                        scale_data=adata.uns['scale_data'], 
+                                       transform_data=adata.uns['transform_data'],
                                        return_dense=True)    
 
         # Getting sigma

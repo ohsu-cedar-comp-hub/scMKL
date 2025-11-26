@@ -1,6 +1,6 @@
+import gc
 import numpy as np
 import anndata as ad
-import gc
 from sklearn.model_selection import StratifiedKFold
 
 from scmkl.tfidf_normalize import tfidf_normalize

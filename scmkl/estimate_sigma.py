@@ -137,6 +137,7 @@ def est_group_sigma(adata: ad.AnnData,
 
     X_train = process_data(X_train, 
                         scale_data = adata.uns['scale_data'], 
+                        transform_data=adata.uns['transform_data'],
                         return_dense = True)
 
     if scipy.sparse.issparse(X_train):
@@ -247,6 +248,7 @@ def estimate_sigma(adata: ad.AnnData,
         # If scale_data will log scale and z-score the data
         X_train = process_data(X_train=X_train,
                                scale_data=adata.uns['scale_data'], 
+                               transform_data=adata.uns['transform_data'],
                                return_dense=True)    
 
         # Estimating sigma

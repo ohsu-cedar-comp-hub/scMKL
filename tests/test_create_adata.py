@@ -35,8 +35,8 @@ class TestCreateAdata(unittest.TestCase):
         """
         # Read-in data
         x, grouping, features, labels = read_data()
-        train = ['train'] * 800
-        test = ['test'] * 200
+        train = ['train']*800
+        test = ['test']*200
         train_test = np.array(train + test)
         d = scmkl.calculate_d(len(labels))
 
@@ -140,10 +140,10 @@ class TestCreateAdata(unittest.TestCase):
 
         # Creating adata to test, remove features must be `False` as it 
         # unreliably resorts features
-        adata = scmkl.create_adata(X = x, feature_names = features, 
+        adata = scmkl.create_adata(X=x, feature_names=features, 
                                    obs_names=obs,
-                                   cell_labels = labels, 
-                                   group_dict = grouping,
+                                   cell_labels=labels, 
+                                   group_dict=grouping,
                                    remove_features=False, 
                                    split_data=train_test)
         

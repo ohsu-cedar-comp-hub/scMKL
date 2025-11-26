@@ -7,7 +7,7 @@ from test_calculate_z import create_test_adata
 
 def read_h5ad(mod: str):
     """
-    Reads in a h5ad file in example/data directory.
+    Reads in a h5ad file in ../example/data directory.
     """
     h5_fp = f'../example/data/pbmc_{mod.lower()}.h5ad'
     group_fp = f'../example/data/_{mod.upper()}_azimuth_pbmc_groupings.pkl'
@@ -15,11 +15,13 @@ def read_h5ad(mod: str):
 
     split_data = np.array(['train']*adata.shape[0])
     split_data[adata.obs['batch'] == '3k'] = 'test'
+    transform_data = 'rna' == mod.lower()
 
     adata = scmkl.format_adata(adata, 'celltypes', group_fp, 
                                split_data=split_data, 
                                allow_multiclass=True, 
-                               class_threshold=2000)
+                               class_threshold=2000,
+                               transform_data=transform_data)
 
     return adata
 
@@ -116,13 +118,13 @@ class TestOptimizeAlpha(unittest.TestCase):
                                            train_dict=train_dict,
                                            metric='F1-Score',
                                            batch_size=26)
-        
+
         expected_alphas = {
             'B': 0.3, 
             'CD14+ Monocytes': 0.3, 
-            'CD16+ Monocytes': 0.1, 
-            'CD4 T': 0.05, 
-            'CD8 T': 0.3, 
+            'CD16+ Monocytes': 0.3, 
+            'CD4 T': 0.1, 
+            'CD8 T': 0.1, 
             'Dendritic': 0.05, 
             'NK': 0.1}
         
@@ -132,7 +134,7 @@ class TestOptimizeAlpha(unittest.TestCase):
         
     def test_folds_and_processing(self):
         """
-        Much of this code adapted from optimize alpha code
+        Much of this code adapted from optimize alpha code.
         """
         # Need a matrix to track fold generation with
         x = np.arange(500).reshape(500,1)

@@ -143,16 +143,17 @@ def multimodal_processing(adatas : list[ad.AnnData], names : list[str],
     Examples
     --------
     >>> rna_adata = scmkl.create_adata(X = mcf7_rna_mat, 
-    ...                                feature_names = gene_names, 
-    ...                                scale_data = True, 
-    ...                                cell_labels = cell_labels, 
-    ...                                 group_dict = rna_grouping)
+    ...                                feature_names=gene_names, 
+    ...                                scale_data=True, 
+    ...                                transform_data=True,
+    ...                                cell_labels=cell_labels, 
+    ...                                 group_dict=rna_grouping)
     >>>
-    >>> atac_adata = scmkl.create_adata(X = mcf7_atac_mat, 
-    ...                                 feature_names = peak_names, 
-    ...                                 scale_data = False, 
-    ...                                 cell_labels = cell_labels, 
-    ...                                 group_dict = atac_grouping)
+    >>> atac_adata = scmkl.create_adata(X=mcf7_atac_mat, 
+    ...                                 feature_names=peak_names, 
+    ...                                 scale_data=False, 
+    ...                                 cell_labels=cell_labels, 
+    ...                                 group_dict=atac_grouping)
     >>>
     >>> adatas = [rna_adata, atac_adata]
     >>> mod_names = ['rna', 'atac']

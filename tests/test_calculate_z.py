@@ -17,7 +17,8 @@ def create_test_adata(mod = 'RNA'):
                                    cell_labels = labels, D = d,
                                    group_dict = grouping, 
                                    remove_features = False,
-                                   scale_data=scale_data)
+                                   scale_data=scale_data,
+                                   transform_data=scale_data)
 
     return adata
 

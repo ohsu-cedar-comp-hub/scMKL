@@ -259,11 +259,11 @@ def sort_samples(train_indices, test_indices):
 def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame, 
                  feature_names: np.ndarray, cell_labels: np.ndarray, 
                  group_dict: dict, obs_names: None | np.ndarray=None, 
-                 scale_data: bool=True, split_data: np.ndarray | None=None, 
-                 D: int | None=None, remove_features: bool=True, 
-                 train_ratio: float=0.8, distance_metric: str='euclidean', 
-                 kernel_type: str='Gaussian', random_state: int=1, 
-                 allow_multiclass: bool = False, 
+                 scale_data: bool=True, transform_data: bool=False, 
+                 split_data: np.ndarray | None=None, D: int | None=None, 
+                 remove_features: bool=True, train_ratio: float=0.8, 
+                 distance_metric: str='euclidean', kernel_type: str='Gaussian', 
+                 random_state: int=1, allow_multiclass: bool = False, 
                  class_threshold: str | int | None = None,
                  reduction: str | None = None, tfidf: bool = False):
     """
@@ -295,8 +295,12 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
 
     scale_data : bool  
         If `True`, data matrix is log transformed and standard 
-        scaled. 
-        
+        scaled. Default is `True`.
+
+    transform_data : bool
+        If `True`, data will be log1p transformed (recommended for 
+        counts data). Default is `False`.   
+    
     split_data : None | np.ndarray
         If `None`, data will be split stratified by cell labels. 
         Else, is an array of precalculated train/test split 
@@ -386,7 +390,10 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
             Number of dimensions to scMKL with.
 
         `adata.uns['scale_data']` (bool):
-            Whether or not data is log and z-score transformed.
+            Whether or not data is scaled.
+
+        `adata.uns['transform_data']` (bool):
+            Whether or not data is log1p transformed.
 
         `adata.uns['distance_metric']` (str): 
             Distance metric as given.
@@ -458,6 +465,7 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
     adata.uns['group_dict'] = group_dict
     adata.uns['seed_obj'] = np.random.default_rng(100*random_state)
     adata.uns['scale_data'] = scale_data
+    adata.uns['transform_data'] = transform_data
     adata.uns['D'] = D if D is not None else calculate_d(adata.shape[0])
     adata.uns['kernel_type'] = kernel_type
     adata.uns['distance_metric'] = distance_metric
@@ -522,20 +530,23 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
     adata.uns['test_indices'] = test_indices
 
     if not scale_data:
-        print("WARNING: Data will not be log transformed and scaled. "
+        print("WARNING: Data will not be scaled. "
               "To change this behavior, set scale_data to True")
+    if not transform_data:
+        print("WARNING: Data will not be transformed."
+              "To change this behavior, set transform_data to True")
 
     return adata
 
 
 def format_adata(adata: ad.AnnData | str, cell_labels: np.ndarray | str, 
                  group_dict: dict | str, use_raw: bool=False, 
-                 scale_data: bool=True, split_data: np.ndarray | None=None, 
-                 D: int | None=None, remove_features: bool=True, 
-                 train_ratio: float=0.8, distance_metric: str='euclidean', 
-                 kernel_type: str='Gaussian', random_state: int=1, 
-                 allow_multiclass: bool = False, 
-                 class_threshold: str | int | None= None, 
+                 scale_data: bool=True, transform_data: bool=False, 
+                 split_data: np.ndarray | None=None, D: int | None=None, 
+                 remove_features: bool=True, train_ratio: float=0.8, 
+                 distance_metric: str='euclidean', kernel_type: str='Gaussian', 
+                 random_state: int=1, allow_multiclass: bool = False, 
+                 class_threshold: str | int | None=None, 
                  reduction: str | None = None, tfidf: bool = False):
     """
     Function to format an `ad.AnnData` object to carry all relevant 
@@ -574,6 +585,10 @@ def format_adata(adata: ad.AnnData | str, cell_labels: np.ndarray | str,
     scale_data : bool  
         If `True`, data matrix is log transformed and standard 
         scaled. 
+
+    transform_data : bool
+        If `True`, data will be log1p transformed (recommended for 
+        counts data). Default is `False`. 
         
     split_data : None | np.ndarray
         If `None`, data will be split stratified by cell labels. 
@@ -662,7 +677,10 @@ def format_adata(adata: ad.AnnData | str, cell_labels: np.ndarray | str,
             Number of dimensions to scMKL with.
 
         `adata.uns['scale_data']` (bool):
-            Whether or not data is log and z-score transformed.
+            Whether or not data is scaled.
+
+        `adata.uns['transform_data']` (bool):
+            Whether or not data is log1p transformed.
 
         `adata.uns['distance_metric']` (str): 
             Distance metric as given.
@@ -711,7 +729,7 @@ def format_adata(adata: ad.AnnData | str, cell_labels: np.ndarray | str,
 
     adata = create_adata(X, adata.var_names.to_numpy().copy(), cell_labels, 
                          group_dict, adata.obs_names.to_numpy().copy(), 
-                         scale_data, split_data, D, remove_features, 
+                         scale_data, transform_data, split_data, D, remove_features, 
                          train_ratio, distance_metric, kernel_type, 
                          random_state, allow_multiclass, class_threshold, 
                          reduction, tfidf)

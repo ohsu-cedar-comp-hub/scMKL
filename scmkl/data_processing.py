@@ -35,7 +35,7 @@ def sparse_var(X: scipy.sparse._csc.csc_matrix | np.ndarray, axis: int | None=No
 
 def process_data(X_train: np.ndarray | scipy.sparse._csc.csc_matrix,
                  X_test: np.ndarray | scipy.sparse._csc.csc_matrix | None=None,
-                 scale_data: bool=True, 
+                 scale_data: bool=True, transform_data: bool=False,
                  return_dense: bool=True):
     """
     Function to preprocess data matrix according to type of data 
@@ -55,6 +55,10 @@ def process_data(X_train: np.ndarray | scipy.sparse._csc.csc_matrix,
     scale_data : bool
         If `True`, data will be logarithmized then z-score 
         transformed.
+
+    transform_data : bool
+        If `True`, data will be log1p transformed (recommended for 
+        counts data). Default is `False`.
 
     return_dense: bool
         If `True`, a np.ndarray will be returned as opposed to a 
@@ -83,7 +87,7 @@ def process_data(X_train: np.ndarray | scipy.sparse._csc.csc_matrix,
     X_test = X_test[:, variable_features]
 
     # Data processing according to data type
-    if scale_data:
+    if transform_data:
 
         if scipy.sparse.issparse(X_train):
             X_train = X_train.log1p()
@@ -91,7 +95,8 @@ def process_data(X_train: np.ndarray | scipy.sparse._csc.csc_matrix,
         else:
             X_train = np.log1p(X_train)
             X_test = np.log1p(X_test)
-            
+    
+    if scale_data:
         #Center and scale count data
         train_means = np.mean(X_train, 0)
         train_sds = np.sqrt(var[variable_features])
