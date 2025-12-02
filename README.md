@@ -4,7 +4,7 @@
 
 
 ![PyPI](https://img.shields.io/pypi/v/scmkl?label=pypi%20package)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/scmkl)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/scmkl?period=total&units=INTERNATIONAL_SYSTEM&left_color=GREY&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/scmkl)
 [![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/version.svg?style=flat&cache-control=no-cache)](https://anaconda.org/ivango17/scmkl)
 [![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/downloads.svg?style=flat&cache-control=no-cache)](https://anaconda.org/ivango17/scmkl)
 [![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/latest_release_date.svg?style=flat&cache-control=no-cache)](https://anaconda.org/ivango17/scmkl)
