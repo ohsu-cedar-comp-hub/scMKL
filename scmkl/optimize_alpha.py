@@ -545,4 +545,6 @@ def optimize_alpha(adata: ad.AnnData | list[ad.AnnData],
                                         early_stopping, batches, 
                                         batch_size, combination)
         
+    gc.collect()
+
     return alpha_star
