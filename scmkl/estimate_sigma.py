@@ -136,13 +136,13 @@ def est_group_sigma(adata: ad.AnnData,
         X_train = tfidf(X_train, mode = 'normalize')
 
     X_train = process_data(X_train, 
-                        scale_data = adata.uns['scale_data'], 
-                        transform_data=adata.uns['transform_data'],
-                        return_dense = True)
+                           scale_data=adata.uns['scale_data'], 
+                           transform_data=adata.uns['transform_data'],
+                           return_dense=True)
 
     if scipy.sparse.issparse(X_train):
         X_train = X_train.toarray()
-        X_train = np.array(X_train, dtype = np.float32)
+        X_train = np.array(X_train, dtype=np.float32)
 
     # Calculates mean sigma from all batches
     sigma = batch_sigma(X_train, adata.uns['distance_metric'], batch_idx)

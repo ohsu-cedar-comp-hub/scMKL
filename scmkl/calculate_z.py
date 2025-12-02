@@ -63,13 +63,13 @@ def calc_groupz(X_train, X_test, adata, D, sigma, proj_func):
         Training and testing Z matrices for group.
     """  
     if scipy.sparse.issparse(X_train):
-        X_train = X_train.toarray().astype(np.float16)
-        X_test = X_test.toarray().astype(np.float16)
+        X_train = X_train.toarray().astype(np.float32)
+        X_test = X_test.toarray().astype(np.float32)
 
     W = proj_func(X_train, sigma, adata.uns['seed_obj'], D)
     
-    train_projection = np.matmul(X_train, W)
-    test_projection = np.matmul(X_test, W)
+    train_projection = np.matmul(X_train, W, dtype=np.float32)
+    test_projection = np.matmul(X_test, W, dtype=np.float32)
 
     return train_projection, test_projection
 
@@ -128,15 +128,15 @@ def calculate_z(adata, n_features=5000, batches=10,
     train_len = len(adata.uns['train_indices'])
     test_len = len(adata.uns['test_indices'])
 
-    if batch_size * batches > len(adata.uns['train_indices']):
+    if batch_size * batches > train_len:
         old_batch_size = batch_size
-        batch_size = int(len(adata.uns['train_indices'])/batches)
+        batch_size = int(train_len/batches)
         print("Specified batch size required too many cells for "
                 "independent batches. Reduced batch size from "
                 f"{old_batch_size} to {batch_size}")
 
     if 'sigma' not in adata.uns.keys():
-        n_samples = np.min((2000, adata.uns['train_indices'].shape[0]))
+        n_samples = np.min((2000, train_len))
         sample_range = np.arange(n_samples)
         batch_idx = get_batches(sample_range, adata.uns['seed_obj'], 
                                 batches=batches, batch_size=batch_size)
@@ -145,8 +145,8 @@ def calculate_z(adata, n_features=5000, batches=10,
     # Create Arrays to store concatenated group Zs
     # Each group of features will have a corresponding entry in each array
     n_cols = 2*adata.uns['D']*n_pathway
-    Z_train = np.zeros((train_len, n_cols))
-    Z_test = np.zeros((test_len, n_cols))
+    Z_train = np.zeros((train_len, n_cols), dtype=np.float32)
+    Z_test = np.zeros((test_len, n_cols), dtype=np.float32)
 
 
     # Setting kernel function 
@@ -196,11 +196,11 @@ def calculate_z(adata, n_features=5000, batches=10,
         # Preserves order to be able to extract meaningful groups
         cos_idx, sin_idx = get_z_indices(m, D)
 
-        Z_train[0:, cos_idx] = np.cos(train_projection)
-        Z_train[0:, sin_idx] = np.sin(train_projection)
+        Z_train[0:, cos_idx] = np.cos(train_projection, dtype=np.float32)
+        Z_train[0:, sin_idx] = np.sin(train_projection, dtype=np.float32)
 
-        Z_test[0:, cos_idx] = np.cos(test_projection)
-        Z_test[0:, sin_idx] = np.sin(test_projection)
+        Z_test[0:, cos_idx] = np.cos(test_projection, dtype=np.float32)
+        Z_test[0:, sin_idx] = np.sin(test_projection, dtype=np.float32)
 
     adata.uns['Z_train'] = Z_train*sq_i_d
     adata.uns['Z_test'] = Z_test*sq_i_d
