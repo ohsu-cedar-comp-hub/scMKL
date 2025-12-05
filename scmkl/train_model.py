@@ -70,10 +70,11 @@ def train_model(adata: ad.AnnData, group_size: int | None=None, alpha:float=0.9)
     alphamax *= alpha
 
     # Instantiate celer Group Lasso Regression Model Object
-    model = celer.GroupLasso(groups = group_size, alpha = alphamax)
+    model = celer.GroupLasso(groups=group_size, alpha=alphamax)
 
     # Fit model using training data
     model.fit(X_train, train_labels.ravel())
 
     adata.uns['model'] = model
+    
     return adata

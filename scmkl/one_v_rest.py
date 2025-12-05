@@ -1,8 +1,10 @@
+import gc
+import tracemalloc
 import numpy as np
 import pandas as pd
 import anndata as ad
 from sklearn.metrics import f1_score
-import gc
+
 
 from scmkl.run import run
 from scmkl.calculate_z import calculate_z
@@ -349,7 +351,7 @@ def one_v_rest(adatas : list | ad.AnnData, names : list,
                                         cell_labels, 
                                         adata.uns['seed_obj'],
                                         other_factor)
-
+    tracemalloc.start()
     for label in uniq_labels:
 
         print(f"Comparing {label} to other types", flush = True)
@@ -372,6 +374,7 @@ def one_v_rest(adatas : list | ad.AnnData, names : list,
         
         # Running scMKL
         results[label] = run(adata, alpha_list, return_probs=True)
+        gc.collect()
 
     # Getting final predictions
     if isinstance(alpha_params, dict):
@@ -398,7 +401,7 @@ def one_v_rest(adatas : list | ad.AnnData, names : list,
     results['Low_confidence'] = low_conf
     results['Macro_F1-Score'] = macro_f1
 
-    if force_balance:
+    if force_balance or train_dict:
         results['Training_indices'] = train_idx
 
     return results

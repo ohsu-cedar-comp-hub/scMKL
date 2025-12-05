@@ -115,7 +115,6 @@ def run(adata: ad.AnnData, alpha_list: np.ndarray,
         train_start = time.time()
 
         adata = train_model(adata, group_size= 2*D, alpha = alpha)
-
         if return_probs:
             alpha_res = predict(adata, 
                                 metrics = metrics,

@@ -1,6 +1,6 @@
-Metadata-Version: 2.4
+Metadata-Version: 2.1
 Name: scmkl
-Version: 0.4.0
+Version: 0.4.1
 Summary: Single-cell analysis using Multiple Kernel Learning
 Home-page: https://github.com/ohsu-cedar-comp-hub/scMKL/tree/main
 Author: Sam Kupp, Ian VanGordon, Cigdem Ak
@@ -25,16 +25,6 @@ Requires-Dist: scanpy==1.11.4
 Requires-Dist: umap-learn==0.5.7
 Requires-Dist: muon==0.1.6
 Requires-Dist: gseapy==1.1.9
-Dynamic: author
-Dynamic: author-email
-Dynamic: classifier
-Dynamic: description
-Dynamic: description-content-type
-Dynamic: home-page
-Dynamic: license-file
-Dynamic: requires-dist
-Dynamic: requires-python
-Dynamic: summary
 
 <h1 align="center">
 <img src="https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/scMKL_logo.png?raw=true" width="500"/>
@@ -42,7 +32,7 @@ Dynamic: summary
 
 
 ![PyPI](https://img.shields.io/pypi/v/scmkl?label=pypi%20package)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/scmkl)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/scmkl?period=total&units=INTERNATIONAL_SYSTEM&left_color=GREY&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/scmkl)
 [![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/version.svg?style=flat&cache-control=no-cache)](https://anaconda.org/ivango17/scmkl)
 [![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/downloads.svg?style=flat&cache-control=no-cache)](https://anaconda.org/ivango17/scmkl)
 [![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/latest_release_date.svg?style=flat&cache-control=no-cache)](https://anaconda.org/ivango17/scmkl)

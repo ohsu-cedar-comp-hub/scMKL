@@ -142,7 +142,7 @@ def est_group_sigma(adata: ad.AnnData,
 
     if scipy.sparse.issparse(X_train):
         X_train = X_train.toarray()
-        X_train = np.array(X_train, dtype=np.float32)
+        X_train = np.array(X_train, dtype=np.float16)
 
     # Calculates mean sigma from all batches
     sigma = batch_sigma(X_train, adata.uns['distance_metric'], batch_idx)
