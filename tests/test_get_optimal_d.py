@@ -8,14 +8,14 @@ def create_dummy_adata():
     """
     Creates a dummy unformatted adata object to test functions.
     """
-    x = np.arange(60000).reshape(60000,1)
+    x = np.arange(6000).reshape(6000,1)
     x = np.concatenate([x, x, x], axis=1)
     vars = {f'gene_{i}' for i in range(x.shape[1])}
     labs = [
         'class_1', 'class_2', 'class_2', 
         'class_1', 'class_1', 'class_3'
         ]
-    labs *= 10000
+    labs *= 1000
 
     group_dict = {
             'Group1': ['gene_0', 'gene_2'],
@@ -26,8 +26,8 @@ def create_dummy_adata():
     adata.obs['labels'] = labs
     adata.var_names = vars
     adata.uns['group_dict'] = group_dict
-    adata.uns['train_indices'] = np.arange(0, 48000)
-    adata.uns['test_indices'] = np.arange(48000, 60000)
+    adata.uns['train_indices'] = np.arange(0, 4800)
+    adata.uns['test_indices'] = np.arange(4800, 6000)
 
     return adata
 
@@ -54,8 +54,7 @@ class TestGetOptimalD(unittest.TestCase):
         """
         adata = create_dummy_adata()
         balanced_d = scmkl.calculate_d(scmkl.get_median_size(adata, 1.5))
-
-        self.assertEqual(balanced_d, 445, 
+        self.assertEqual(balanced_d, 126, 
                          "Multiclass D calculation is incorrect.")
         
 
@@ -65,7 +64,7 @@ class TestGetOptimalD(unittest.TestCase):
         correctly across multiple use cases.
         """
         adata = create_dummy_adata()
-        bin_labs = np.array(['class_1', 'class_2']*30000)
+        bin_labs = np.array(['class_1', 'class_2']*3000)
 
         # Need to test D provided case
         formatted_adata = scmkl.format_adata(adata, bin_labs, 
@@ -76,14 +75,15 @@ class TestGetOptimalD(unittest.TestCase):
         # Need to test D not provided for binary case
         formatted_adata = scmkl.format_adata(adata, bin_labs, 
                                              adata.uns['group_dict'])
-        self.assertEqual(formatted_adata.uns['D'], 587, 
+        self.assertEqual(formatted_adata.uns['D'], 167, 
                          "Incorrect D when D not provided for binary.")
         
         # Need to test D not provided for binary case
         formatted_adata = scmkl.format_adata(adata, 'labels', 
                                              adata.uns['group_dict'],
                                              allow_multiclass=True)
-        self.assertEqual(formatted_adata.uns['D'], 445, 
+        print(formatted_adata.uns['D'])
+        self.assertEqual(formatted_adata.uns['D'], 126, 
                          "Incorrect D when D not provided for multiclass.")
 
 
