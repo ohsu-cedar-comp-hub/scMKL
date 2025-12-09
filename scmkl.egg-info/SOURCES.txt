@@ -31,6 +31,7 @@ tests/test_create_adata.py
 tests/test_dataframes.py
 tests/test_estimate_sigma.py
 tests/test_get_gene_groupings.py
+tests/test_get_optimal_d.py
 tests/test_get_region_grouping.py
 tests/test_multimodal_processing.py
 tests/test_one_v_rest.py

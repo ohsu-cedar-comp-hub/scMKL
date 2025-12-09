@@ -75,6 +75,46 @@ class TestCalculateZ(unittest.TestCase):
         self.assertAlmostEqual(np.median(adata.uns['Z_test']), 0.063864,
                                places = 4, msg = ("Z_test median is out of "
                                                   "bounds for expected dist"))
+        
+
+    def test_check_invalid_z(self):
+        """
+        Ensures a value error is raise when inputting adata with np.nan 
+        containing Z_mat.
+        """
+        adata = create_test_adata()
+        adata = scmkl.calculate_z(adata)
+
+        adata.uns['Z_train'][100,1000] = np.nan
+        adata.uns['Z_test'][10, 100] = np.inf
+
+        with self.assertRaises(ValueError) as ar:
+            scmkl.check_for_nan(adata)
+
+        with self.assertRaises(ValueError) as ar:
+            scmkl.check_for_inf(adata)
+
+    def test_check_valid_z(self):
+        """
+        Ensures a value error is raise when inputting adata with np.nan 
+        containing Z_mat.
+        """
+        adata = create_test_adata()
+        adata = scmkl.calculate_z(adata)
+
+        n_nans = np.sum(np.isnan(adata.uns['Z_train']))
+        n_nans += np.sum(np.isnan(adata.uns['Z_test']))
+
+        n_infs = np.sum(np.isinf(adata.uns['Z_train']))
+        n_infs += np.sum(np.isinf(adata.uns['Z_test']))
+
+        self.assertFalse(bool(n_nans), 
+                         "scmkl.check_for_nan raised ValueError with valid Z.")
+        
+        self.assertFalse(bool(n_infs), 
+                         "scmkl.check_for_inf raised ValueError with valid Z.")
+
+
 
 if __name__ == '__main__':
     unittest.main()

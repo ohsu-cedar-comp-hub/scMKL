@@ -150,8 +150,8 @@ def est_group_sigma(adata: ad.AnnData,
     # sigma = 0 is numerically unusable in later steps
     # Using such a small sigma will result in wide distribution, and 
     # typically a non-predictive Z
-    if sigma == 0:
-        sigma += 1e-5
+    if sigma < 1e-2:
+        sigma = 1e-2
 
     if n_features < n_group_features:
         # Heuristic we calculated to account for fewer features used in 
@@ -213,11 +213,11 @@ def estimate_sigma(adata: ad.AnnData,
         batch_size = int(len(adata.uns['train_indices'])/batches)
         print("Specified batch size required too many cells for "
                 "independent batches. Reduced batch size from "
-                f"{old_batch_size} to {batch_size}")
+                f"{old_batch_size} to {batch_size}", flush=True)
 
     if batch_size > 2000:
         print("Warning: Batch sizes over 2000 may "
-               "result in long run-time.")
+               "result in long run-time.", flush=True)
         
     # Getting subsample indices
     sample_size = np.min((2000, adata.uns['train_indices'].shape[0]))

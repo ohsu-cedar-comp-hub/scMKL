@@ -8,6 +8,58 @@ from scmkl.data_processing import process_data, get_group_mat, sample_cells
 from scmkl.projections import gaussian_trans, laplacian_trans, cauchy_trans
 
 
+def check_for_nan(adata: ad.AnnData):
+    """
+    Ensures only valid values are in training and test matrices.
+
+    Parameters
+    ----------
+    adata : ad.AnnData
+        Object with `'Z_train'` and `'Z_test'` keys in `.uns` 
+        attribute.
+
+    Returns
+    -------
+    None
+    """
+    n_nans = np.sum(np.isnan(adata.uns['Z_train']))
+    n_nans += np.sum(np.isnan(adata.uns['Z_test']))
+
+    if n_nans:
+        raise ValueError(
+            "Some values in Z matrix are type `np.nan`. This is likely "
+            "due to a small kernel width or invalid values in input Z matrix."
+            )
+    
+    return None
+
+
+def check_for_inf(adata: ad.AnnData):
+    """
+    Ensures only valid values are in training and test matrices.
+
+    Parameters
+    ----------
+    adata : ad.AnnData
+        Object with `'Z_train'` and `'Z_test'` keys in `.uns` 
+        attribute.
+
+    Returns
+    -------
+    None
+    """
+    n_infs = np.sum(np.isinf(adata.uns['Z_train']))
+    n_infs += np.sum(np.isinf(adata.uns['Z_test']))
+
+    if n_infs:
+        raise ValueError(
+            "Some values in Z matrix are type `np.inf`. This is likely "
+            "due to input matrix containing negative values."
+            )
+    
+    return None
+
+
 def get_z_indices(m, D):
     """
     Takes the number associated with the group as `m` and returns the 
@@ -207,5 +259,8 @@ def calculate_z(adata, n_features=5000, batches=10,
 
     if 'sigma' not in adata.uns.keys():
         adata.uns['sigma'] = np.array(sigma_list)
+
+    check_for_nan(adata)
+    check_for_inf(adata)
 
     return adata

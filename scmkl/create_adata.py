@@ -190,6 +190,32 @@ def binary_split(y: np.ndarray, train_indices: np.ndarray | None=None,
     return train_indices, test_indices
 
 
+def get_median_size(adata: ad.AnnData, other_factor: float=1.5):
+    """
+    Returns the median size of training plus testing samples per cell 
+    type. Used to calculate D for multiclass runs.
+
+    Parameters
+    ----------
+    adata : ad.AnnData
+        An ad.AnnData object with `test_indices` in `.uns` keys and 
+        `labels` in `.obs` keys.
+
+    Returns
+    -------
+    median_size : int
+        The median size of training plus testing samples across cell 
+        types. 
+    """
+    n_test = adata.uns['test_indices'].shape[0]
+
+    _, n_cts = np.unique(adata.obs['labels'][adata.uns['train_indices']], 
+                         return_counts=True)
+    sizes = [n_test + (other_factor*count) for count in n_cts]
+
+    return np.median(sizes)
+ 
+
 def calculate_d(num_samples : int):
     """
     This function calculates the optimal number of dimensions for 
@@ -221,6 +247,46 @@ def calculate_d(num_samples : int):
 
     return int(np.max([d, 100]))
 
+
+def get_optimal_d(adata: ad.AnnData, D: int | None, allow_multiclass: bool, 
+                  other_factor: float=1.5):
+    """
+    Takes the ad.AnnData object and input D. If D is type `int`, D will 
+    be return. If D is `None` and `allow_multiclass is False`, 
+    `scmkl.calculate_d(adata.shape[0])` will be returned. Else, median 
+    size of training and testing will be calculated and 
+    `scmkl.calculate_d(median_size)` will be returned.
+
+    Parameters
+    ----------
+    adata : ad.AnnData
+        An ad.AnnData object with `test_indices` in `.uns` keys and 
+        `labels` in `.obs` keys.
+    
+    D : int | None
+        The D provided as an `int` or `None` if optimal D should be 
+        calculated.
+
+    allow_multiclass : bool
+        Should be `False` if labels are binary. Else, should be `True` 
+        indicating there are more than two classes.
+
+    Returns
+    -------
+    d : int
+        Either the input or calculated optimal d for the experiment. 
+    """
+    if D is not None:    
+        assert isinstance(D, int) and D > 0, 'D must be a positive integer.'
+        return D
+    
+    if allow_multiclass:
+        size = get_median_size(adata, other_factor)
+    else:
+        size = adata.shape[0]
+
+    return calculate_d(size)
+        
 
 def sort_samples(train_indices, test_indices):
     """
@@ -265,7 +331,8 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
                  distance_metric: str='euclidean', kernel_type: str='Gaussian', 
                  random_state: int=1, allow_multiclass: bool = False, 
                  class_threshold: str | int | None = None,
-                 reduction: str | None = None, tfidf: bool = False):
+                 reduction: str | None = None, tfidf: bool = False, 
+                 other_factor: float=1.5):
     """
     Function to create an AnnData object to carry all relevant 
     information going forward.
@@ -425,13 +492,11 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
     """
 
     assert X.shape[1] == len(feature_names), ("Different number of features "
-                                              "in X than feature names")
+                                              "in X than feature names.")
     
     if not allow_multiclass:
         assert len(np.unique(cell_labels)) == 2, ("cell_labels must contain "
-                                                  "2 classes")
-    if D is not None:    
-        assert isinstance(D, int) and D > 0, 'D must be a positive integer'
+                                                  "2 classes.")
 
     kernel_options = ['gaussian', 'laplacian', 'cauchy']
     assert kernel_type.lower() in kernel_options, ("Given kernel type not "
@@ -466,7 +531,6 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
     adata.uns['seed_obj'] = np.random.default_rng(100*random_state)
     adata.uns['scale_data'] = scale_data
     adata.uns['transform_data'] = transform_data
-    adata.uns['D'] = D if D is not None else calculate_d(adata.shape[0])
     adata.uns['kernel_type'] = kernel_type
     adata.uns['distance_metric'] = distance_metric
     adata.uns['reduction'] = reduction if isinstance(reduction, str) else 'None'
@@ -528,6 +592,8 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
 
     adata.uns['train_indices'] = train_indices
     adata.uns['test_indices'] = test_indices
+
+    adata.uns['D'] = get_optimal_d(adata, D, allow_multiclass, other_factor)
 
     if not scale_data:
         print("WARNING: Data will not be scaled. "
