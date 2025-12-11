@@ -330,7 +330,7 @@ def one_v_rest(adatas : list | ad.AnnData, names : list,
                                       batches=batches,
                                       batch_size=batch_size)
     else:
-        adata = adatas[0].copy()
+        adata = adatas[0]
 
     # Preventing multiple copies of adata(s) in memory
     del adatas
