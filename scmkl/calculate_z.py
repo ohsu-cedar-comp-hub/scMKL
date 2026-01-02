@@ -123,6 +123,10 @@ def calc_groupz(X_train, X_test, adata, D, sigma, proj_func):
     train_projection = np.matmul(X_train, W, dtype=np.float16)
     test_projection = np.matmul(X_test, W, dtype=np.float16)
 
+    if np.isnan(train_projection).any() or np.isnan(test_projection).any():
+        train_projection = np.matmul(X_train, W, dtype=np.float64)
+        test_projection = np.matmul(X_test, W, dtype=np.float64)
+
     return train_projection, test_projection
 
 
@@ -212,6 +216,7 @@ def calculate_z(adata, n_features=5000, batches=10,
 
 
     # Loop over each of the groups and creating Z for each
+    z_dtype = np.float16
     sigma_list = list()
     for m, group_features in enumerate(adata.uns['group_dict'].values()):
 
@@ -244,16 +249,21 @@ def calculate_z(adata, n_features=5000, batches=10,
                                                         adata, D, sigma, 
                                                         proj_func)
 
+        if train_projection.dtype != z_dtype:
+            z_dtype = train_projection.dtype
+            Z_train = Z_train.astype(z_dtype)
+            Z_test = Z_test.astype(z_dtype)
+
         # Store group Z in whole-Z object
         # Preserves order to be able to extract meaningful groups
         cos_idx, sin_idx = get_z_indices(m, D)
 
-        Z_train[0:, cos_idx] = np.cos(train_projection, dtype=np.float16)
-        Z_train[0:, sin_idx] = np.sin(train_projection, dtype=np.float16)
+        Z_train[0:, cos_idx] = np.cos(train_projection, dtype=z_dtype)
+        Z_train[0:, sin_idx] = np.sin(train_projection, dtype=z_dtype)
 
-        Z_test[0:, cos_idx] = np.cos(test_projection, dtype=np.float16)
-        Z_test[0:, sin_idx] = np.sin(test_projection, dtype=np.float16)
-
+        Z_test[0:, cos_idx] = np.cos(test_projection, dtype=z_dtype)
+        Z_test[0:, sin_idx] = np.sin(test_projection, dtype=z_dtype)
+        
     adata.uns['Z_train'] = Z_train*sq_i_d
     adata.uns['Z_test'] = Z_test*sq_i_d
 
