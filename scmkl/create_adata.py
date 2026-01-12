@@ -595,6 +595,13 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
 
     adata.uns['D'] = get_optimal_d(adata, D, allow_multiclass, other_factor)
 
+    cts, cts_counts = np.unique(adata.obs['labels'], return_counts=True)
+    small_cts = cts[10 > cts_counts]
+    if small_cts.size:
+        print("WARNING: There are less than 10 cells for the "
+              "following label(s):", small_cts, 
+              "Can lead to issues running `scmkl.optimize_alpha()`.", 
+              sep='\n')
     if not scale_data:
         print("WARNING: Data will not be scaled. "
               "To change this behavior, set scale_data to True")

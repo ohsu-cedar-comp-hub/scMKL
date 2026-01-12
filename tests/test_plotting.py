@@ -118,6 +118,7 @@ class TestPlotting(unittest.TestCase):
         atac_adata = scmkl.format_adata(adata_fp.format('atac'), 'celltypes',
                                         group_fp.format('ATAC'),
                                         allow_multiclass=True)
+        atac_adata.X[1 > atac_adata.X] = 1
 
         scmkl.group_umap(atac_adata, g_name='CD16+ Monocyte Markers', 
                          is_binary=True, title='CD16+ Monocyte Markers', 
