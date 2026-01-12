@@ -7,7 +7,7 @@
 ## **scMKL Documentation**
 """
 
-__version__ = '0.4.3a1'
+__version__ = '0.4.3a2'
 
 __all__ = ['calculate_z', 
            'calculate_d',

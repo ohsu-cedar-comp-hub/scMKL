@@ -219,7 +219,7 @@ def multimodal_processing(adatas : list[ad.AnnData], names : list[str],
         if verbose:
             print(f"Estimating sigma and calculating Z for {names[i]}", 
                   flush = True)
-        adatas[i] = calculate_z(adata, n_features = 5000, batches=batches, 
+        adatas[i] = calculate_z(adatas[i], n_features=5000, batches=batches, 
                                 batch_size=batch_size)
 
     if 'labels' in adatas[0].obs:
