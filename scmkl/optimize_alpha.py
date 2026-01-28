@@ -298,7 +298,7 @@ def bin_optimize_alpha(adata: list[ad.AnnData],
                                   batches, batch_size)
 
         for i, alpha in enumerate(alpha_array):
-
+            print(f'Optimizing', alpha, flush=True)
             fold_adata = train_model(fold_adata, group_size, alpha=alpha)
             _, metrics = predict(fold_adata, metrics=[metric])
             metric_array[i, fold] = metrics[metric]
@@ -418,13 +418,14 @@ def multi_optimize_alpha(adata: list[ad.AnnData], group_size: int,
     opt_alpha_dict = dict()
 
     for cl in classes:
+        print('Optimizing alpha for', cl, flush=True)
         temp_classes = orig_labels.copy()
         temp_classes[temp_classes != cl] = 'other'
 
         for i in range(len(adata)):
             adata[i].obs['labels'] = temp_classes.copy()
             adata[i].uns['train_indices'] = train_idcs[cl]
-        
+
         opt_alpha_dict[cl] = bin_optimize_alpha(adata, group_size, tfidf, 
                                                 alpha_array, k, metric, 
                                                 early_stopping, batches, 

@@ -6,7 +6,8 @@ import gc
 import warnings
 
 
-def filter_features(feature_names: np.ndarray, group_dict: dict):
+def filter_features(feature_names: np.ndarray, group_dict: dict,
+                    add_ones: bool):
     """
     Function to remove features only in feature names or group_dict.
     Any features not included in group_dict will be removed from the
@@ -44,8 +45,9 @@ def filter_features(feature_names: np.ndarray, group_dict: dict):
         group_dict[group] = np.sort(np.array(group_feats))
 
     # Only keeping groupings that have at least two features
+    min_features = 1 if add_ones else 2
     group_dict = {group : group_dict[group] for group in group_dict.keys()
-                  if len(group_dict[group]) > 1}
+                  if len(group_dict[group]) >= min_features}
 
     group_features = np.array(list(group_features.intersection(feature_set)))
 
@@ -332,7 +334,7 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
                  random_state: int=1, allow_multiclass: bool = False, 
                  class_threshold: str | int | None = None,
                  reduction: str | None = None, tfidf: bool = False, 
-                 other_factor: float=1.5):
+                 other_factor: float=1.5, add_ones: bool=False):
     """
     Function to create an AnnData object to carry all relevant 
     information going forward.
@@ -426,6 +428,10 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
     tfidf: bool
         Whether to calculate TFIDF transformation on peaks within 
         groupings.
+
+    add_ones: bool
+        Allows the addition of ones for downstream functions to run 
+        single features.
         
     Returns
     -------
@@ -490,7 +496,6 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
     uns: 'group_dict', 'seed_obj', 'scale_data', 'D', 'kernel_type', 
     'distance_metric', 'train_indices', 'test_indices'
     """
-
     assert X.shape[1] == len(feature_names), ("Different number of features "
                                               "in X than feature names.")
     
@@ -513,7 +518,8 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
         adata.obs_names = obs_names
 
     filtered_feature_names, group_dict = filter_features(feature_names, 
-                                                          group_dict)
+                                                          group_dict,
+                                                          add_ones)
     
     # Ensuring that there are common features between feature_names and groups
     overlap_err = ("No common features between feature names and grouping "
@@ -535,6 +541,7 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
     adata.uns['distance_metric'] = distance_metric
     adata.uns['reduction'] = reduction if isinstance(reduction, str) else 'None'
     adata.uns['tfidf'] = tfidf
+    adata.uns['add_ones'] = add_ones
 
     if (split_data is None):
         assert X.shape[0] == len(cell_labels), ("Different number of cells "
@@ -620,7 +627,8 @@ def format_adata(adata: ad.AnnData | str, cell_labels: np.ndarray | str,
                  distance_metric: str='euclidean', kernel_type: str='Gaussian', 
                  random_state: int=1, allow_multiclass: bool = False, 
                  class_threshold: str | int | None=None, 
-                 reduction: str | None = None, tfidf: bool = False):
+                 reduction: str | None=None, tfidf: bool=False,
+                 other_factor: float=1.5, add_ones: bool=False):
     """
     Function to format an `ad.AnnData` object to carry all relevant 
     information going forward. `adata.obs_names` will be retained.
@@ -805,6 +813,6 @@ def format_adata(adata: ad.AnnData | str, cell_labels: np.ndarray | str,
                          scale_data, transform_data, split_data, D, remove_features, 
                          train_ratio, distance_metric, kernel_type, 
                          random_state, allow_multiclass, class_threshold, 
-                         reduction, tfidf)
+                         reduction, tfidf, other_factor, add_ones)
 
     return adata

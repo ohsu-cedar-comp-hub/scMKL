@@ -85,7 +85,7 @@ def get_z_indices(m, D):
     return cos_idx, sin_idx
 
 
-def calc_groupz(X_train, X_test, adata, D, sigma, proj_func):
+def calc_groupz(X_train, X_test, adata, D, sigma, proj_func, dtype):
     """
     Calculates the Z matrix for grouping.
 
@@ -119,9 +119,9 @@ def calc_groupz(X_train, X_test, adata, D, sigma, proj_func):
         X_test = X_test.toarray().astype(np.float16)
 
     W = proj_func(X_train, sigma, adata.uns['seed_obj'], D)
-    
-    train_projection = np.matmul(X_train, W, dtype=np.float16)
-    test_projection = np.matmul(X_test, W, dtype=np.float16)
+
+    train_projection = np.matmul(X_train, W, dtype=dtype)
+    test_projection = np.matmul(X_test, W, dtype=dtype)
 
     if np.isnan(train_projection).any() or np.isnan(test_projection).any():
         train_projection = np.matmul(X_train, W, dtype=np.float64)
@@ -234,7 +234,8 @@ def calculate_z(adata, n_features=5000, batches=10,
         X_train, X_test = process_data(X_train=X_train, X_test=X_test, 
                                        scale_data=adata.uns['scale_data'], 
                                        transform_data=adata.uns['transform_data'],
-                                       return_dense=True)    
+                                       return_dense=True, 
+                                       add_ones=adata.uns['add_ones'])    
 
         # Getting sigma
         if 'sigma' in adata.uns.keys():
@@ -247,9 +248,11 @@ def calculate_z(adata, n_features=5000, batches=10,
         assert sigma > 0, "Sigma must be more than 0"
         train_projection, test_projection = calc_groupz(X_train, X_test, 
                                                         adata, D, sigma, 
-                                                        proj_func)
+                                                        proj_func, z_dtype)
 
         if train_projection.dtype != z_dtype:
+            print("Converting Z dtype from np.float16 to np.float64", 
+                  flush=True)
             z_dtype = train_projection.dtype
             Z_train = Z_train.astype(z_dtype)
             Z_test = Z_test.astype(z_dtype)

@@ -682,7 +682,7 @@ def group_umap(adata: ad.AnnData, g_name: str | list, is_binary: bool=False,
         sc.tl.umap(adata, random_state=1)
 
     else:
-        ac.pp.tfidf(adata, scale_factor=1e4)
+        ac.pp.tfidf(adata)
         sc.pp.normalize_total(adata)
         sc.pp.log1p(adata)
         ac.tl.lsi(adata)

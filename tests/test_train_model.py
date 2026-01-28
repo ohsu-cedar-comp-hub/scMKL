@@ -50,10 +50,10 @@ class TestTrainModel(unittest.TestCase):
                           "correct number of coefficients"))
         
         # Checking that the min and max coeffs are expected values
-        self.assertAlmostEqual(np.max(coefs), 1.71228, places = 4, 
-                        msg = "Max coefficient is higher than expected")
-        self.assertAlmostEqual(np.min(coefs), -1.36524, places = 4,
-                        msg = "Min coefficient is lower than expected")
+        self.assertAlmostEqual(np.max(coefs), 1.713568, places = 4, 
+                        msg = "Max coefficient unexpected")
+        self.assertAlmostEqual(np.min(coefs), -1.365424, places = 4,
+                        msg = "Min coefficient is unexpected")
         
 
 if __name__ == '__main__':

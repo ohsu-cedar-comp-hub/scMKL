@@ -148,10 +148,10 @@ def est_group_sigma(adata: ad.AnnData,
     sigma = batch_sigma(X_train, adata.uns['distance_metric'], batch_idx)
 
     # sigma = 0 is numerically unusable in later steps
-    # Using such a small sigma will result in wide distribution, and 
+    # Using such a small sigma will result in narrow distribution, and 
     # typically a non-predictive Z
-    if sigma < 1e-2:
-        sigma = 1e-2
+    if sigma < 0.1:
+        sigma = 0.1
 
     if n_features < n_group_features:
         # Heuristic we calculated to account for fewer features used in 
@@ -207,7 +207,7 @@ def estimate_sigma(adata: ad.AnnData,
     assert batch_size <= len(adata.uns['train_indices']), ("Batch size must be "
                                                           "smaller than the "
                                                           "training set.")
-
+    
     if batch_size * batches > len(adata.uns['train_indices']):
         old_batch_size = batch_size
         batch_size = int(len(adata.uns['train_indices'])/batches)
@@ -238,7 +238,8 @@ def estimate_sigma(adata: ad.AnnData,
         # Filtering to only features in grouping using filtered view of adata
         X_train = get_group_mat(adata[indices], n_features=n_features, 
                             group_features=group_features, 
-                            n_group_features=n_group_features)
+                            n_group_features=n_group_features, 
+                            process_test=False)
         
         if adata.uns['tfidf']:
             X_train = tfidf(X_train, mode='normalize')
@@ -248,8 +249,7 @@ def estimate_sigma(adata: ad.AnnData,
         # If scale_data will log scale and z-score the data
         X_train = process_data(X_train=X_train,
                                scale_data=adata.uns['scale_data'], 
-                               transform_data=adata.uns['transform_data'],
-                               return_dense=True)    
+                               transform_data=adata.uns['transform_data'])    
 
         # Estimating sigma
         sigma = est_group_sigma(adata, X_train, n_group_features, 

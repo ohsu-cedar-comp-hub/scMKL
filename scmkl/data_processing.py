@@ -33,10 +33,27 @@ def sparse_var(X: scipy.sparse._csc.csc_matrix | np.ndarray, axis: int | None=No
     return var.ravel()
 
 
+def add_dummy_features(X_train: np.ndarray | scipy.sparse._csc.csc_matrix,
+                       X_test: np.ndarray | scipy.sparse._csc.csc_matrix 
+                       | None=None, orig_test: str | None=None):
+    """
+    Will add a column of ones to the matrices. If X_test not provided, 
+    col will only be added to X_train.
+    """
+    X_train = np.hstack((X_train, np.ones((X_train.shape[0], 1), 
+                                          dtype=np.float16)))
+
+    if not isinstance(orig_test, type(None)):
+        X_test = np.hstack((X_test, np.ones((X_test.shape[0], 1), 
+                                            dtype=np.float16)))
+
+    return X_train, X_test
+
+
 def process_data(X_train: np.ndarray | scipy.sparse._csc.csc_matrix,
                  X_test: np.ndarray | scipy.sparse._csc.csc_matrix | None=None,
                  scale_data: bool=True, transform_data: bool=False,
-                 return_dense: bool=True):
+                 return_dense: bool=True, add_ones: bool=False):
     """
     Function to preprocess data matrix according to type of data 
     (e.g. counts/rna, or binary/atac). Will process test data 
@@ -78,8 +95,7 @@ def process_data(X_train: np.ndarray | scipy.sparse._csc.csc_matrix,
     else:
         orig_test = 'given'
 
-    # Remove features that have no variance in the training data 
-    # (will be uniformative)
+    # Remove features that have low variance in the training data 
     var = sparse_var(X_train, axis = 0)
     variable_features = np.where(var > 1e-5)[0]
 
@@ -111,6 +127,8 @@ def process_data(X_train: np.ndarray | scipy.sparse._csc.csc_matrix,
         X_train = X_train.toarray()
         X_test = X_test.toarray()
 
+    if add_ones:
+        X_train, X_test = add_dummy_features(X_train, X_test, orig_test)
 
     if orig_test is None:
         return X_train
@@ -290,10 +308,11 @@ def get_group_mat(adata: ad.AnnData, n_features: int,
     # using large groupings
     # Will use all features if the grouping contains fewer than n_features
     number_features = np.min([n_features, n_group_features])
+
     group_array = np.array(list(group_features))
     group_features = adata.uns['seed_obj'].choice(group_array, 
                                                   number_features, 
-                                                  replace = False) 
+                                                  replace=False) 
 
     # Create data arrays containing only features within this group
     if process_test:

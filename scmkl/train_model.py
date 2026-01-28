@@ -51,10 +51,9 @@ def train_model(adata: ad.AnnData, group_size: int | None=None, alpha:float=0.9)
 
     if group_size is None:
         group_size = 2*adata.uns['D']
-
+    
     y_train = adata.obs['labels'].iloc[adata.uns['train_indices']]
     X_train = adata.uns['Z_train'][adata.uns['train_indices']]
-
     cell_labels = np.unique(y_train)
 
     # This is a regression algorithm. We need to make the labels 'continuous' 
