@@ -1,6 +1,6 @@
-Metadata-Version: 2.4
+Metadata-Version: 2.1
 Name: scmkl
-Version: 0.4.3a3
+Version: 0.4.4
 Summary: Single-cell analysis using Multiple Kernel Learning
 Home-page: https://github.com/ohsu-cedar-comp-hub/scMKL/tree/main
 Author: Sam Kupp, Ian VanGordon, Cigdem Ak
@@ -25,16 +25,6 @@ Requires-Dist: scanpy==1.11.4
 Requires-Dist: umap-learn==0.5.7
 Requires-Dist: muon==0.1.6
 Requires-Dist: gseapy==1.1.9
-Dynamic: author
-Dynamic: author-email
-Dynamic: classifier
-Dynamic: description
-Dynamic: description-content-type
-Dynamic: home-page
-Dynamic: license-file
-Dynamic: requires-dist
-Dynamic: requires-python
-Dynamic: summary
 
 <h1 align="center">
 <img src="https://github.com/ohsu-cedar-comp-hub/scMKL/blob/main/scMKL_logo.png?raw=true" width="500"/>

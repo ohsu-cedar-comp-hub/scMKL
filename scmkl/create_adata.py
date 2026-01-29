@@ -5,6 +5,8 @@ import pandas as pd
 import gc
 import warnings
 
+from scmkl.data_processing import sparse_var
+
 
 def filter_features(feature_names: np.ndarray, group_dict: dict,
                     add_ones: bool):
@@ -615,6 +617,15 @@ def create_adata(X: scipy.sparse._csc.csc_matrix | np.ndarray | pd.DataFrame,
     if not transform_data:
         print("WARNING: Data will not be transformed."
               "To change this behavior, set transform_data to True")
+        
+    # Need to avoid including samples with no obervations 
+    # (must be done after feature filtering for grouping)
+    zero_var = np.array(sparse_var(adata.X, axis=1) == 0).ravel()
+    num_zero_var = np.sum(zero_var)
+    if 0 < num_zero_var:
+        print("WARNING: Some samples contain no variance across features "
+              "(likely all zeros), consider removing them and recreating "
+              "AnnData.", flush=True)
 
     return adata
 
