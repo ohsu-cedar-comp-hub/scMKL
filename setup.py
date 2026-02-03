@@ -6,7 +6,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name = 'scmkl',
-    version = '0.4.4',
+    version = '0.4.3',
     description = "Single-cell analysis using Multiple Kernel Learning",
     long_description = long_description,
     long_description_content_type = 'text/markdown',
@@ -16,7 +16,7 @@ setup(
     packages = find_packages(),
     python_requires = '>=3.11.1, <3.13',
     install_requires = [
-        'wheel==0.41.2',
+        'wheel==0.46.2',
         'anndata==0.10.8',
         'celer==0.7.3',
         'numpy==1.26.4',

@@ -1,4 +1,4 @@
-wheel==0.41.2
+wheel==0.46.2
 anndata==0.10.8
 celer==0.7.3
 numpy==1.26.4
