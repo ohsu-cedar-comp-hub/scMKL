@@ -10,12 +10,20 @@
 [![Anaconda-Server Badge](https://anaconda.org/ivango17/scmkl/badges/latest_release_date.svg?style=flat&cache-control=no-cache)](https://anaconda.org/ivango17/scmkl)
 
 
-Single-cell analysis using Multiple Kernel Learning, scMKL, is a binary classification algorithm utilizing prior information to group features to enhance classification and aid understanding of distinguishing features in multi-omic data sets.
+Single-cell analysis using Multiple Kernel Learning, scMKL, is a binary 
+classification algorithm utilizing prior information to group features to 
+enhance classification and aid understanding of distinguishing features in 
+omic and multi-omic data sets.
+
+We have demonstrated scMKL's ability to achieve high classification 
+performance while providing the added confidence of model interpretability on 
+single-cell RNA, ATAC, ADT, and methylation data.
 
 
 ## Installation
 
 ### Conda install
+
 Conda is the recommended method to install scMKL:
 
 ```bash
@@ -27,6 +35,7 @@ Ensure bioconda and conda-forge are in your available conda channels.
 
 
 ### Pip install
+
 First, create a virtual environment with `python>=3.11.1,<3.13`.
 
 Then, install scMKL with:
@@ -37,21 +46,108 @@ pip install scmkl
 
 If wheels do not build correctly, ensure ```gcc``` and ```g++``` are installed and up to date. They can be installed with ```sudo apt install gcc``` and ```sudo apt install g++```.
 
-## Requirements
-scMKL takes advantage of AnnData objects and can be implemented with just four pieces of data:
 
-1) scRNA and/or scATAC matrices (can be `scipy.sparse` matrix)
+## Usage
 
-2) An array of cell labels
+The table below shows what type of data scMKL expects based on the modality in 
+question. In all situations, matrices should be cells x features.
 
-3) An array of feature names (eg. gene symbols for RNA or peaks for ATAC)
+| Modality | Input matrix description |
+| -------- | ----------------- |
+| Transcriptomics (RNA) | Counts matrix |
+| Chromatin  Accessibility (ATAC) | Binarized counts matrix (any counts more than 0 become 1) |
+| Epitope (ADT) | Counts matrix |
+| Methylomics (scMET) | Aggregated methylation over windows (e.g. mean methylation per genomics window) |
 
-4) A grouping dictionary where {'group_1' : [feature_5, feature_16], 'group_2' : [feature_1, feature_4, feature_9]}
+Additionally, scMKL requires a feature grouping dictionary where each key, 
+value pair is represented as `'group1: ['feature1', 'feature2', 'feature7']'`. 
+Features can be genes for RNA, regions for ATAC and MET, or proteins for ADT. 
+Any number of groups can be used and features can be overlapping between 
+groups (e.g. `'feature1'` is in five groups). For help getting feature 
+groupings, see our notebooks in [examples](./example/). 
 
-For implementing scMKL and learning how to get meaningful feature groupings, see our examples for your use case in [examples](https://github.com/ohsu-cedar-comp-hub/scMKL/tree/main/example/README.md).
+scMKL implements `AnnData.anndata` objects in one of two ways:
+
+1) Taking an existing `AnnData.anndata` object and formatting it for scMKL to 
+train and test on. 
+
+```python
+import scmkl
+import numpy as np
+import anndata as ad
+
+# Read in feature grouping dictionary (e.g. geneset library for RNA)
+group_dict = np.load('your_grouping.pkl', allow_pickle=True)
+
+# Read in your AnnData.anndata obj
+adata = ad.read_h5ad('your_adata.h5ad')
+
+# Apply scmkl formatting where 'phenotype_obs_key' is the col name in obs 
+# for labels, can also be an array of labels and set `allow_multiclass` to 
+# true if there are more than two cell classes 
+adata = scmkl.format_adata(
+    adata, 
+    cell_labels='phenotype_obs_key', 
+    group_dict=group_dict,
+    allow_multiclass=True
+    )
+```
+
+
+2) Reading in data separately and creating an scMKL formatted 
+`AnnData.anndata` object.
+
+```python
+import scmkl
+import numpy as np
+
+# Read in feature grouping dictionary (e.g. geneset library for RNA)
+group_dict = np.load('your_grouping.pkl', allow_pickle=True)
+
+# Read in feature names
+var_names = np.load('your_feature_names.npy')
+
+# Read in cell labels
+obs = np.load('your_cell_labels.npy')
+
+# Read in data matrix (can also be a scipy.sparse matrix)
+mat = np.load('your_matrix.npy')
+
+# Create scMKL formatted AnnData.anndata and set `allow_multiclass` to true 
+# if there are more than two cell classes 
+adata = scmkl.create_adata(
+    data_mat, 
+    feature_names=gene_names, 
+    group_dict=group_dict,
+    allow_multiclass=True
+    )
+```
+
+Then, depending on whether or not your labels are binary, train and test your 
+model.
+
+For binary:
+
+```python 
+results = scmkl.run(adata)
+```
+
+For multiclass:
+
+```python
+results = scmkl.one_v_rest(
+    adata, 
+    names=['RNA']
+    )
+```
+
+Both of these functions return a dictionary with evaluation metrics, group 
+weights, ect... To learn more about accessing this data, see our 
+[GitHub Pages](https://ohsu-cedar-comp-hub.github.io/scMKL/).
 
 
 ## Links
+
 Repo: [https://github.com/ohsu-cedar-comp-hub/scMKL](https://github.com/ohsu-cedar-comp-hub/scMKL)
 
 PyPI: [https://pypi.org/project/scmkl/](https://pypi.org/project/scmkl/)
@@ -62,6 +158,7 @@ API: [https://ohsu-cedar-comp-hub.github.io/scMKL/](https://ohsu-cedar-comp-hub.
 
 
 ## Publication
+
 If you use scMKL in your research, please cite using:
 
 > Kupp, S., VanGordon, I., Gönen, M., Esener, S.,  Eksi, S., Ak, C. 
