@@ -57,10 +57,10 @@ question. In all situations, matrices should be cells x features.
 | Transcriptomics (RNA) | Counts matrix |
 | Chromatin  Accessibility (ATAC) | Binarized counts matrix (any counts more than 0 become 1) |
 | Epitope (ADT) | Counts matrix |
-| Methylomics (scMET) | Aggregated methylation over windows (e.g. mean methylation per genomics window) |
+| Methylomics (MET) | Aggregated methylation over windows (e.g. mean methylation per genomics window) |
 
 Additionally, scMKL requires a feature grouping dictionary where each key, 
-value pair is represented as `'group1: ['feature1', 'feature2', 'feature7']'`. 
+value pair is represented as `'group1': ['feature1', 'feature2', 'feature7']`. 
 Features can be genes for RNA, regions for ATAC and MET, or proteins for ADT. 
 Any number of groups can be used and features can be overlapping between 
 groups (e.g. `'feature1'` is in five groups). For help getting feature 
@@ -76,11 +76,13 @@ import scmkl
 import numpy as np
 import anndata as ad
 
-# Read in feature grouping dictionary (e.g. geneset library for RNA)
-group_dict = np.load('your_grouping.pkl', allow_pickle=True)
-
 # Read in your AnnData.anndata obj
 adata = ad.read_h5ad('your_adata.h5ad')
+
+# Read in feature grouping dictionary (e.g. geneset library for RNA)
+group_dict = np.load('your_grouping.pkl', allow_pickle=True)
+# or for RNA, pull a gene set from the internet with 
+group_dict = scmkl.get_gene_groupings('Azimuth_2021', organism='human')
 
 # Apply scmkl formatting where 'phenotype_obs_key' is the col name in obs 
 # for labels, can also be an array of labels and set `allow_multiclass` to 
@@ -101,11 +103,13 @@ adata = scmkl.format_adata(
 import scmkl
 import numpy as np
 
-# Read in feature grouping dictionary (e.g. geneset library for RNA)
-group_dict = np.load('your_grouping.pkl', allow_pickle=True)
-
 # Read in feature names
 var_names = np.load('your_feature_names.npy')
+
+# Read in feature grouping dictionary (e.g. geneset library for RNA)
+group_dict = np.load('your_grouping.pkl', allow_pickle=True)
+# or for RNA, pull a gene set from the internet with
+group_dict = scmkl.get_gene_groupings('Azimuth_2021', organism='human')
 
 # Read in cell labels
 obs = np.load('your_cell_labels.npy')
@@ -121,6 +125,21 @@ adata = scmkl.create_adata(
     group_dict=group_dict,
     allow_multiclass=True
     )
+```
+
+If you are not using RNA data and do not have a grouping dictionary but want 
+to try scMKL on your dataset, you can create a random grouping with:
+
+```python
+# Assuming feature names and numpy are loaded
+n_groups = 50
+group_size = 25
+grouping_dict = {f'group_{i}': np.random.choice(
+                                   var_names, 
+                                   size=group_size, 
+                                   replace=False
+                                   ) 
+                    for i in range(n_groups)}
 ```
 
 Then, depending on whether or not your labels are binary, train and test your 
@@ -142,7 +161,7 @@ results = scmkl.one_v_rest(
 ```
 
 Both of these functions return a dictionary with evaluation metrics, group 
-weights, ect... To learn more about accessing this data, see our 
+weights, etc... To learn more about accessing this data, see our 
 [GitHub Pages](https://ohsu-cedar-comp-hub.github.io/scMKL/).
 
 
