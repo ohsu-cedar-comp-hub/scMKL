@@ -458,14 +458,10 @@ def weights_heatmap(result, n_groups: None | int=None,
         x_lab = 'Alpha'
 
     if scale_weights and is_multi:
-        max_norms = dict()
         for ct in set(df['Class']):
             g_rows = df['Class'] == ct
-            max_norms[ct] = np.max(df[g_rows]['Kernel Weight'])
-            scale_cols = ['Class', 'Kernel Weight']
-
-        new = df[scale_cols].apply(lambda x: x[1] / max_norms[x[0]], axis=1)
-        df['Kernel Weight'] = new
+            max_norm = np.max(df[g_rows]['Kernel Weight'])
+            df.loc[g_rows, 'Kernel Weight'] /= max_norm
 
         l_title = 'Scaled\nKernel Weight'
 

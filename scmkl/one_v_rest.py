@@ -316,9 +316,9 @@ def one_v_rest(adatas : list | ad.AnnData, names : list,
     train_indices = adatas[0].uns['train_indices'].copy()
     test_indices = adatas[0].uns['test_indices'].copy()
 
-    uniq_labels = _eval_labels(cell_labels = adatas[0].obs['labels'], 
-                               train_indices = train_indices,
-                               test_indices = test_indices)
+    uniq_labels = _eval_labels(cell_labels=adatas[0].obs['labels'], 
+                               train_indices=train_indices.astype(str),
+                               test_indices=test_indices.astype(str))
 
     if (len(adatas) == 1) and ('Z_train' not in adatas[0].uns.keys()):
         adata = calculate_z(adatas[0], n_features = 5000, 

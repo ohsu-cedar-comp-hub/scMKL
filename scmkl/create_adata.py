@@ -212,8 +212,8 @@ def get_median_size(adata: ad.AnnData, other_factor: float=1.5):
         types. 
     """
     n_test = adata.uns['test_indices'].shape[0]
-
-    _, n_cts = np.unique(adata.obs['labels'][adata.uns['train_indices']], 
+    
+    _, n_cts = np.unique(adata.obs.loc[adata.uns['train_indices'].astype(str), 'labels'], 
                          return_counts=True)
     sizes = [n_test + (other_factor*count) for count in n_cts]
 

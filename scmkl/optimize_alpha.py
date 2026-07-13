@@ -76,7 +76,7 @@ def get_folds(adata: ad.AnnData, k: int):
     >>> test_fold_0
     array([  1,   2,  4,  7])
     """
-    y = adata.obs['labels'][adata.uns['train_indices']].copy()
+    y = adata.obs.loc[adata.uns['train_indices'].astype(str), 'labels'].copy()
 
     # Creating dummy x prevents holding more views in memory
     x = y.copy()
@@ -274,7 +274,7 @@ def bin_optimize_alpha(adata: list[ad.AnnData],
 
     # Only want folds for training samples
     train_indices = adata[0].uns['train_indices'].copy()
-    cv_adata = [adata[i][train_indices, :].copy()
+    cv_adata = [adata[i][train_indices.astype(str), :].copy()
                 for i in range(len(adata))]
 
     folds = get_folds(adata[0], k)
