@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: scmkl
-Version: 0.5.0a0
+Version: 0.5.0
 Summary: Single-cell analysis using Multiple Kernel Learning
 Home-page: https://github.com/ohsu-cedar-comp-hub/scMKL/tree/main
 Author: Sam Kupp, Ian VanGordon, Cigdem Ak
@@ -62,27 +62,28 @@ single-cell RNA, ATAC, ADT, and methylation data.
 
 ### Conda install
 
-Conda is the recommended method to install scMKL:
+Conda is the recommended method to install scMKL and Python version must be at 
+least `3.11` but less than `3.14`:
 
 ```bash
-conda create -n scMKL python=3.12 
-conda activate scMKL
-conda install -c conda-forge -c bioconda ivango17::scmkl
+conda create -n scmkl_env -c conda-forge -c bioconda ivango17::scmkl
 ```
 Ensure bioconda and conda-forge are in your available conda channels.
 
 
 ### Pip install
 
-First, create a virtual environment with `python>=3.11.1,<3.13`.
+First, create a virtual environment with `'python>=3.11.1,<3.14'`.
 
 Then, install scMKL with:
 ```bash
-# activate your new env with python>=3.11.1 and <3.13
+# activate your new env with python>=3.11.1 and <3.14
 pip install scmkl
 ```
 
-If wheels do not build correctly, ensure ```gcc``` and ```g++``` are installed and up to date. They can be installed with ```sudo apt install gcc``` and ```sudo apt install g++```.
+If wheels do not build correctly, ensure ```gcc``` and ```g++``` are installed 
+and up to date. They can be installed with ```sudo apt install gcc``` and 
+```sudo apt install g++```.
 
 
 ## Usage
@@ -222,7 +223,9 @@ If you use scMKL in your research, please cite using:
 Interpretable and integrative analysis of single-cell multiomics with scMKL. *Commun Biol* **8**, 1160 (2025). 
 https://doi.org/10.1038/s42003-025-08533-7
 
-Our Shiny for Python application for viewing data produced from this work can be found here: [scMKL_analysis](https://huggingface.co/spaces/scMKL-team/scMKL_analysis)
+Our Shiny for Python application for viewing data produced from this work can 
+be found here: 
+[scMKL_analysis](https://huggingface.co/spaces/scMKL-team/scMKL_analysis)
 
 
 ## Issues
