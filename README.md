@@ -24,8 +24,8 @@ single-cell RNA, ATAC, ADT, and methylation data.
 
 ### Conda install
 
-Conda is the recommended method to install scMKL and Python version must be at 
-least `3.11` but less than `3.14`:
+Conda is the recommended method to install scMKL and Python version must be 
+`'>=3.11.1,<=3.13'`:
 
 ```bash
 conda create -n scmkl_env -c conda-forge -c bioconda ivango17::scmkl
@@ -35,7 +35,7 @@ Ensure bioconda and conda-forge are in your available conda channels.
 
 ### Pip install
 
-First, create a virtual environment with `'python>=3.11.1,<3.14'`.
+First, create a virtual environment with `'python>=3.11.1,<=3.13'`.
 
 Then, install scMKL with:
 ```bash
